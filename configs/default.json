@@ -1,0 +1,103 @@
+{
+  "title": "What is PawPad \u2014 Privacy-First Multi-Chain Wallet",
+  "characters": {
+    "paw": {
+      "id": "paw",
+      "name": "Paw",
+      "color": "#7C3AED",
+      "role": "host",
+      "poses": {
+        "neutral": "/characters/paw/neutral.png",
+        "excited": "/characters/paw/excited.png",
+        "waving": "/characters/paw/neutral.png",
+        "explaining": "/characters/paw/neutral.png",
+        "thinking": "/characters/paw/neutral.png",
+        "serious": "/characters/paw/neutral.png",
+        "celebrating": "/characters/paw/excited.png"
+      },
+      "voice": {
+        "refAudioPath": "./voices/paw.wav",
+        "refText": "ZM folks, here is your July 24th 2025 crypto update. Bitcoin is trading around 118520 US dollars.",
+        "cfgValue": "2.0",
+        "steps": "15"
+      }
+    },
+    "pad": {
+      "id": "pad",
+      "name": "Pad",
+      "color": "#06B6D4",
+      "role": "explainer",
+      "poses": {
+        "neutral": "/characters/pad/neutral.png",
+        "thinking": "/characters/pad/thinking.png",
+        "serious": "/characters/pad/thinking.png",
+        "explaining": "/characters/pad/neutral.png",
+        "excited": "/characters/pad/neutral.png",
+        "waving": "/characters/pad/neutral.png",
+        "celebrating": "/characters/pad/neutral.png"
+      },
+      "voice": {
+        "refAudioPath": "./voices/pad.wav",
+        "refText": "Today, software handles our money, our health, our work.",
+        "cfgValue": "2.0",
+        "steps": "15"
+      }
+    }
+  },
+  "scenes": [
+    {
+      "characterId": "paw",
+      "dialogue": "Hey crypto fam! I'm Paw, and welcome to PawPad, the wallet that finally gets privacy right. No more choosing between security and usability!",
+      "emotion": "excited",
+      "visualType": "character-only",
+      "highlightText": "PawPad",
+      "durationOverride": 8.5
+    },
+    {
+      "characterId": "pad",
+      "dialogue": "Here's the magic: FROST MPC threshold signatures. Your private key is split into shares across multiple devices. Even if one device is compromised, attackers get nothing usable.",
+      "emotion": "thinking",
+      "visualType": "split-screen",
+      "highlightText": "FROST MPC",
+      "durationOverride": 10.0
+    },
+    {
+      "characterId": "paw",
+      "dialogue": "Best part? One wallet, multiple chains! Bridge seamlessly between Solana's speed and Zcash's bulletproof privacy. Your assets, your rules.",
+      "emotion": "excited",
+      "visualType": "split-screen",
+      "highlightText": "Multi-Chain",
+      "durationOverride": 9.0
+    },
+    {
+      "characterId": "pad",
+      "dialogue": "We run signing operations inside Oasis ROFL Trusted Execution Environments. Hardware-level isolation means not even node operators can see your keys.",
+      "emotion": "serious",
+      "visualType": "split-screen",
+      "highlightText": "TEE Security",
+      "durationOverride": 9.5
+    },
+    {
+      "characterId": "paw",
+      "dialogue": "Privacy should be the default, not an afterthought. Join thousands securing their assets with PawPad. Link in the description!",
+      "emotion": "celebrating",
+      "visualType": "character-only",
+      "highlightText": "Join PawPad",
+      "durationOverride": 8.5
+    }
+  ],
+  "style": {
+    "theme": "pawpad",
+    "format": "16:9",
+    "showSubtitles": true,
+    "showCharacterName": true,
+    "transitionType": "fade"
+  },
+  "music": {
+    "volume": 0.1
+  },
+  "watermark": {
+    "text": "PawPad by ZkAGI",
+    "show": true
+  }
+}

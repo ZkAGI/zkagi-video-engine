@@ -1,0 +1,15 @@
+{
+  "title": "CHANGE_ME",
+  "characters": {
+    "paw": {
+      "id": "paw", "name": "Paw", "color": "#7C3AED", "role": "host",
+      "poses": { "neutral": "/characters/paw/neutral.png", "excited": "/characters/paw/excited.png", "waving": "/characters/paw/neutral.png", "explaining": "/characters/paw/neutral.png", "thinking": "/characters/paw/neutral.png", "serious": "/characters/paw/neutral.png", "celebrating": "/characters/paw/excited.png" },
+      "voice": { "refAudioPath": "./voices/paw.wav", "refText": "Hi, I'm Paw, your friendly guide to privacy-preserving technology.", "cfgValue": "2.0", "steps": "15" }
+    }
+  },
+  "scenes": [
+    { "characterId": "paw", "dialogue": "YOUR TEXT HERE", "emotion": "neutral", "visualType": "talking-head" }
+  ],
+  "style": { "theme": "zkagi-brand", "format": "16:9", "showSubtitles": true, "showCharacterName": true, "transitionType": "fade" },
+  "watermark": { "text": "ZkAGI", "show": true }
+}

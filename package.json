@@ -1,0 +1,31 @@
+{
+  "name": "zkagi-video-engine",
+  "version": "1.0.0",
+  "description": "Parametrized video generation with tiger characters and VoxCPM voice cloning — built on Remotion",
+  "scripts": {
+    "dev": "npx remotion studio",
+    "build": "npx remotion render ZkAGIVideo out/video.mp4",
+    "build:vertical": "npx remotion render ZkAGIVideoVertical out/video-vertical.mp4",
+    "build:square": "npx remotion render ZkAGIVideoSquare out/video-square.mp4",
+    "generate-audio": "npx tsx src/scripts/generate-audio.ts",
+    "generate-script": "npx tsx src/scripts/generate-script.ts",
+    "generate": "npx tsx src/scripts/full-pipeline.ts",
+    "create": "npx tsx src/scripts/create-video.ts",
+    "test-tts": "npx tsx src/scripts/test-tts.ts"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.0",
+    "@remotion/cli": "^4.0.0",
+    "@remotion/media-utils": "^4.0.0",
+    "@remotion/renderer": "^4.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "remotion": "^4.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0"
+  }
+}
