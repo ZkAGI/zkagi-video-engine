@@ -71,21 +71,167 @@ curl -X POST "http://45.251.34.28:8010/generate" \
 
 **Health check:** `curl http://45.251.34.28:8010/health`
 
-#### AI Video Clips (Optional — fal.ai + Kling, if FAL_KEY is set)
+#### AI Video Clips (Self-Hosted LTX-2 via ComfyUI — FREE)
+**ComfyUI URL:** Determined at runtime. Always discover it with:
 ```bash
-curl -X POST "https://fal.run/fal-ai/kling-video/v1.5/pro/image-to-video" \
-  -H "Authorization: Key $FAL_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "SCENE MOTION DESCRIPTION, smooth camera movement",
-    "image_url": "URL_OF_GENERATED_IMAGE",
-    "duration": "5",
-    "aspect_ratio": "16:9"
-  }'
-# Download video → public/scenes/scene-{i}.mp4
+COMFY_URL="http://$(ip route show default | awk '{print $3}'):8001"
+# Verify: curl -s "$COMFY_URL/system_stats" | python3 -c "import sys,json; print(json.load(sys.stdin)['system']['comfyui_version'])"
 ```
 
-**Default behavior:** Always generate images via the self-hosted GPU API (free, fast). Only use fal.ai video gen if user explicitly requests video clips AND FAL_KEY is set.
+**How it works:** Send a workflow JSON to ComfyUI's `/prompt` endpoint. ComfyUI runs LTX-2 on the RTX 5090 and outputs a video file.
+
+**Step-by-step for each scene video clip:**
+
+**1. Submit the workflow:**
+```bash
+COMFY_URL="http://$(ip route show default | awk '{print $3}'):8001"
+
+curl -s -X POST "$COMFY_URL/prompt" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": {
+      "1": {
+        "class_type": "EmptyLTXVLatentVideo",
+        "inputs": {
+          "width": 768,
+          "height": 512,
+          "length": 97,
+          "batch_size": 1
+        }
+      },
+      "2": {
+        "class_type": "CheckpointLoaderSimple",
+        "inputs": {
+          "ckpt_name": "ltx-video-2b-v0.9.5.safetensors"
+        }
+      },
+      "3": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+          "text": "SCENE_PROMPT_HERE, cinematic, smooth motion, vibrant colors, no text",
+          "clip": ["2", 1]
+        }
+      },
+      "4": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+          "text": "blurry, low quality, distorted, text, watermark, static, ugly",
+          "clip": ["2", 1]
+        }
+      },
+      "5": {
+        "class_type": "KSampler",
+        "inputs": {
+          "seed": RANDOM_SEED,
+          "steps": 30,
+          "cfg": 3.5,
+          "sampler_name": "euler_ancestral",
+          "scheduler": "normal",
+          "denoise": 1.0,
+          "model": ["2", 0],
+          "positive": ["3", 0],
+          "negative": ["4", 0],
+          "latent_image": ["1", 0]
+        }
+      },
+      "6": {
+        "class_type": "VAEDecode",
+        "inputs": {
+          "samples": ["5", 0],
+          "vae": ["2", 2]
+        }
+      },
+      "7": {
+        "class_type": "SaveVideo",
+        "inputs": {
+          "filename_prefix": "scene_VIDEO_INDEX",
+          "images": ["6", 0]
+        }
+      }
+    }
+  }'
+```
+
+**IMPORTANT:** The workflow above is a starting template. Claude Code MUST first check what LTX-2 model files are available:
+```bash
+curl -s "$COMFY_URL/object_info/CheckpointLoaderSimple" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['CheckpointLoaderSimple']['input']['required']['ckpt_name'][0])"
+```
+Use whichever LTX model checkpoint is listed (e.g., `ltx-video-2b-v0.9.5.safetensors` or similar).
+
+If the basic workflow above fails, Claude Code should inspect available nodes and build a working workflow:
+```bash
+# List all LTX-related nodes
+curl -s "$COMFY_URL/object_info" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(k) for k in sorted(d.keys()) if 'ltx' in k.lower()]"
+
+# Get node details (inputs/outputs)
+curl -s "$COMFY_URL/object_info/LTXVConditioning" | python3 -m json.tool
+curl -s "$COMFY_URL/object_info/LTXVImgToVideo" | python3 -m json.tool
+curl -s "$COMFY_URL/object_info/LTXVScheduler" | python3 -m json.tool
+```
+
+Available LTX-2 nodes on this system:
+- `EmptyLTXVLatentVideo` — create empty latent for text-to-video
+- `LTXVConditioning` — LTX-specific conditioning
+- `LTXVImgToVideo` — image-to-video (use a generated scene image as first frame)
+- `LTXVImgToVideoInplace` — in-place image-to-video
+- `LTXVScheduler` — LTX-specific scheduler
+- `LTXVLoRALoader` / `LTXVLoRASelector` — for LoRA support
+- `LTXVPreprocess` — preprocessing
+- `LTXVAddGuide` — add guide frames
+- `LTXVLatentUpsampler` — upscale latent
+- `ModelSamplingLTXV` — model sampling config
+
+**2. Poll for completion:**
+```bash
+# The /prompt response returns a prompt_id
+PROMPT_ID=$(curl -s -X POST "$COMFY_URL/prompt" -H "Content-Type: application/json" -d "$WORKFLOW_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['prompt_id'])")
+
+# Poll history until complete
+while true; do
+  STATUS=$(curl -s "$COMFY_URL/history/$PROMPT_ID" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+if '$PROMPT_ID' in d:
+  outputs = d['$PROMPT_ID'].get('outputs', {})
+  if outputs:
+    print('DONE')
+  else:
+    status = d['$PROMPT_ID'].get('status', {})
+    if status.get('status_str') == 'error':
+      print('ERROR')
+    else:
+      print('RUNNING')
+else:
+  print('WAITING')
+")
+  if [ "$STATUS" = "DONE" ]; then break; fi
+  if [ "$STATUS" = "ERROR" ]; then echo "ComfyUI workflow failed"; break; fi
+  sleep 2
+done
+```
+
+**3. Download the output video:**
+```bash
+# Get the output filename from history
+FILENAME=$(curl -s "$COMFY_URL/history/$PROMPT_ID" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)['$PROMPT_ID']['outputs']
+for node_id, output in d.items():
+  if 'gifs' in output:
+    print(output['gifs'][0]['filename'])
+    break
+  elif 'videos' in output:
+    print(output['videos'][0]['filename'])
+    break
+")
+
+# Download the video
+curl -s "$COMFY_URL/view?filename=$FILENAME&type=output" --output public/scenes/scene-{i}.mp4
+```
+
+**Fallback:** If ComfyUI is not running or LTX-2 fails, fall back to static images from the image gen API at http://45.251.34.28:8010/generate with Ken Burns zoom in Remotion.
+
+**Default behavior:** PREFER video clips via LTX-2 for ALL scenes (free, local, high quality). Fall back to static images only if ComfyUI is unavailable.
 
 **Style guide for ALL visual prompts:**
 - Include: "cute cartoon tiger mascot, tech/crypto theme, modern, vibrant gradient"
@@ -208,10 +354,42 @@ output/                   ← Rendered MP4s
 ```bash
 export IMAGE_GEN_URL=http://45.251.34.28:8010    # Self-hosted GPU image gen (default, free)
 export TTS_URL=https://avatar.zkagi.ai            # VoxCPM TTS (default)
-export FAL_KEY=your-fal-ai-key                    # Optional: for AI video clip generation
+# ComfyUI URL is auto-discovered: http://$(ip route show default | awk '{print $3}'):8001
 ```
 
-No API keys needed for image gen or TTS — both are self-hosted!
+No API keys needed — image gen, video gen (LTX-2), and TTS are all self-hosted!
+
+---
+
+## SCRIPT WRITING RULES (CRITICAL)
+Claude Code MUST follow these rules when writing video scripts:
+
+**Tone & Style:**
+- Write like a viral content creator, NOT a corporate explainer
+- Short punchy sentences. No jargon. No technical babble.
+- Each scene: max 15-20 words of dialogue
+- Think "storytelling" not "presenting" — hook people in the first 3 seconds
+- Add humor, personality, and "masala" — make people want to watch till the end
+- Use analogies a 12-year-old would understand
+
+**Structure:**
+- Scene 1: HOOK — shocking stat, bold claim, or funny opener (3-5 seconds)
+- Scenes 2-4: STORY — explain through examples and stories, not features (5-8 seconds each)
+- Last scene: CTA — tell them what to do next (3-5 seconds)
+
+**What NOT to do:**
+- No long monologues. Ever.
+- No "In this video we will explore..." — boring!
+- No listing features like a product spec sheet
+- No "Let me explain..." — just explain it
+- No technical jargon unless absolutely needed
+
+**Examples of GOOD vs BAD dialogue:**
+- BAD: "PawPad utilizes FROST MPC threshold signature schemes for distributed key management"
+- GOOD: "Your wallet key is split into pieces. No single device has the full thing. That means nobody can steal it."
+
+- BAD: "We leverage Oasis ROFL Trusted Execution Environments for hardware-level isolation"
+- GOOD: "Imagine a vault inside a vault. That is where your transactions happen. Not even we can peek inside."
 
 ---
 
