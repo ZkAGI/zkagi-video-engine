@@ -219,22 +219,28 @@ done
 
 **3. Download the output video:**
 ```bash
-# Get the output filename from history
-FILENAME=$(curl -s "$COMFY_URL/history/$PROMPT_ID" | python3 -c "
+# Get ALL outputs from history - look for videos/gifs/images
+OUTPUT_JSON=$(curl -s "$COMFY_URL/history/$PROMPT_ID" | python3 -c "
 import sys,json
 d=json.load(sys.stdin)['$PROMPT_ID']['outputs']
 for node_id, output in d.items():
-  if 'gifs' in output:
-    print(output['gifs'][0]['filename'])
-    break
-  elif 'videos' in output:
-    print(output['videos'][0]['filename'])
-    break
+  for key in ['gifs', 'videos', 'images']:
+    if key in output:
+      for item in output[key]:
+        if item.get('filename','').endswith('.mp4') or item.get('filename','').endswith('.webm'):
+          print(item['filename'])
+          break
 ")
 
-# Download the video
-curl -s "$COMFY_URL/view?filename=$FILENAME&type=output" --output public/scenes/scene-{i}.mp4
+# Download using the EXACT filename from the output
+curl -s "$COMFY_URL/view?filename=$OUTPUT_JSON&type=output" --output public/scenes/scene-{i}.mp4
+
+# Verify the file is valid
+ffprobe -v error -show_entries format=duration -of csv=p=0 public/scenes/scene-{i}.mp4
+ls -la public/scenes/scene-{i}.mp4
 ```
+
+**IMPORTANT:** ComfyUI SaveVideo node uses the prefix you set + `_00001_`. So if prefix is `scene_0`, the filename is `scene_0_00001_.mp4`. Always check history output for the exact filename.
 
 **Fallback:** If ComfyUI is not running or LTX-2 fails, fall back to static images from the image gen API at http://45.251.34.28:8010/generate with Ken Burns zoom in Remotion.
 
@@ -270,9 +276,75 @@ curl -X POST "https://avatar.zkagi.ai/v1/clone-tts" \
   --output public/audio/scene-{i}.wav
 ```
 
+**IMPORTANT TTS RULES:**
+- Each scene dialogue MUST be 15-30 words to produce 8-15 seconds of audio
+- If audio comes out under 5 seconds, the dialogue is too short — rewrite it longer
+- Do NOT regenerate more than once — write proper length dialogue the first time
+- Test audio plays correctly before moving on: `ffplay -nodisp -autoexit public/audio/scene-{i}.wav`
+
 After generating all audio, get durations:
 ```bash
 ffprobe -v error -show_entries format=duration -of csv=p=0 public/audio/scene-{i}.wav
+```
+
+**CRITICAL — VIDEO vs AUDIO DURATION MISMATCH:**
+LTX-2 video clips are typically 3-5 seconds. TTS audio is 8-15 seconds per scene. Claude Code MUST fill the entire scene duration intelligently:
+
+**Strategy: Generate MULTIPLE assets per scene to fill the audio duration.**
+
+For a scene with 12 seconds of audio, Claude Code should:
+1. Generate 2-3 LTX-2 video clips (3-5s each) with slightly different prompts/angles
+2. Generate 1-2 still images (from image gen API) as transition frames
+3. Remotion stitches them together: clip1 → image (with Ken Burns) → clip2 → clip3
+
+**Example for a 12-second scene about "wallet security":**
+```
+Sub-clip A (0-4s):    LTX-2 video - "glowing digital vault opening, neon blue"
+Sub-clip B (4-7s):    Still image with zoom - "shield protecting crypto keys, vibrant"  
+Sub-clip C (7-12s):   LTX-2 video - "keys splitting into fragments, secure encryption visual"
+```
+
+**Rules:**
+- NEVER loop a single clip — it looks cheap and repetitive
+- NEVER leave black gaps — every frame must have a visual
+- Each sub-clip should show a different angle/moment of the scene topic
+- Use crossfade transitions (10-15 frames) between sub-clips
+- Still images get Ken Burns zoom effect (slow zoom in or pan) to feel alive
+- Total sub-clip durations must add up to >= audio duration
+
+**In Remotion, use nested Sequences within each scene:**
+```jsx
+<Sequence from={sceneStart} durationInFrames={totalSceneFrames}>
+  <Audio src={staticFile('audio/scene-0.wav')} />
+  
+  {/* Sub-clip A: video */}
+  <Sequence from={0} durationInFrames={120}>
+    <Video src={staticFile('scenes/scene-0-a.mp4')} volume={0} />
+  </Sequence>
+  
+  {/* Sub-clip B: image with zoom */}
+  <Sequence from={105} durationInFrames={100}>
+    <Img src={staticFile('scenes/scene-0-b.png')} style={{transform: `scale(${zoom})`}} />
+  </Sequence>
+  
+  {/* Sub-clip C: video */}
+  <Sequence from={195} durationInFrames={165}>
+    <Video src={staticFile('scenes/scene-0-c.mp4')} volume={0} />
+  </Sequence>
+  
+  {/* Subtitles and highlight text on top */}
+</Sequence>
+```
+
+**File naming for sub-clips:**
+```
+public/scenes/
+├── scene-0-a.mp4     ← first video clip
+├── scene-0-b.png     ← transition image  
+├── scene-0-c.mp4     ← second video clip
+├── scene-1-a.mp4
+├── scene-1-b.mp4
+└── ...
 ```
 
 ### Step 5: Write Remotion Composition (CREATIVE — VIBE-BASED)
