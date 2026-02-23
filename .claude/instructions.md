@@ -40,223 +40,52 @@ ls public/characters/
 
 ### Step 3: Generate Scene Visuals (2-Step Pipeline)
 
-**For EVERY scene, use this 2-step pipeline for best quality:**
+**FIRST: Read `.claude/LTX2-SKILL.md` for complete LTX-2 reference.**
 
-**Step A: Generate a scene image** (gives LTX-2 a high-quality starting frame)
+**For EVERY scene, use this 2-step pipeline:**
+
+**Step A: Generate a reference image per sub-clip**
 ```bash
 curl -X POST "http://45.251.34.28:8010/generate" \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "SCENE VISUAL DESCRIPTION, no text, cinematic lighting, vibrant colors",
     "negative_prompt": "text, words, letters, watermark, blurry, low quality, deformed",
-    "width": 768,
-    "height": 512,
-    "steps": 30,
-    "cfg_scale": 6,
-    "num_images": 1,
-    "backend": "diffusers"
-  }' \
-  --output public/scenes/scene-{i}.png
+    "width": 768, "height": 512, "steps": 30, "cfg_scale": 6,
+    "num_images": 1, "backend": "diffusers"
+  }' --output public/scenes/scene-{i}.png
 ```
 
-**Step B: Animate it with LTX-2 image-to-video** (turns the static image into a video clip)
-Upload the generated image to ComfyUI, then use `LTXVImgToVideo` node to animate it.
-```bash
-# First upload the image to ComfyUI
-COMFY_URL="http://$(ip route show default | awk '{print $3}'):8001"
-curl -s -X POST "$COMFY_URL/upload/image" \
-  -F "image=@public/scenes/scene-{i}.png" \
-  -F "type=input"
+**Step B: Animate EACH reference image with LTX-2 image-to-video**
+1. Upload image to ComfyUI: `curl -s -X POST "$COMFY_URL/upload/image" -F "image=@public/scenes/scene-{i}.png" -F "type=input"`
+2. Submit workflow from LTX2-SKILL.md (use image-to-video pipeline with motion prompt + audio)
+3. Poll for completion, download video clip
 
-# Then submit a workflow using LTXVImgToVideo
-# Claude Code: check the node details first:
-# curl -s "$COMFY_URL/object_info/LTXVImgToVideo" | python3 -m json.tool
-# Build a workflow that loads the uploaded image → LTXVImgToVideo → SaveVideo
-```
-
-This 2-step approach gives much higher quality than text-to-video alone because LTX-2 has a reference frame to animate from.
+**CRITICAL: Generate MULTIPLE video clips per scene to fill audio duration. NO static images as filler. NO looping.**
 
 **Health check for image gen:** `curl http://45.251.34.28:8010/health`
 
-#### AI Video Clips (Self-Hosted LTX-2 via ComfyUI — FREE)
-**ComfyUI URL:** Determined at runtime. Always discover it with:
+#### ComfyUI LTX-2 Connection
 ```bash
 COMFY_URL="http://$(ip route show default | awk '{print $3}'):8001"
 # Verify: curl -s "$COMFY_URL/system_stats" | python3 -c "import sys,json; print(json.load(sys.stdin)['system']['comfyui_version'])"
 ```
+**All LTX-2 workflow details, prompting guide, and quality tips → `.claude/LTX2-SKILL.md`**
 
-**How it works:** Send a workflow JSON to ComfyUI's `/prompt` endpoint. ComfyUI runs LTX-2 on the RTX 5090 and outputs a video file.
-
-**Step-by-step for each scene video clip:**
-
-**1. Submit the workflow:**
-```bash
-COMFY_URL="http://$(ip route show default | awk '{print $3}'):8001"
-
-curl -s -X POST "$COMFY_URL/prompt" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": {
-      "1": {
-        "class_type": "EmptyLTXVLatentVideo",
-        "inputs": {
-          "width": 768,
-          "height": 512,
-          "length": 97,
-          "batch_size": 1
-        }
-      },
-      "2": {
-        "class_type": "CheckpointLoaderSimple",
-        "inputs": {
-          "ckpt_name": "ltx-video-2b-v0.9.5.safetensors"
-        }
-      },
-      "3": {
-        "class_type": "CLIPTextEncode",
-        "inputs": {
-          "text": "SCENE_PROMPT_HERE, cinematic, smooth motion, vibrant colors, no text",
-          "clip": ["2", 1]
-        }
-      },
-      "4": {
-        "class_type": "CLIPTextEncode",
-        "inputs": {
-          "text": "blurry, low quality, distorted, text, watermark, static, ugly",
-          "clip": ["2", 1]
-        }
-      },
-      "5": {
-        "class_type": "KSampler",
-        "inputs": {
-          "seed": RANDOM_SEED,
-          "steps": 30,
-          "cfg": 3.5,
-          "sampler_name": "euler_ancestral",
-          "scheduler": "normal",
-          "denoise": 1.0,
-          "model": ["2", 0],
-          "positive": ["3", 0],
-          "negative": ["4", 0],
-          "latent_image": ["1", 0]
-        }
-      },
-      "6": {
-        "class_type": "VAEDecode",
-        "inputs": {
-          "samples": ["5", 0],
-          "vae": ["2", 2]
-        }
-      },
-      "7": {
-        "class_type": "SaveVideo",
-        "inputs": {
-          "filename_prefix": "scene_VIDEO_INDEX",
-          "images": ["6", 0]
-        }
-      }
-    }
-  }'
-```
-
-**IMPORTANT:** The workflow above is a starting template. Claude Code MUST first check what LTX-2 model files are available:
-```bash
-curl -s "$COMFY_URL/object_info/CheckpointLoaderSimple" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['CheckpointLoaderSimple']['input']['required']['ckpt_name'][0])"
-```
-Use whichever LTX model checkpoint is listed (e.g., `ltx-video-2b-v0.9.5.safetensors` or similar).
-
-If the basic workflow above fails, Claude Code should inspect available nodes and build a working workflow:
-```bash
-# List all LTX-related nodes
-curl -s "$COMFY_URL/object_info" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(k) for k in sorted(d.keys()) if 'ltx' in k.lower()]"
-
-# Get node details (inputs/outputs)
-curl -s "$COMFY_URL/object_info/LTXVConditioning" | python3 -m json.tool
-curl -s "$COMFY_URL/object_info/LTXVImgToVideo" | python3 -m json.tool
-curl -s "$COMFY_URL/object_info/LTXVScheduler" | python3 -m json.tool
-```
-
-Available LTX-2 nodes on this system:
-- `EmptyLTXVLatentVideo` — create empty latent for text-to-video
-- `LTXVConditioning` — LTX-specific conditioning
-- `LTXVImgToVideo` — image-to-video (use a generated scene image as first frame)
-- `LTXVImgToVideoInplace` — in-place image-to-video
-- `LTXVScheduler` — LTX-specific scheduler
-- `LTXVLoRALoader` / `LTXVLoRASelector` — for LoRA support
-- `LTXVPreprocess` — preprocessing
-- `LTXVAddGuide` — add guide frames
-- `LTXVLatentUpsampler` — upscale latent
-- `ModelSamplingLTXV` — model sampling config
-
-**2. Poll for completion:**
-```bash
-# The /prompt response returns a prompt_id
-PROMPT_ID=$(curl -s -X POST "$COMFY_URL/prompt" -H "Content-Type: application/json" -d "$WORKFLOW_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['prompt_id'])")
-
-# Poll history until complete
-while true; do
-  STATUS=$(curl -s "$COMFY_URL/history/$PROMPT_ID" | python3 -c "
-import sys,json
-d=json.load(sys.stdin)
-if '$PROMPT_ID' in d:
-  outputs = d['$PROMPT_ID'].get('outputs', {})
-  if outputs:
-    print('DONE')
-  else:
-    status = d['$PROMPT_ID'].get('status', {})
-    if status.get('status_str') == 'error':
-      print('ERROR')
-    else:
-      print('RUNNING')
-else:
-  print('WAITING')
-")
-  if [ "$STATUS" = "DONE" ]; then break; fi
-  if [ "$STATUS" = "ERROR" ]; then echo "ComfyUI workflow failed"; break; fi
-  sleep 2
-done
-```
-
-**3. Download the output video:**
-```bash
-# Get ALL outputs from history - look for videos/gifs/images
-OUTPUT_JSON=$(curl -s "$COMFY_URL/history/$PROMPT_ID" | python3 -c "
-import sys,json
-d=json.load(sys.stdin)['$PROMPT_ID']['outputs']
-for node_id, output in d.items():
-  for key in ['gifs', 'videos', 'images']:
-    if key in output:
-      for item in output[key]:
-        if item.get('filename','').endswith('.mp4') or item.get('filename','').endswith('.webm'):
-          print(item['filename'])
-          break
-")
-
-# Download using the EXACT filename from the output
-curl -s "$COMFY_URL/view?filename=$OUTPUT_JSON&type=output" --output public/scenes/scene-{i}.mp4
-
-# Verify the file is valid
-ffprobe -v error -show_entries format=duration -of csv=p=0 public/scenes/scene-{i}.mp4
-ls -la public/scenes/scene-{i}.mp4
-```
-
-**IMPORTANT:** ComfyUI SaveVideo node uses the prefix you set + `_00001_`. So if prefix is `scene_0`, the filename is `scene_0_00001_.mp4`. Always check history output for the exact filename.
-
-**Fallback:** If ComfyUI is not running or LTX-2 fails, fall back to static images from the image gen API at http://45.251.34.28:8010/generate with Ken Burns zoom in Remotion.
-
-**Default behavior:** PREFER video clips via LTX-2 for ALL scenes (free, local, high quality). Fall back to static images only if ComfyUI is unavailable.
-
-**Style guide for ALL visual prompts:**
-- Include: "cute cartoon tiger mascot, tech/crypto theme, modern, vibrant gradient"
-- Match scene mood: "glowing neon circuits" for tech, "warm sunrise" for intro, "confetti celebration" for outro
+**Visual prompt guidelines:**
+- **Image gen prompts:** describe the SCENE (setting, mood, colors, composition). Include "cinematic lighting, vibrant"
+- **LTX-2 motion prompts:** describe MOVEMENT (camera, elements, energy). Must be DIFFERENT from image prompt
+- Motion prompts MUST relate to the dialogue — "breaking free" → show shattering/breaking motion
 - NEVER include text in AI images (Remotion adds all text)
-- Keep consistent style by reusing style keywords across all scenes
+
+**Fallback:** If ComfyUI is down, use static images with Ken Burns zoom. But PREFER video clips always.
 
 Save all generated visuals to:
 ```
 public/scenes/
-├── scene-0.png (or .mp4)
-├── scene-1.png (or .mp4)
+├── scene-0-a.mp4 (first clip)
+├── scene-0-b.mp4 (second clip)
+├── scene-1-a.mp4
 └── ...
 ```
 
@@ -523,17 +352,20 @@ No API keys needed — image gen, video gen (LTX-2), and TTS are all self-hosted
 Claude Code MUST follow these rules when writing video scripts:
 
 **Tone & Style:**
-- Write like a viral content creator, NOT a corporate explainer
+- Write like a FUNNY content creator, NOT a corporate explainer
+- Be conversational, witty, slightly irreverent — like MrBeast meets a crypto bro
 - Short punchy sentences. No jargon. No technical babble.
-- Each scene: max 15-20 words of dialogue
+- Each scene: 15-25 words of dialogue (produces 8-12s of audio)
 - Think "storytelling" not "presenting" — hook people in the first 3 seconds
 - Add humor, personality, and "masala" — make people want to watch till the end
 - Use analogies a 12-year-old would understand
+- ROAST the problem before presenting the solution
+- Use rhetorical questions, sarcasm, and surprise
 
 **Structure:**
-- Scene 1: HOOK — shocking stat, bold claim, or funny opener (3-5 seconds)
-- Scenes 2-4: STORY — explain through examples and stories, not features (5-8 seconds each)
-- Last scene: CTA — tell them what to do next (3-5 seconds)
+- Scene 1: HOOK — funny roast, shocking question, or "wait what?" moment (8-10 seconds)
+- Scenes 2-3: STORY — explain through funny analogies and relatable examples (8-12 seconds each)
+- Last scene: CTA — hype them up, give the link, end with energy (8-10 seconds)
 
 **What NOT to do:**
 - No long monologues. Ever.
@@ -541,13 +373,75 @@ Claude Code MUST follow these rules when writing video scripts:
 - No listing features like a product spec sheet
 - No "Let me explain..." — just explain it
 - No technical jargon unless absolutely needed
+- No robotic corporate tone — be HUMAN
+- No "Welcome to..." or "Today we're going to..." — snooze!
 
 **Examples of GOOD vs BAD dialogue:**
 - BAD: "PawPad utilizes FROST MPC threshold signature schemes for distributed key management"
-- GOOD: "Your wallet key is split into pieces. No single device has the full thing. That means nobody can steal it."
+- GOOD: "Bro, your wallet has ONE key and you think that's safe? That's like putting all your money under your mattress and hoping nobody checks."
 
 - BAD: "We leverage Oasis ROFL Trusted Execution Environments for hardware-level isolation"
-- GOOD: "Imagine a vault inside a vault. That is where your transactions happen. Not even we can peek inside."
+- GOOD: "Imagine a vault... inside another vault... inside a volcano. That's basically where your transactions happen. Good luck hacking THAT."
+
+- BAD: "ZkAGI combines artificial intelligence with zero knowledge proofs for private computation"
+- GOOD: "What if AI could help you without EVER seeing your data? Sounds impossible right? That's literally what we built."
+
+- BAD: "Join us at zkagi.ai to learn more about our platform"
+- GOOD: "Stop letting big tech spy on your breakfast searches. zkagi dot ai. You're welcome."
+
+---
+
+## SOUND EFFECTS & ATTENTION HOOKS (CRITICAL)
+Claude Code MUST add sound effects to make videos engaging. These go in the Remotion composition.
+
+**Download or generate these sound effects and save to public/sfx/:**
+```bash
+mkdir -p public/sfx
+```
+
+**Required sounds (use free sources or generate with ffmpeg):**
+```bash
+# Whoosh transition (between scenes)
+ffmpeg -f lavfi -i "anoisesrc=d=0.3:c=pink:r=44100:a=0.4" -af "afade=t=in:st=0:d=0.05,afade=t=out:st=0.15:d=0.15,highpass=f=2000,lowpass=f=8000" public/sfx/whoosh.wav
+
+# Pop/ding (for highlight words)  
+ffmpeg -f lavfi -i "sine=frequency=880:duration=0.15" -af "afade=t=out:st=0.05:d=0.1" public/sfx/pop.wav
+
+# Bass drop (for hook/reveal moments)
+ffmpeg -f lavfi -i "sine=frequency=60:duration=0.4" -af "afade=t=in:st=0:d=0.05,afade=t=out:st=0.2:d=0.2" public/sfx/bass-drop.wav
+
+# Notification ping (for CTA/link moments)
+ffmpeg -f lavfi -i "sine=frequency=1200:duration=0.2" -af "afade=t=out:st=0.1:d=0.1" public/sfx/ping.wav
+
+# Record scratch (for "wait what" moments)
+ffmpeg -f lavfi -i "anoisesrc=d=0.5:c=white:r=44100:a=0.3" -af "highpass=f=1000,tremolo=f=20:d=0.7,afade=t=in:st=0:d=0.05,afade=t=out:st=0.2:d=0.3" public/sfx/scratch.wav
+```
+
+**When to use sounds in Remotion:**
+```jsx
+// Scene transition — add whoosh
+<Sequence from={sceneTransitionFrame - 5} durationInFrames={15}>
+  <Audio src={staticFile("sfx/whoosh.wav")} volume={0.4} />
+</Sequence>
+
+// Hook moment — bass drop
+<Sequence from={hookRevealFrame} durationInFrames={15}>
+  <Audio src={staticFile("sfx/bass-drop.wav")} volume={0.5} />
+</Sequence>
+
+// CTA link shown — ping
+<Sequence from={ctaLinkFrame} durationInFrames={10}>
+  <Audio src={staticFile("sfx/ping.wav")} volume={0.3} />
+</Sequence>
+```
+
+**Rules:**
+- EVERY scene transition gets a whoosh or bass drop
+- Highlight/keyword moments get a pop sound
+- CTA/link reveal gets a ping
+- "Wait what?" or surprise moments get a record scratch
+- Keep SFX volume at 0.3-0.5 (not louder than voice)
+- SFX make the video feel ALIVE and PROFESSIONAL
 
 ---
 
