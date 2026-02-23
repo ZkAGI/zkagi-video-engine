@@ -38,26 +38,19 @@ ls public/characters/
 
 **Users can add more voices anytime** by dropping wav+txt files in `voices/` and images in `public/characters/{name}/`.
 
-### Step 3: Generate Scene Visuals
+### Step 3: Generate Scene Visuals (2-Step Pipeline)
 
-**For each scene, decide: image or video clip?**
-- Use **video clips** for: intros, dramatic moments, abstract concepts, outros
-- Use **images** for: technical explanations, data points, anything with text overlay
+**For EVERY scene, use this 2-step pipeline for best quality:**
 
-#### AI Image Generation (Self-Hosted GPU — SDXL/Diffusers)
-**Endpoint:** `POST http://45.251.34.28:8010/generate`
-**Content-Type:** `application/json`
-**Returns:** Raw PNG bytes (save directly to file)
-**Cost:** FREE (self-hosted)
-
+**Step A: Generate a scene image** (gives LTX-2 a high-quality starting frame)
 ```bash
 curl -X POST "http://45.251.34.28:8010/generate" \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "SCENE VISUAL DESCRIPTION, no text, cinematic lighting, vibrant colors",
     "negative_prompt": "text, words, letters, watermark, blurry, low quality, deformed",
-    "width": 1920,
-    "height": 1080,
+    "width": 768,
+    "height": 512,
     "steps": 30,
     "cfg_scale": 6,
     "num_images": 1,
@@ -66,10 +59,24 @@ curl -X POST "http://45.251.34.28:8010/generate" \
   --output public/scenes/scene-{i}.png
 ```
 
-**For 9:16 vertical videos**, use `"width": 1080, "height": 1920`
-**For 1:1 square videos**, use `"width": 1080, "height": 1080`
+**Step B: Animate it with LTX-2 image-to-video** (turns the static image into a video clip)
+Upload the generated image to ComfyUI, then use `LTXVImgToVideo` node to animate it.
+```bash
+# First upload the image to ComfyUI
+COMFY_URL="http://$(ip route show default | awk '{print $3}'):8001"
+curl -s -X POST "$COMFY_URL/upload/image" \
+  -F "image=@public/scenes/scene-{i}.png" \
+  -F "type=input"
 
-**Health check:** `curl http://45.251.34.28:8010/health`
+# Then submit a workflow using LTXVImgToVideo
+# Claude Code: check the node details first:
+# curl -s "$COMFY_URL/object_info/LTXVImgToVideo" | python3 -m json.tool
+# Build a workflow that loads the uploaded image → LTXVImgToVideo → SaveVideo
+```
+
+This 2-step approach gives much higher quality than text-to-video alone because LTX-2 has a reference frame to animate from.
+
+**Health check for image gen:** `curl http://45.251.34.28:8010/health`
 
 #### AI Video Clips (Self-Hosted LTX-2 via ComfyUI — FREE)
 **ComfyUI URL:** Determined at runtime. Always discover it with:
@@ -268,10 +275,13 @@ After generating all audio, get durations:
 ffprobe -v error -show_entries format=duration -of csv=p=0 public/audio/scene-{i}.wav
 ```
 
-### Step 5: Write Remotion Composition
+### Step 5: Write Remotion Composition (CREATIVE — VIBE-BASED)
 Write/update `src/compositions/ZkAGIVideo.tsx` to composite everything.
 
-**CRITICAL REMOTION RULES:**
+**CRITICAL: Every video should look DIFFERENT. Do NOT copy-paste the same template every time.**
+Claude Code must make creative decisions based on the video's vibe, topic, and tone.
+
+**Technical rules (always follow):**
 - Use `staticFile()` for ALL asset paths (images, video, audio)
 - Use `<Img>` from remotion (not `<img>`) for images
 - Use `<Video>` from remotion for video clips, with `startFrom={0}`
@@ -281,24 +291,54 @@ Write/update `src/compositions/ZkAGIVideo.tsx` to composite everything.
 - Use `spring()` and `interpolate()` for all animations
 - Register composition with total frames = sum of all scene frames
 
-**Layer order per scene (bottom to top):**
-1. **Background** — AI-generated image (with slow Ken Burns zoom via `interpolate`) OR video clip (via `<Video>`)
-2. **Overlay gradient** — semi-transparent gradient for text readability
-3. **Tiger character** — from `public/characters/{id}/neutral.png`, with:
-   - Spring bounce entrance from below
-   - Gentle idle floating (sin wave on Y)
-   - Subtle scale pulse (simulates speaking energy)
-   - Exit: fade out in last 15 frames
-4. **Highlight text** — key phrase with spring scale-pop animation
-5. **Subtitles** — word-by-word reveal synced to scene duration
-6. **TTS Audio** — `<Audio src={staticFile('audio/scene-{i}.wav')}>`
+**Creative rules (Claude Code DECIDES per video):**
 
-**Scene transitions:** 10-15 frame crossfade overlap between scenes
+Claude Code must pick the visual style based on the vibe. DO NOT use the same look every time. Options include:
 
-**Global layers:**
-- Animated background particles (subtle, matches theme)
-- Watermark (top right)
-- Background music if provided (public/music/, low volume)
+**Caption/Subtitle Style — pick one per video:**
+- Big bold center text (hype/announcement videos)
+- Small lower-third subtitle bar (news/update style)
+- Word-by-word pop-in with spring physics (educational)
+- Karaoke-style highlight (fun/casual)
+- Minimal — no captions, just key phrases (cinematic)
+- Caption size, font weight, color, position should ALL vary per video vibe
+
+**Scene Transition Style — pick one per video:**
+- Hard cut (fast-paced, TikTok style)
+- Crossfade (smooth, educational)
+- Zoom-through (dramatic, announcement)
+- Wipe/slide (news style)
+- Glitch/flash (tech/crypto vibe)
+- Mix transitions within a video for variety
+
+**Background Treatment — pick per scene:**
+- Full-bleed video clip from LTX-2 (default for most scenes)
+- Video clip with color overlay tint (for text-heavy scenes)
+- Split screen — video on one side, key stats on other
+- Blurred/dimmed video background with sharp text foreground
+- NO background character overlay if the AI video already shows a character — avoid redundant layering
+
+**Motion & Animation — vary per scene:**
+- Character overlay: sometimes show it, sometimes don't (if AI background already has a character)
+- Text entrance: spring, typewriter, fade, slide, bounce — pick what fits
+- Pacing: vary speed per scene (fast cuts for hype, slow for emotional)
+- Scale effects: zoom in on important moments, zoom out for establishing shots
+- Shake/vibrate for impact moments
+
+**Color & Mood — match the topic:**
+- Crypto/tech: dark backgrounds, neon accents, purple/blue/green
+- Product launch: bright, celebratory, golden highlights
+- Educational: clean, light backgrounds, clear contrast
+- News update: professional, muted with accent colors
+- Fun/casual: saturated colors, playful animations
+
+**What NOT to do:**
+- Do NOT use the exact same layout for every scene
+- Do NOT always put character in bottom-left with subtitle in bottom-right
+- Do NOT use the same font size for every caption
+- Do NOT force character overlay when the AI background already tells the story
+- Do NOT make every transition a crossfade
+- Do NOT make it look like a PowerPoint slideshow
 
 ### Step 6: Render
 ```bash
