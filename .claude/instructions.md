@@ -261,26 +261,56 @@ public/scenes/
 ```
 
 ### Step 4: Generate TTS Audio
-For each scene, call VoxCPM with the character's voice:
+For each scene, call VoxCPM with the character's voice.
 
+**CRITICAL: Use these EXACT commands. Do NOT modify the ref_text strings.**
+
+**For paw voice scenes:**
 ```bash
-# Read the character's reference text
-REF_TEXT=$(cat voices/{characterId}.txt)
-
 curl -X POST "https://avatar.zkagi.ai/v1/clone-tts" \
-  -F "ref_audio=@voices/{characterId}.wav" \
-  -F "ref_text=$REF_TEXT" \
+  -F "ref_audio=@voices/paw.wav" \
+  -F "ref_text=ZM folks, here is your July 24th 2025 crypto update. Bitcoin is trading around 118520 US dollars." \
   -F "text=SCENE DIALOGUE HERE" \
   -F "cfg_value=2.0" \
   -F "steps=15" \
   --output public/audio/scene-{i}.wav
 ```
 
+**For pad voice scenes:**
+```bash
+curl -X POST "https://avatar.zkagi.ai/v1/clone-tts" \
+  -F "ref_audio=@voices/pad.wav" \
+  -F "ref_text=Today, software handles our money, our health, our work." \
+  -F "text=SCENE DIALOGUE HERE" \
+  -F "cfg_value=2.0" \
+  -F "steps=15" \
+  --output public/audio/scene-{i}.wav
+```
+
+**DO NOT use `$(cat voices/paw.txt)` or `$(cat voices/pad.txt)` — this causes encoding issues and non-English output.**
+**DO NOT change cfg_value or steps — these exact values produce English output.**
+**DO NOT use any other TTS endpoint — ONLY /v1/clone-tts.**
+
+**AFTER generating each audio file, VERIFY it:**
+```bash
+# Check file size (must be >50KB for 5+ seconds of audio)
+ls -la public/audio/scene-{i}.wav
+
+# Check duration
+ffprobe -v error -show_entries format=duration -of csv=p=0 public/audio/scene-{i}.wav
+
+# MANDATORY: Play it to verify it's English (on Linux)
+timeout 3 aplay public/audio/scene-{i}.wav 2>/dev/null || timeout 3 ffplay -nodisp -autoexit -t 3 public/audio/scene-{i}.wav 2>/dev/null
+```
+
+If any audio is NOT English or has glitches, regenerate it ONE time with the same exact command. If still broken after one retry, the dialogue text might be confusing the model — simplify the dialogue to use common English words and shorter sentences.
+
 **IMPORTANT TTS RULES:**
 - Each scene dialogue MUST be 15-30 words to produce 8-15 seconds of audio
 - If audio comes out under 5 seconds, the dialogue is too short — rewrite it longer
 - Do NOT regenerate more than once — write proper length dialogue the first time
-- Test audio plays correctly before moving on: `ffplay -nodisp -autoexit public/audio/scene-{i}.wav`
+- Keep dialogue in simple, clear English — no unusual words, no special characters
+- Do NOT use emojis, symbols, or non-ASCII characters in dialogue text
 
 After generating all audio, get durations:
 ```bash
