@@ -407,10 +407,26 @@ Claude Code must pick the visual style based on the vibe. DO NOT use the same lo
 **What NOT to do:**
 - Do NOT use the exact same layout for every scene
 - Do NOT always put character in bottom-left with subtitle in bottom-right
-- Do NOT use the same font size for every caption
 - Do NOT force character overlay when the AI background already tells the story
 - Do NOT make every transition a crossfade
 - Do NOT make it look like a PowerPoint slideshow
+- NEVER put giant heading text in the center of the screen (like "UNBREAKABLE" or "SECURITY") — this looks hideous and covers the video
+- NEVER make captions/subtitles cover more than 15% of screen height
+
+**STRICT CAPTION/SUBTITLE RULES:**
+- Subtitles go at the BOTTOM of the screen, not center
+- Maximum 2 lines of text at any time
+- Font size: 20-28px max for 1080p. NEVER 40px+
+- Use a subtle semi-transparent dark pill/bar behind text for readability
+- Subtitles should cover max 10-15% of screen height
+- No highlightText giant titles — if you want to emphasize a word, make it a different color within the subtitle, not a separate giant heading
+- The video background is the star, captions are supporting — never let text dominate the visual
+
+**TTS AUDIO QUALITY RULES:**
+- After generating each audio file, VERIFY it is English by checking file size (should be >50KB for 5+ seconds)
+- If any audio sounds wrong, regenerate ONCE with same parameters
+- Use cfg_value=2.0 and steps=15 always — do not change these
+- Hardcode ref_text strings, do not read from files with cat (can cause encoding issues)
 
 ### Step 6: Render
 ```bash
