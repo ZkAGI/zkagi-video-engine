@@ -1,9 +1,9 @@
 # PawPad — Product Knowledge Base
 
 ## What is PawPad?
-A seedless MPC wallet powered by Oasis TEE. No seed phrases. No passwords. Your wallet key is split into 2 shares — one on your device, one inside a hardware-secured enclave (Oasis TEE). Neither share alone can do anything. Both are required to sign transactions.
+A seedless wallet powered by Oasis TEE (Trusted Execution Environment). No seed phrases. No passwords. Your wallet keys (EVM, Solana, Zcash) are generated and stored INSIDE a hardware-secured enclave via ROFL smart contracts. Keys never leave the TEE. Signing happens inside the enclave.
 
-**Tagline:** "Your keys, split and secured. No seed phrase. No single point of failure."
+**Tagline:** "Your keys, locked in hardware. No seed phrase. No way in."
 
 **Target audience:** Crypto users tired of losing seed phrases, new users scared of self-custody complexity.
 
