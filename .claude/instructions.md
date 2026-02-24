@@ -11,10 +11,47 @@ Full AI video production pipeline. Claude Code handles everything:
 ### Step 1: Write Script
 Based on user's brief, write 3-7 scenes. For each scene define:
 - `characterId` — which voice/character to use
-- `dialogue` — what they say (15-30 words per scene)
+- `dialogue` — what they say (15-25 words per scene)
 - `visualPrompt` — description of what the background should show
-- `sceneType` — "image" (AI image + Remotion animation) or "video" (AI video clip)
-- `highlightText` — key phrase to display big on screen
+- `sceneType` — one of:
+  - `"video"` — AI-generated video clip via LTX-2 (hype, concept, abstract)
+  - `"demo"` — real product screen recording with voiceover (product showcase)
+  - `"image"` — fallback: AI image with Ken Burns zoom
+- `demoClip` — (only for demo scenes) path to screen recording, e.g. `"products/pawpad/demo-clips/tee-wallet-creation.mp4"`
+- `demoTimestamp` — (only for demo scenes) start/end time to trim, e.g. `[6, 18]` (seconds)
+
+**Video structure with product demos (RECOMMENDED for product videos):**
+```
+Scene 1: [video]  AI hype scene — hook the viewer, roast the problem
+Scene 2: [video]  AI explainer — "here's what PawPad does differently"
+Scene 3: [demo]   REAL product footage — "let me show you"
+Scene 4: [demo]   REAL product footage — "and look at this"
+Scene 5: [video]  AI CTA scene — "try it yourself at..."
+```
+
+### Step 1b: Load Product Knowledge (for product videos)
+If the video is about a specific product, read its knowledge base FIRST:
+```bash
+# Check available products
+ls products/*/PRODUCT.md
+
+# Read the product knowledge
+cat products/pawpad/PRODUCT.md    # ← for PawPad videos
+```
+This gives you: features, user flows, USPs, analogies for scripts, and demo clip paths with timestamps.
+
+**Available products:**
+```
+products/
+├── pawpad/
+│   ├── PRODUCT.md          ← Features, flows, USPs, script analogies
+│   └── demo-clips/         ← Screen recordings (add .mp4 files here)
+│       ├── tee-wallet-creation.mp4
+│       ├── agent-dashboard.mp4
+│       └── key-recovery.mp4
+├── zkterminal/             ← (coming soon)
+└── zynapse/                ← (coming soon)
+```
 
 ### Step 2: Discover Available Voices
 Check `voices/` folder for available characters:
@@ -87,6 +124,46 @@ public/scenes/
 ├── scene-0-b.mp4 (second clip)
 ├── scene-1-a.mp4
 └── ...
+```
+
+### Step 3b: Prepare Demo Clips (for demo scenes only)
+For scenes with `sceneType: "demo"`, trim the real screen recording to match:
+
+```bash
+# Trim demo clip to specific timestamp range
+ffmpeg -i products/pawpad/demo-clips/tee-wallet-creation.mp4 \
+  -ss 6 -to 18 \
+  -c:v libx264 -an \
+  public/scenes/scene-{i}-demo.mp4
+
+# Verify duration matches or exceeds audio duration
+ffprobe -v error -show_entries format=duration -of csv=p=0 public/scenes/scene-{i}-demo.mp4
+```
+
+**Demo clip rules:**
+- Trim to the relevant portion using timestamps from PRODUCT.md
+- Remove audio from demo clip (`-an`) — TTS voiceover replaces it
+- If demo clip is SHORTER than TTS audio: slow it down with `-filter:v "setpts=1.5*PTS"`
+- If demo clip is LONGER than TTS audio: trim tighter or speed up with `-filter:v "setpts=0.75*PTS"`
+- Add a subtle dark gradient overlay at bottom in Remotion so captions are readable over the UI
+
+**In Remotion, demo scenes use `<OffthreadVideo>` (not `<Video>`) for better performance:**
+```jsx
+// Demo scene — real product footage
+<Sequence from={sceneStart} durationInFrames={sceneFrames}>
+  <OffthreadVideo
+    src={staticFile("scenes/scene-2-demo.mp4")}
+    style={{ width: "100%", height: "100%", objectFit: "contain" }}
+    volume={0}
+  />
+  {/* Dark gradient at bottom for caption readability */}
+  <div style={{
+    position: "absolute", bottom: 0, width: "100%", height: "30%",
+    background: "linear-gradient(transparent, rgba(0,0,0,0.7))"
+  }} />
+  <Subtitles text={dialogue} ... />
+  <Audio src={staticFile("audio/scene-2.wav")} />
+</Sequence>
 ```
 
 ### Step 4: Generate TTS Audio
@@ -300,16 +377,29 @@ npx remotion render ZkAGIVideoVertical output/video-vertical.mp4 --bundle-cache=
 
 ## FILE STRUCTURE
 ```
+products/                 ← Product knowledge base + demo clips
+├── pawpad/
+│   ├── PRODUCT.md        ← Features, flows, USPs, analogies
+│   └── demo-clips/       ← Real screen recordings (.mp4)
+│       ├── tee-wallet-creation.mp4
+│       ├── agent-dashboard.mp4
+│       └── key-recovery.mp4
+├── zkterminal/           ← (add more products here)
+└── zynapse/
+
 public/
 ├── characters/           ← Tiger character overlays (PNG, transparent bg)
 │   ├── paw/neutral.png, excited.png
 │   └── pad/neutral.png, thinking.png
-├── scenes/               ← AI-generated backgrounds per scene (Step 3)
-│   ├── scene-0.png (or .mp4)
+├── scenes/               ← AI-generated + trimmed demo clips per scene
+│   ├── scene-0-a.mp4     ← LTX-2 video clip
+│   ├── scene-0-b.mp4     ← second clip
+│   ├── scene-2-demo.mp4  ← trimmed product demo
 │   └── ...
 ├── audio/                ← TTS audio files (Step 4)
 │   ├── scene-0.wav
 │   └── ...
+├── sfx/                  ← Sound effects (whoosh, pop, bass-drop, ping, scratch)
 └── music/                ← Optional background music tracks
 
 voices/                   ← Voice reference samples
@@ -317,11 +407,14 @@ voices/                   ← Voice reference samples
 ├── pad.wav + pad.txt     ← Explainer tiger voice
 └── {new}.wav + {new}.txt ← Add more voices here
 
-configs/                  ← Video config JSONs (optional, for manual mode)
 src/
 ├── compositions/ZkAGIVideo.tsx  ← Main Remotion composition (rewritten per video)
 ├── components/                   ← Reusable components
 └── lib/                          ← TTS client, themes
+
+.claude/
+├── instructions.md       ← This file (pipeline guide)
+└── LTX2-SKILL.md         ← LTX-2 video generation reference
 
 output/                   ← Rendered MP4s
 ```
@@ -447,11 +540,20 @@ ffmpeg -f lavfi -i "anoisesrc=d=0.5:c=white:r=44100:a=0.3" -af "highpass=f=1000,
 
 ## EXAMPLE BRIEFS
 
-**Simple:**
-> "Make a 60s video about PawPad wallet. Use paw for intro/outro and pad for technical parts."
+**Simple AI-only:**
+> "Make a 45s video about why privacy matters in crypto. Use paw voice. Make it funny."
 
-**With voice selection:**
-> "Make a video about ZkAGI token launch. Use paw (energetic host) for the announcement scenes and pad (calm explainer) for the tokenomics breakdown."
+**Product demo (PawPad wallet creation):**
+> "Make a 60s video showing how PawPad wallet creation works. Use pad voice. Include the real screen recording of TEE wallet creation flow. Read products/pawpad/PRODUCT.md first. AI scenes for hook and CTA, demo clip for the actual product walkthrough."
 
-**With format:**
-> "Make a 30s TikTok (9:16) about why privacy matters in crypto. Fast-paced, use paw only."
+**Product demo (PawPad agent):**
+> "Make a 45s video about PawPad's AI trading agent. Show the real agent dashboard demo clip. Explain how the agent trades autonomously while your keys stay safe in TEE. Use paw voice for hype, pad for the demo walkthrough."
+
+**Product demo (PawPad recovery):**
+> "Make a 30s video showing how easy PawPad wallet recovery is. Include the real key recovery demo clip. Hook: 'Lost your phone? No problem.' Use pad voice."
+
+**Use case / scenario video:**
+> "Make a 60s video: scenario where someone loses their phone with crypto on it. Show the panic, then show how PawPad recovery saves them. Mix AI scenes for the story with real product demo of recovery flow."
+
+**Multi-product:**
+> "Make a 90s video about ZkAGI's product ecosystem. Cover PawPad wallet, ZkTerminal, and Zynapse. Use demo clips from each product. Read all PRODUCT.md files first."
