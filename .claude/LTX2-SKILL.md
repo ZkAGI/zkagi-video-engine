@@ -388,7 +388,7 @@ public/scenes/
 
 ## VIDEO QUALITY TIPS
 
-1. **Image-to-video >> Text-to-video** — Always provide a reference image
+1. **Image-to-video >> Text-to-video** — Always provide a reference image for this 
 2. **LTXVPreprocess the image** — Intentionally degrades to look like video compression, preventing quality mismatch between input image and generated frames
 3. **Use Hires.fix** — 2x spatial upscale with LTXVLatentUpsampler if available
 4. **Distilled LoRA** — Use 8-step distilled for stable, fast results
