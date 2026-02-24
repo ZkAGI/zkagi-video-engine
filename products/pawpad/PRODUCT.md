@@ -1,7 +1,7 @@
 # PawPad — Product Knowledge Base
 
 ## What is PawPad?
-A seedless wallet powered by Oasis TEE (Trusted Execution Environment). No seed phrases. No passwords. Your wallet keys (EVM, Solana, Zcash) are generated and stored INSIDE a hardware-secured enclave via ROFL smart contracts. Keys never leave the TEE. Signing happens inside the enclave.
+A seedless wallet powered by Oasis TEE (Trusted Execution Environment). No seed phrases. No passwords. Your wallet keys (EVM, Solana) are generated and stored INSIDE a hardware-secured enclave via ROFL smart contracts. Keys never leave the TEE. Signing happens inside the enclave.
 
 **Tagline:** "Your keys, locked in hardware. No seed phrase. No way in."
 
@@ -15,7 +15,7 @@ A seedless wallet powered by Oasis TEE (Trusted Execution Environment). No seed 
 - Keys never leave the TEE — signing happens inside the enclave
 - Even Oasis node operators cannot see what's inside the TEE
 - TOTP secret also stored here
-- EVM, Solana, Zcash keys all managed inside TEE
+- EVM, Solana keys all managed inside TEE
 - ROFL contract endpoint: `https://p3000.m1242.opf-testnet-rofl-25.rofl.app`
 
 ### TOTP (Google Authenticator)
@@ -37,7 +37,7 @@ A seedless wallet powered by Oasis TEE (Trusted Execution Environment). No seed 
 ```
 1. User opens PawPad → taps "Create Wallet" → selects "Seedless Wallet"
 2. App communicates with Oasis TEE via ROFL contract:
-   - TEE generates wallet keys internally (EVM, Solana, Zcash)
+   - TEE generates wallet keys internally (EVM, Solana)
    - Keys NEVER leave the TEE
    - Public addresses returned to app
 3. TOTP Setup:
@@ -53,7 +53,7 @@ A seedless wallet powered by Oasis TEE (Trusted Execution Environment). No seed 
    - THIS IS THE ONLY TIME the backup is offered
 5. Wallet ready:
    - Home screen shows wallet address, balance
-   - Supports: Zcash, EVM chains, Solana
+   - Supports: EVM chains, Solana
    - All keys secure inside TEE
 ```
 
@@ -65,7 +65,7 @@ User Device                    Oasis TEE (ROFL)
     |                               | Generates keys inside TEE
     |                               | EVM private key in TEE
     |                               | Solana private key in TEE
-    |                               | Zcash private key in TEE
+    |                               |
     |<-- Public addresses returned--|
     |                               |
     |--- Store TOTP secret -------->|
@@ -167,7 +167,7 @@ New Device                     Oasis TEE (ROFL)
 - **TEE-secured**: Keys live in hardware enclave. Even node operators can't see them.
 - **Recoverable**: Lost your phone? Backup file + Google Authenticator = wallet back.
 - **AI trading**: Built-in autonomous trading agent with PnL tracking.
-- **Multi-chain**: Zcash, EVM chains, Solana — all from one wallet.
+- **Multi-chain**: EVM chains, Solana — all from one wallet.
 
 ### Analogies for Videos
 - "Seed phrases are like writing your bank password on a napkin and hoping you don't lose it"
