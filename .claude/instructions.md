@@ -6,6 +6,25 @@ Full AI video production pipeline. Claude Code handles everything:
 
 ---
 
+## MANDATORY: READ SKILLS BEFORE ANY VIDEO TASK
+
+Before doing ANYTHING for a video brief, Claude Code MUST read these files in order:
+
+1. .claude/skills/screenplay/SKILL.md — for script writing
+2. .claude/skills/image-prompt-craft/SKILL.md — for image generation prompts
+3. .claude/skills/motion-prompt-craft/SKILL.md — for LTX-2 video prompts
+4. .claude/LTX2-SKILL.md — for ComfyUI workflow reference
+5. products/{product}/PRODUCT.md — if the video is about a specific product
+
+Then check for demo clips:
+6. ls products/*/demo-clips/*.mp4 — if any exist for the product, USE THEM
+
+These skills contain the quality standards, prompt engineering techniques, and style guides that make videos professional and entertaining. SKIPPING these produces generic, boring, corporate-looking videos.
+
+This is NOT optional. Read them EVERY time. Even if you think you remember them.
+
+---
+
 ## PIPELINE
 
 **BEFORE writing scripts, read .claude/skills/screenplay/SKILL.md. BEFORE writing image prompts, read .claude/skills/image-prompt-craft/SKILL.md. BEFORE writing LTX-2 prompts, read .claude/skills/motion-prompt-craft/SKILL.md.**
