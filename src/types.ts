@@ -33,6 +33,7 @@ export const SceneSchema = z.object({
   dialogue: z.string(),
   emotion: EmotionEnum.default("neutral"),
   visualType: VisualTypeEnum.default("talking-head"),
+  sceneType: z.enum(["image", "video"]).default("image"),
   backgroundUrl: z.string().optional(),
   backgroundColor: z.string().optional(),
   highlightText: z.string().optional(),

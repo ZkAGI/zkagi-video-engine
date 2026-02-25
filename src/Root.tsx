@@ -2,7 +2,7 @@ import { Composition } from "remotion";
 import { ZkAGIVideo } from "./compositions/ZkAGIVideo";
 import { VideoConfigSchema } from "./types";
 
-// ── Default tiger characters (PawPad mascots) ──
+// ── Tiger characters (PawPad mascots) ──
 const CHARACTERS = {
   paw: {
     id: "paw", name: "Paw", color: "#7C3AED", role: "host",
@@ -32,96 +32,59 @@ const CHARACTERS = {
   },
 };
 
-// ── PawPad Wallet Video Scenes ──
-// Audio durations: 8.0, 7.2, 7.36, 7.68, 16.48, 2.88 seconds (~49.6s total)
+// ── PawPad Wallet Creation Demo (60s, 4 scenes, all pad voice) ──
+// Audio durations: 13.92s + 15.36s + 17.92s + 14.56s = 61.76s
 const PAWPAD_SCENES = [
   {
-    characterId: "paw",
-    dialogue: "Hey crypto fans! Welcome to PawPad, the friendliest and most secure wallet in the entire web3 space!",
-    emotion: "excited" as const,
+    characterId: "pad",
+    dialogue: "Twenty four random words written down on a piece of paper. That is your master plan for protecting your entire life savings? Come on now. That is not security. That is like writing your bank password on a napkin and praying nobody finds it.",
+    emotion: "serious" as const,
     visualType: "talking-head" as const,
-    highlightText: "Welcome to PawPad",
-    durationOverride: 8.0,
+    sceneType: "video" as const,
+    durationOverride: 13.92,
   },
   {
     characterId: "pad",
-    dialogue: "PawPad uses multi-party computation to keep your private keys secure. Your keys are split across multiple servers.",
-    emotion: "thinking" as const,
-    visualType: "talking-head" as const,
-    highlightText: "Multi-Party Computation",
-    durationOverride: 7.2,
-  },
-  {
-    characterId: "pad",
-    dialogue: "With biometric authentication and hardware wallet support, your assets stay protected at all times.",
+    dialogue: "PawPad generates your wallet keys inside a hardware vault called a Trusted Execution Environment. Your keys never leave the vault. Not hackers, not node operators, nobody can see what is inside. It is like a safe that only opens for you.",
     emotion: "explaining" as const,
     visualType: "talking-head" as const,
-    highlightText: "Biometric Security",
-    durationOverride: 7.36,
+    sceneType: "video" as const,
+    durationOverride: 15.36,
   },
   {
     characterId: "pad",
-    dialogue: "Send, receive, and swap tokens across multiple blockchains with just one tap. It is cross-chain made simple.",
-    emotion: "neutral" as const,
-    visualType: "talking-head" as const,
-    highlightText: "Cross-Chain Simple",
-    durationOverride: 7.68,
-  },
-  {
-    characterId: "paw",
-    dialogue: "Plus, PawPad supports NFTs, DeFi protocols, and comes with built-in gas optimization to save you money!",
+    dialogue: "Here is how easy it is. Open PawPad, tap create wallet, choose seedless wallet. A QR code pops up on screen. Scan it with Google Authenticator, save your encrypted backup file, and boom. Your wallet is live. Thirty seconds flat.",
     emotion: "excited" as const,
     visualType: "talking-head" as const,
-    highlightText: "NFTs + DeFi + Gas Savings",
-    durationOverride: 16.48,
+    sceneType: "video" as const,
+    durationOverride: 17.92,
   },
   {
-    characterId: "paw",
-    dialogue: "Download PawPad today and experience crypto the way it should be. Secure, simple, and fun!",
+    characterId: "pad",
+    dialogue: "No seed phrases to lose. No passwords to forget. Just your keys locked in hardware that nobody can crack. Stop trusting napkins with your life savings. Try PawPad right now at paw dot zkagi dot ai.",
     emotion: "celebrating" as const,
     visualType: "talking-head" as const,
-    highlightText: "Download PawPad!",
-    durationOverride: 2.88,
+    sceneType: "video" as const,
+    durationOverride: 14.56,
   },
 ];
 
-// Total frames: ~49.6 seconds at 30fps
-const TOTAL_FRAMES = Math.ceil((8.0 + 7.2 + 7.36 + 7.68 + 16.48 + 2.88) * 30);
+// Total: 418 + 461 + 538 + 437 = 1854 frames at 30fps = 61.8s
+const TOTAL_FRAMES = 1854;
 
 const pawpadProps = {
-  title: "PawPad Wallet",
+  title: "PawPad: Your Keys, Locked in Hardware",
   characters: CHARACTERS,
   scenes: PAWPAD_SCENES,
-  style: { theme: "pawpad" as const, format: "16:9" as const, showSubtitles: true, showCharacterName: true, transitionType: "fade" as const },
+  style: { theme: "pawpad" as const, format: "16:9" as const, showSubtitles: true, showCharacterName: false, transitionType: "fade" as const },
   music: { volume: 0.12 },
   watermark: { text: "PawPad", show: true },
   useGeneratedBackgrounds: true,
 };
 
-// Demo scenes for testing
-const DEMO_SCENES = [
-  { characterId: "paw", dialogue: "Welcome to ZkAGI! Where privacy meets intelligence.", emotion: "excited" as const, visualType: "talking-head" as const },
-  { characterId: "pad", dialogue: "Today we are exploring how zero-knowledge proofs keep your data safe.", emotion: "thinking" as const, visualType: "talking-head" as const, highlightText: "Zero-Knowledge Proofs" },
-];
-
-const demoProps = {
-  title: "ZkAGI Demo",
-  characters: CHARACTERS,
-  scenes: DEMO_SCENES,
-  style: { theme: "zkagi-brand" as const, format: "16:9" as const, showSubtitles: true, showCharacterName: true, transitionType: "fade" as const },
-  music: { volume: 0.12 },
-  watermark: { text: "ZkAGI", show: true },
-  useGeneratedBackgrounds: false,
-};
-
 export const RemotionRoot: React.FC = () => (
   <>
-    {/* PawPad Wallet Video - Main composition */}
     <Composition id="ZkAGIVideo" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1920} height={1080} schema={VideoConfigSchema} defaultProps={pawpadProps} />
     <Composition id="ZkAGIVideoVertical" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1080} height={1920} schema={VideoConfigSchema} defaultProps={{ ...pawpadProps, style: { ...pawpadProps.style, format: "9:16" as const } }} />
-    <Composition id="ZkAGIVideoSquare" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1080} height={1080} schema={VideoConfigSchema} defaultProps={{ ...pawpadProps, style: { ...pawpadProps.style, format: "1:1" as const } }} />
-
-    {/* Demo composition with gradient backgrounds */}
-    <Composition id="ZkAGIDemo" component={ZkAGIVideo} durationInFrames={240} fps={30} width={1920} height={1080} schema={VideoConfigSchema} defaultProps={demoProps} />
   </>
 );

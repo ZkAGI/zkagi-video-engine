@@ -8,6 +8,8 @@ Full AI video production pipeline. Claude Code handles everything:
 
 ## PIPELINE
 
+**BEFORE writing scripts, read .claude/skills/screenplay/SKILL.md. BEFORE writing image prompts, read .claude/skills/image-prompt-craft/SKILL.md. BEFORE writing LTX-2 prompts, read .claude/skills/motion-prompt-craft/SKILL.md.**
+
 ### Step 1: Write Script
 Based on user's brief, write 3-7 scenes. For each scene define:
 - `characterId` — which voice/character to use

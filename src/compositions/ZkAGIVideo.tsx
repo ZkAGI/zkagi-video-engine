@@ -2,256 +2,167 @@ import React from "react";
 import {
   AbsoluteFill,
   Audio,
+  Video,
   Sequence,
   useCurrentFrame,
   useVideoConfig,
   interpolate,
   spring,
   staticFile,
-  Easing,
   Img,
 } from "remotion";
-import { VideoConfig, Scene, Emotion } from "../types";
+import { VideoConfig, Scene } from "../types";
 import { Watermark } from "../components/Watermark";
-import { getTheme, Theme } from "../lib/themes";
+import { getTheme } from "../lib/themes";
 
 // ═══════════════════════════════════════════════════════════════
-// Scene Background with Ken Burns effect
+// VIDEO CLIP BACKGROUND — plays LTX-2 generated clips
 // ═══════════════════════════════════════════════════════════════
-const SceneBackground: React.FC<{
-  sceneIndex: number;
+const VideoClipBg: React.FC<{
+  videoPath: string;
   durationInFrames: number;
-  backgroundUrl?: string;
-}> = ({ sceneIndex, durationInFrames, backgroundUrl }) => {
+  fadeIn?: number;
+}> = ({ videoPath, durationInFrames, fadeIn = 8 }) => {
   const frame = useCurrentFrame();
-
-  // Ken Burns zoom effect - slow zoom in
-  const scale = interpolate(frame, [0, durationInFrames], [1.0, 1.15], {
-    extrapolateRight: "clamp",
-  });
-
-  // Subtle pan
-  const panX = interpolate(frame, [0, durationInFrames], [0, -3], {
-    extrapolateRight: "clamp",
-  });
-  const panY = interpolate(frame, [0, durationInFrames], [0, -2], {
-    extrapolateRight: "clamp",
-  });
-
-  // Fade in
-  const opacity = interpolate(frame, [0, 15], [0, 1], {
-    extrapolateRight: "clamp",
-  });
-
-  const imagePath = backgroundUrl || `scenes/scene-${sceneIndex}.png`;
+  const opacity = fadeIn > 0
+    ? interpolate(frame, [0, fadeIn], [0, 1], { extrapolateRight: "clamp" })
+    : 1;
 
   return (
     <AbsoluteFill>
-      {/* AI-generated scene background */}
-      <Img
-        src={staticFile(imagePath)}
+      <Video
+        src={staticFile(videoPath)}
         style={{
-          position: "absolute",
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          transform: `scale(${scale}) translate(${panX}%, ${panY}%)`,
           opacity,
         }}
-      />
-
-      {/* Gradient overlay for text readability */}
-      <div
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          background: `linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.6) 100%)`,
-        }}
-      />
-
-      {/* Subtle vignette */}
-      <div
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          background: `radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)`,
-        }}
+        volume={0}
+        startFrom={0}
       />
     </AbsoluteFill>
   );
 };
 
 // ═══════════════════════════════════════════════════════════════
-// Animated Gradient Background (fallback)
+// GLITCH FLASH — tech/crypto scene transition
 // ═══════════════════════════════════════════════════════════════
-const AnimatedBackground: React.FC<{
-  theme: Theme;
-  sceneIndex: number;
-}> = ({ theme, sceneIndex }) => {
+const GlitchFlash: React.FC<{ color?: string }> = ({ color = "#06B6D4" }) => {
   const frame = useCurrentFrame();
+  if (frame > 8) return null;
 
-  // Subtle gradient rotation and shift
-  const gradientAngle = interpolate(frame, [0, 300], [135 + sceneIndex * 15, 180 + sceneIndex * 15], {
-    extrapolateRight: "clamp",
-  });
-
-  // Pulsing glow effect
-  const glowIntensity = 0.3 + Math.sin(frame / 40) * 0.1;
-  const glowSize = 40 + Math.sin(frame / 25) * 10;
+  const flash1 = frame < 2 ? 0.7 : 0;
+  const flash2 = frame >= 3 && frame < 5 ? 0.4 : 0;
+  const scanline = frame >= 2 && frame < 6 ? 0.3 : 0;
 
   return (
-    <AbsoluteFill>
-      {/* Base gradient */}
-      <div
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          background: `linear-gradient(${gradientAngle}deg, #0f172a 0%, #1e1b4b 40%, #0c4a6e 100%)`,
-        }}
-      />
-
-      {/* Animated orbs */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20%",
-          left: "10%",
-          width: 400,
-          height: 400,
-          borderRadius: "50%",
-          background: `radial-gradient(circle, rgba(124,58,237,${glowIntensity}) 0%, transparent 70%)`,
-          filter: `blur(${glowSize}px)`,
-          transform: `translate(${Math.sin(frame / 50) * 30}px, ${Math.cos(frame / 40) * 20}px)`,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: "15%",
-          right: "15%",
-          width: 350,
-          height: 350,
-          borderRadius: "50%",
-          background: `radial-gradient(circle, rgba(6,182,212,${glowIntensity * 0.8}) 0%, transparent 70%)`,
-          filter: `blur(${glowSize * 1.2}px)`,
-          transform: `translate(${Math.cos(frame / 45) * 25}px, ${Math.sin(frame / 35) * 25}px)`,
-        }}
-      />
-
-      {/* Grid overlay for tech feel */}
-      <div
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          backgroundImage: `
-            linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: "60px 60px",
-          opacity: 0.5,
-        }}
-      />
+    <AbsoluteFill style={{ zIndex: 200 }}>
+      <div style={{
+        position: "absolute", width: "100%", height: "100%",
+        backgroundColor: color, opacity: flash1 + flash2,
+      }} />
+      {scanline > 0 && (
+        <div style={{
+          position: "absolute", width: "100%", height: "100%",
+          background: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,${scanline}) 2px, rgba(0,0,0,${scanline}) 4px)`,
+        }} />
+      )}
     </AbsoluteFill>
   );
 };
 
 // ═══════════════════════════════════════════════════════════════
-// Kinetic Typography - Animated words with spring physics
+// SCREEN SHAKE — impact effect for comedy moments
 // ═══════════════════════════════════════════════════════════════
-const KineticTypography: React.FC<{
+const ScreenShake: React.FC<{
+  children: React.ReactNode;
+  triggerFrame: number;
+  intensity?: number;
+}> = ({ children, triggerFrame, intensity = 6 }) => {
+  const frame = useCurrentFrame();
+  const shakeProgress = frame - triggerFrame;
+
+  let x = 0, y = 0;
+  if (shakeProgress >= 0 && shakeProgress < 12) {
+    const decay = Math.max(0, 1 - shakeProgress / 12);
+    x = Math.sin(shakeProgress * 4.5) * intensity * decay;
+    y = Math.cos(shakeProgress * 3.7) * intensity * 0.6 * decay;
+  }
+
+  return (
+    <AbsoluteFill style={{ transform: `translate(${x}px, ${y}px)` }}>
+      {children}
+    </AbsoluteFill>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════
+// SUBTITLES — clean lower-third with word reveal
+// ═══════════════════════════════════════════════════════════════
+const Subtitles: React.FC<{
   text: string;
-  highlightText?: string;
-  durationInFrames: number;
   accentColor: string;
-}> = ({ text, highlightText, durationInFrames, accentColor }) => {
+  durationInFrames: number;
+  highlightWords?: string[];
+}> = ({ text, accentColor, durationInFrames, highlightWords = [] }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const words = text.split(" ");
 
-  // Calculate how many words to show
-  const wordsPerFrame = words.length / (durationInFrames * 0.7);
-  const currentWordCount = Math.min(words.length, Math.floor(frame * wordsPerFrame) + 1);
+  const revealEnd = durationInFrames * 0.85;
+  const wordsPerFrame = words.length / revealEnd;
+  const visibleCount = Math.min(words.length, Math.floor(frame * wordsPerFrame) + 1);
 
-  // Container spring animation
-  const containerSpring = spring({
-    frame,
-    fps,
-    config: { damping: 20, mass: 0.8, stiffness: 100 },
+  const enterSpring = spring({ frame, fps, config: { damping: 15, mass: 0.5, stiffness: 140 } });
+  const slideY = interpolate(enterSpring, [0, 1], [30, 0]);
+  const enterOp = interpolate(enterSpring, [0, 1], [0, 1]);
+
+  const exitOp = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp",
   });
 
-  const containerY = interpolate(containerSpring, [0, 1], [30, 0]);
-  const containerOpacity = interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" });
-  const fadeOut = interpolate(
-    frame,
-    [durationInFrames - 20, durationInFrames],
-    [1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  );
-
   return (
-    <div
-      style={{
-        position: "absolute",
-        bottom: 80,
-        left: "50%",
-        transform: `translateX(-50%) translateY(${containerY}px)`,
-        maxWidth: "80%",
-        opacity: containerOpacity * fadeOut,
-      }}
-    >
-      <div
-        style={{
-          background: "rgba(15,23,42,0.9)",
-          backdropFilter: "blur(20px)",
-          padding: "24px 48px",
-          borderRadius: 20,
-          borderLeft: `5px solid ${accentColor}`,
-          boxShadow: `0 20px 60px rgba(0,0,0,0.4), 0 0 40px ${accentColor}20`,
-        }}
-      >
-        <p
-          style={{
-            color: "#FFFFFF",
-            fontSize: 38,
-            lineHeight: 1.6,
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 500,
-            margin: 0,
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "0.3em",
-          }}
-        >
-          {words.slice(0, currentWordCount).map((word, i) => {
-            const wordFrame = Math.max(0, frame - i / wordsPerFrame);
-            const wordSpring = spring({
-              frame: wordFrame,
-              fps,
-              config: { damping: 12, mass: 0.5, stiffness: 200 },
-            });
-
-            const isHighlight = highlightText?.toLowerCase().includes(word.toLowerCase().replace(/[!?,.]/, ""));
-            const scale = interpolate(wordSpring, [0, 1], [0.5, 1]);
-            const opacity = interpolate(wordSpring, [0, 1], [0, 1]);
-            const y = interpolate(wordSpring, [0, 1], [20, 0]);
-
+    <div style={{
+      position: "absolute",
+      bottom: 32,
+      left: "50%",
+      transform: `translateX(-50%) translateY(${slideY}px)`,
+      maxWidth: "82%",
+      opacity: enterOp * exitOp,
+      zIndex: 50,
+    }}>
+      <div style={{
+        background: "rgba(0,0,0,0.72)",
+        backdropFilter: "blur(16px)",
+        padding: "10px 24px",
+        borderRadius: 10,
+        borderLeft: `3px solid ${accentColor}`,
+      }}>
+        <p style={{
+          color: "#FFFFFF",
+          fontSize: 22,
+          lineHeight: 1.5,
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 500,
+          margin: 0,
+          textAlign: "left",
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        }}>
+          {words.slice(0, visibleCount).map((word, i) => {
+            const isHighlight = highlightWords.some(hw =>
+              word.toLowerCase().replace(/[.,?!]/g, "").includes(hw.toLowerCase())
+            );
             return (
-              <span
-                key={i}
-                style={{
-                  display: "inline-block",
-                  color: isHighlight ? accentColor : "#FFFFFF",
-                  fontWeight: isHighlight ? 800 : 500,
-                  transform: `scale(${scale}) translateY(${y}px)`,
-                  opacity,
-                  textShadow: isHighlight ? `0 0 20px ${accentColor}60` : "none",
-                }}
-              >
-                {word}
+              <span key={i} style={{
+                color: isHighlight ? accentColor : "#FFFFFF",
+                fontWeight: isHighlight ? 800 : 500,
+                textShadow: isHighlight ? `0 0 12px ${accentColor}40` : "none",
+              }}>
+                {word}{" "}
               </span>
             );
           })}
@@ -262,127 +173,73 @@ const KineticTypography: React.FC<{
 };
 
 // ═══════════════════════════════════════════════════════════════
-// Animated Character with bounce/zoom effects
+// DARK GRADIENT — bottom overlay for subtitle readability
 // ═══════════════════════════════════════════════════════════════
-const AnimatedCharacter: React.FC<{
-  characterId: string;
-  poseUrl: string;
-  emotion: Emotion;
-  characterName: string;
-  characterColor: string;
-  size: number;
-  position: "left" | "center" | "right";
+const BottomGradient: React.FC<{ intensity?: number }> = ({ intensity = 0.65 }) => (
+  <AbsoluteFill style={{ zIndex: 40 }}>
+    <div style={{
+      position: "absolute", width: "100%", height: "100%",
+      background: `linear-gradient(180deg, transparent 0%, transparent 55%, rgba(0,0,0,${intensity * 0.3}) 75%, rgba(0,0,0,${intensity}) 100%)`,
+    }} />
+  </AbsoluteFill>
+);
+
+// ═══════════════════════════════════════════════════════════════
+// CROSSFADE between sub-clips
+// ═══════════════════════════════════════════════════════════════
+const SubClipFade: React.FC<{ durationInFrames: number }> = ({ durationInFrames }) => {
+  const frame = useCurrentFrame();
+  const mid = durationInFrames / 2;
+  const opacity = frame < mid
+    ? interpolate(frame, [0, mid], [0, 0.5], { extrapolateRight: "clamp" })
+    : interpolate(frame, [mid, durationInFrames], [0.5, 0], { extrapolateRight: "clamp" });
+  return <AbsoluteFill style={{ backgroundColor: "#0a0a1a", opacity, zIndex: 30 }} />;
+};
+
+// ═══════════════════════════════════════════════════════════════
+// SPEAKER BADGE — small name tag top-left
+// ═══════════════════════════════════════════════════════════════
+const SpeakerBadge: React.FC<{
+  name: string;
+  color: string;
   durationInFrames: number;
-}> = ({ poseUrl, emotion, characterName, characterColor, size, position, durationInFrames }) => {
+}> = ({ name, color, durationInFrames }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Entrance spring animation
-  const entranceSpring = spring({
-    frame,
-    fps,
-    config: { damping: 12, mass: 1, stiffness: 80 },
+  const enterSpring = spring({ frame, fps, config: { damping: 20, mass: 0.4, stiffness: 160 } });
+  const slideX = interpolate(enterSpring, [0, 1], [-60, 0]);
+  const opacity = interpolate(enterSpring, [0, 1], [0, 1]);
+
+  const exitOp = interpolate(frame, [durationInFrames - 8, durationInFrames], [1, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp",
   });
 
-  // Bounce effect on entrance
-  const bounceY = interpolate(entranceSpring, [0, 1], [100, 0]);
-  const bounceScale = interpolate(
-    entranceSpring,
-    [0, 0.5, 0.8, 1],
-    [0.3, 1.1, 0.95, 1]
-  );
-
-  // Subtle breathing/idle animation
-  const breathe = Math.sin(frame / 25) * 4;
-  const sway = Math.sin(frame / 40) * 2;
-
-  // Exit animation
-  const exitStart = durationInFrames - 15;
-  const exitProgress = interpolate(
-    frame,
-    [exitStart, durationInFrames],
-    [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  );
-  const exitScale = interpolate(exitProgress, [0, 1], [1, 0.8]);
-  const exitOpacity = interpolate(exitProgress, [0, 1], [1, 0]);
-
-  // Emotion-based animations
-  const emotionBounce = emotion === "excited" || emotion === "celebrating"
-    ? Math.abs(Math.sin(frame / 8)) * 8
-    : 0;
-
-  // Position calculations
-  const posX = position === "left" ? "8%" : position === "right" ? "72%" : "50%";
-  const translateX = position === "center" ? "-50%" : "0";
-
-  // Glow effect matching character color
-  const glowPulse = 0.4 + Math.sin(frame / 20) * 0.2;
-
   return (
-    <div
-      style={{
-        position: "absolute",
-        bottom: 80,
-        left: posX,
-        transform: `
-          translateX(${translateX})
-          translateY(${bounceY + breathe + emotionBounce}px)
-          scale(${bounceScale * exitScale})
-          rotate(${sway}deg)
-        `,
-        opacity: exitOpacity,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      {/* Character glow */}
-      <div
-        style={{
-          position: "absolute",
-          width: size * 0.8,
-          height: size * 0.3,
-          bottom: -20,
-          borderRadius: "50%",
-          background: `radial-gradient(ellipse, ${characterColor}${Math.round(glowPulse * 50).toString(16).padStart(2, "0")} 0%, transparent 70%)`,
-          filter: "blur(25px)",
-        }}
-      />
-
-      {/* Character image */}
-      <Img
-        src={staticFile(poseUrl)}
-        style={{
-          width: size,
-          height: size,
-          objectFit: "contain",
-          filter: `drop-shadow(0 15px 40px rgba(0,0,0,0.5)) drop-shadow(0 0 30px ${characterColor}30)`,
-        }}
-      />
-
-      {/* Name badge */}
-      <div
-        style={{
-          marginTop: 12,
-          padding: "8px 24px",
-          borderRadius: 24,
-          background: `linear-gradient(135deg, ${characterColor}30, ${characterColor}10)`,
-          border: `2px solid ${characterColor}`,
-          backdropFilter: "blur(10px)",
-          boxShadow: `0 4px 20px ${characterColor}30`,
-        }}
-      >
-        <span
-          style={{
-            color: characterColor,
-            fontSize: 20,
-            fontWeight: 700,
-            fontFamily: "'Inter', sans-serif",
-            textShadow: `0 0 10px ${characterColor}50`,
-          }}
-        >
-          {characterName}
+    <div style={{
+      position: "absolute",
+      top: 28,
+      left: 28,
+      transform: `translateX(${slideX}px)`,
+      opacity: opacity * exitOp,
+      zIndex: 55,
+    }}>
+      <div style={{
+        background: `${color}30`,
+        border: `1px solid ${color}60`,
+        padding: "4px 14px",
+        borderRadius: 6,
+        backdropFilter: "blur(8px)",
+      }}>
+        <span style={{
+          color,
+          fontSize: 14,
+          fontWeight: 700,
+          fontFamily: "'Inter', sans-serif",
+          textTransform: "uppercase",
+          letterSpacing: 1.5,
+        }}>
+          {name}
         </span>
       </div>
     </div>
@@ -390,216 +247,257 @@ const AnimatedCharacter: React.FC<{
 };
 
 // ═══════════════════════════════════════════════════════════════
-// Highlight Text - Large animated title
-// ═══════════════════════════════════════════════════════════════
-const HighlightTitle: React.FC<{
-  text: string;
-  position: "center" | "right";
-  accentColor: string;
-  durationInFrames: number;
-}> = ({ text, position, accentColor, durationInFrames }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-
-  const enterSpring = spring({
-    frame,
-    fps,
-    config: { damping: 15, mass: 1.2, stiffness: 100 },
-  });
-
-  const scale = interpolate(enterSpring, [0, 1], [0.5, 1]);
-  const y = interpolate(enterSpring, [0, 1], [-50, 0]);
-  const opacity = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: "clamp" });
-  const fadeOut = interpolate(
-    frame,
-    [durationInFrames - 15, durationInFrames],
-    [1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  );
-
-  // Shimmer effect
-  const shimmerX = interpolate(frame, [0, 60], [-200, 200], {
-    extrapolateRight: "extend",
-  }) % 400;
-
-  const leftPos = position === "right" ? "55%" : "50%";
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        top: "18%",
-        left: leftPos,
-        transform: `translateX(-50%) translateY(${y}px) scale(${scale})`,
-        opacity: opacity * fadeOut,
-      }}
-    >
-      <h1
-        style={{
-          color: "#FFFFFF",
-          fontSize: 72,
-          fontWeight: 900,
-          fontFamily: "'Inter', sans-serif",
-          textAlign: "center",
-          lineHeight: 1.2,
-          margin: 0,
-          textShadow: `
-            0 4px 30px rgba(0,0,0,0.5),
-            0 0 60px ${accentColor}40
-          `,
-          background: `linear-gradient(90deg, #FFFFFF 0%, ${accentColor} 50%, #FFFFFF 100%)`,
-          backgroundSize: "200% 100%",
-          backgroundPosition: `${shimmerX}px 0`,
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }}
-      >
-        {text}
-      </h1>
-
-      {/* Underline accent */}
-      <div
-        style={{
-          marginTop: 12,
-          height: 4,
-          borderRadius: 2,
-          background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
-          transform: `scaleX(${enterSpring})`,
-        }}
-      />
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════
-// Scene Transition Overlay
-// ═══════════════════════════════════════════════════════════════
-const SceneTransition: React.FC<{
-  durationInFrames: number;
-  accentColor: string;
-}> = ({ durationInFrames, accentColor }) => {
-  const frame = useCurrentFrame();
-
-  // Wipe in from left
-  const wipeIn = interpolate(frame, [0, 8], [100, 0], {
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
-
-  // Wipe out to right
-  const wipeOut = interpolate(frame, [8, 16], [0, -100], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.in(Easing.cubic),
-  });
-
-  const shouldShow = frame < 16;
-
-  if (!shouldShow) return null;
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        background: `linear-gradient(90deg, ${accentColor}, #7C3AED)`,
-        transform: `translateX(${frame < 8 ? wipeIn : wipeOut}%)`,
-        zIndex: 100,
-      }}
-    />
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════
-// Scene Renderer - Simplified: Background + Subtitles + Audio only
-// ═══════════════════════════════════════════════════════════════
-const SceneRenderer: React.FC<{
-  scene: Scene;
-  sceneIndex: number;
-  characters: VideoConfig["characters"];
-  theme: Theme;
-  durationInFrames: number;
-  showSubtitles: boolean;
-  showCharacterName: boolean;
-  useGeneratedBackgrounds?: boolean;
-}> = ({ scene, sceneIndex, characters, theme, durationInFrames, showSubtitles, useGeneratedBackgrounds = true }) => {
-  const character = characters[scene.characterId];
-  if (!character) return null;
-
-  return (
-    <AbsoluteFill>
-      {/* Full-screen AI-generated background */}
-      {useGeneratedBackgrounds ? (
-        <SceneBackground
-          sceneIndex={sceneIndex}
-          durationInFrames={durationInFrames}
-          backgroundUrl={scene.backgroundUrl}
-        />
-      ) : (
-        <AnimatedBackground theme={theme} sceneIndex={sceneIndex} />
-      )}
-
-      {/* Scene transition effect */}
-      <SceneTransition durationInFrames={durationInFrames} accentColor={character.color} />
-
-      {/* Subtitles only - no character overlay */}
-      {showSubtitles && (
-        <KineticTypography
-          text={scene.dialogue}
-          highlightText={scene.highlightText}
-          durationInFrames={durationInFrames}
-          accentColor={character.color}
-        />
-      )}
-
-      {/* Scene audio */}
-      <Audio src={staticFile(`audio/scene-${sceneIndex}.wav`)} />
-    </AbsoluteFill>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════
-// Main Composition
+// MAIN COMPOSITION — PawPad Wallet Creation Demo (60s)
 // ═══════════════════════════════════════════════════════════════
 interface ZkAGIVideoProps extends VideoConfig {
   useGeneratedBackgrounds?: boolean;
 }
 
 export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
-  const { scenes, characters, style, music, watermark, useGeneratedBackgrounds = true } = props;
+  const { scenes, characters, style, music, watermark } = props;
   const theme = getTheme(style.theme);
-  const DEFAULT_SCENE_FRAMES = 120;
 
-  const sceneDurations = scenes.map((s) =>
-    s.durationOverride ? Math.ceil(s.durationOverride * 30) : DEFAULT_SCENE_FRAMES
-  );
+  const PAD_COLOR = "#06B6D4"; // teal — all scenes use pad voice
 
-  let frameOffset = 0;
+  // ── Scene durations from TTS audio (30fps) ──
+  // Scene 0: 13.92s = 418 frames
+  // Scene 1: 15.36s = 461 frames
+  // Scene 2: 17.92s = 538 frames
+  // Scene 3: 14.56s = 437 frames
+  const S0 = 418;
+  const S1 = 461;
+  const S2 = 538;
+  const S3 = 437;
+  const TOTAL = S0 + S1 + S2 + S3; // 1854
+
+  // Scene start frames
+  const START = [0, S0, S0 + S1, S0 + S1 + S2];
+
+  // LTX-2 clip at 25fps, 97 frames = 3.88s → at 30fps ≈ 117 frames
+  const CLIP = 117;
+  const XF = 12; // crossfade overlap
 
   return (
-    <AbsoluteFill style={{ background: theme.background }}>
-      {scenes.map((scene, i) => {
-        const start = frameOffset;
-        frameOffset += sceneDurations[i];
-        return (
-          <Sequence key={i} from={start} durationInFrames={sceneDurations[i]}>
-            <SceneRenderer
-              scene={scene}
-              sceneIndex={i}
-              characters={characters}
-              theme={theme}
-              durationInFrames={sceneDurations[i]}
-              showSubtitles={style.showSubtitles}
-              showCharacterName={style.showCharacterName}
-              useGeneratedBackgrounds={useGeneratedBackgrounds}
-            />
+    <AbsoluteFill style={{ background: "#0a0a1a" }}>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* SCENE 0: HOOK — "24 words on paper? Really?" */}
+      {/* ═══════════════════════════════════════════ */}
+      <Sequence from={START[0]} durationInFrames={S0}>
+        <ScreenShake triggerFrame={15} intensity={8}>
+          {/* Clip A: drawer chaos (0→117) */}
+          <Sequence from={0} durationInFrames={CLIP}>
+            <VideoClipBg videoPath="scenes/scene-0-a.mp4" durationInFrames={CLIP} fadeIn={0} />
           </Sequence>
-        );
-      })}
+          {/* Clip B: stained napkin (105→222) */}
+          <Sequence from={CLIP - XF} durationInFrames={CLIP}>
+            <VideoClipBg videoPath="scenes/scene-0-b.mp4" durationInFrames={CLIP} />
+          </Sequence>
+          {/* Clip C: napkin falling into darkness (210→418) */}
+          <Sequence from={2 * CLIP - 2 * XF} durationInFrames={S0 - (2 * CLIP - 2 * XF)}>
+            <VideoClipBg videoPath="scenes/scene-0-c.mp4" durationInFrames={S0 - (2 * CLIP - 2 * XF)} />
+          </Sequence>
+          {/* Sub-clip crossfades */}
+          <Sequence from={CLIP - XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          <Sequence from={2 * CLIP - 2 * XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+        </ScreenShake>
+
+        <BottomGradient intensity={0.7} />
+
+        <SpeakerBadge name="Pad" color={PAD_COLOR} durationInFrames={S0} />
+
+        <Subtitles
+          text={scenes[0].dialogue}
+          accentColor={PAD_COLOR}
+          durationInFrames={S0}
+          highlightWords={["napkin", "security", "paper"]}
+        />
+
+        <Audio src={staticFile("audio/scene-0.wav")} />
+      </Sequence>
+
+      {/* Record scratch at start for comedy hook */}
+      <Sequence from={0} durationInFrames={20}>
+        <Audio src={staticFile("sfx/scratch.wav")} volume={0.45} />
+      </Sequence>
+
+      {/* Bass drop on "not security" punchline */}
+      <Sequence from={START[0] + 280} durationInFrames={15}>
+        <Audio src={staticFile("sfx/bass-drop.wav")} volume={0.4} />
+      </Sequence>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* TRANSITION: Scene 0 → 1 (whoosh + glitch) */}
+      {/* ═══════════════════════════════════════════ */}
+      <Sequence from={START[1] - 4} durationInFrames={12}>
+        <Audio src={staticFile("sfx/whoosh.wav")} volume={0.45} />
+      </Sequence>
+      <Sequence from={START[1]} durationInFrames={10}>
+        <GlitchFlash color={PAD_COLOR} />
+      </Sequence>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* SCENE 1: TEE — hardware vault explanation   */}
+      {/* ═══════════════════════════════════════════ */}
+      <Sequence from={START[1]} durationInFrames={S1}>
+        {/* Clip A: vault interior (0→117) */}
+        <Sequence from={0} durationInFrames={CLIP}>
+          <VideoClipBg videoPath="scenes/scene-1-a.mp4" durationInFrames={CLIP} fadeIn={0} />
+        </Sequence>
+        {/* Clip B: keys in sealed cube (105→222) */}
+        <Sequence from={CLIP - XF} durationInFrames={CLIP}>
+          <VideoClipBg videoPath="scenes/scene-1-b.mp4" durationInFrames={CLIP} />
+        </Sequence>
+        {/* Clip C: shield blocking intruders (210→461) */}
+        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={S1 - (2 * CLIP - 2 * XF)}>
+          <VideoClipBg videoPath="scenes/scene-1-c.mp4" durationInFrames={S1 - (2 * CLIP - 2 * XF)} />
+        </Sequence>
+        {/* Sub-clip crossfades */}
+        <Sequence from={CLIP - XF} durationInFrames={XF * 2}>
+          <SubClipFade durationInFrames={XF * 2} />
+        </Sequence>
+        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={XF * 2}>
+          <SubClipFade durationInFrames={XF * 2} />
+        </Sequence>
+
+        <BottomGradient intensity={0.6} />
+
+        <SpeakerBadge name="Pad" color={PAD_COLOR} durationInFrames={S1} />
+
+        <Subtitles
+          text={scenes[1].dialogue}
+          accentColor={PAD_COLOR}
+          durationInFrames={S1}
+          highlightWords={["TEE", "vault", "never", "nobody"]}
+        />
+
+        <Audio src={staticFile("audio/scene-1.wav")} />
+      </Sequence>
+
+      {/* Pop sounds on "Not hackers, not operators" */}
+      <Sequence from={START[1] + 280} durationInFrames={10}>
+        <Audio src={staticFile("sfx/pop.wav")} volume={0.35} />
+      </Sequence>
+      <Sequence from={START[1] + 340} durationInFrames={10}>
+        <Audio src={staticFile("sfx/pop.wav")} volume={0.35} />
+      </Sequence>
+      <Sequence from={START[1] + 400} durationInFrames={10}>
+        <Audio src={staticFile("sfx/pop.wav")} volume={0.35} />
+      </Sequence>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* TRANSITION: Scene 1 → 2 (whoosh + glitch) */}
+      {/* ═══════════════════════════════════════════ */}
+      <Sequence from={START[2] - 4} durationInFrames={12}>
+        <Audio src={staticFile("sfx/whoosh.wav")} volume={0.45} />
+      </Sequence>
+      <Sequence from={START[2]} durationInFrames={10}>
+        <GlitchFlash color={PAD_COLOR} />
+      </Sequence>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* SCENE 2: WALLET CREATION — step-by-step   */}
+      {/* ═══════════════════════════════════════════ */}
+      <Sequence from={START[2]} durationInFrames={S2}>
+        {/* Clip A: smartphone UI (0→117) */}
+        <Sequence from={0} durationInFrames={CLIP}>
+          <VideoClipBg videoPath="scenes/scene-2-a.mp4" durationInFrames={CLIP} fadeIn={0} />
+        </Sequence>
+        {/* Clip B: QR scan authentication (105→222) */}
+        <Sequence from={CLIP - XF} durationInFrames={CLIP}>
+          <VideoClipBg videoPath="scenes/scene-2-b.mp4" durationInFrames={CLIP} />
+        </Sequence>
+        {/* Clip C: backup download + vault lock (210→538) */}
+        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={S2 - (2 * CLIP - 2 * XF)}>
+          <VideoClipBg videoPath="scenes/scene-2-c.mp4" durationInFrames={S2 - (2 * CLIP - 2 * XF)} />
+        </Sequence>
+        {/* Sub-clip crossfades */}
+        <Sequence from={CLIP - XF} durationInFrames={XF * 2}>
+          <SubClipFade durationInFrames={XF * 2} />
+        </Sequence>
+        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={XF * 2}>
+          <SubClipFade durationInFrames={XF * 2} />
+        </Sequence>
+
+        <BottomGradient intensity={0.6} />
+
+        <SpeakerBadge name="Pad" color={PAD_COLOR} durationInFrames={S2} />
+
+        <Subtitles
+          text={scenes[2].dialogue}
+          accentColor={PAD_COLOR}
+          durationInFrames={S2}
+          highlightWords={["PawPad", "seedless", "wallet", "QR", "backup"]}
+        />
+
+        <Audio src={staticFile("audio/scene-2.wav")} />
+      </Sequence>
+
+      {/* Ping on "seedless wallet is live" */}
+      <Sequence from={START[2] + 470} durationInFrames={10}>
+        <Audio src={staticFile("sfx/ping.wav")} volume={0.35} />
+      </Sequence>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* TRANSITION: Scene 2 → 3 (bass + glitch)   */}
+      {/* ═══════════════════════════════════════════ */}
+      <Sequence from={START[3] - 4} durationInFrames={12}>
+        <Audio src={staticFile("sfx/bass-drop.wav")} volume={0.45} />
+      </Sequence>
+      <Sequence from={START[3]} durationInFrames={10}>
+        <GlitchFlash color={PAD_COLOR} />
+      </Sequence>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* SCENE 3: CTA — "Try it at paw.zkagi.ai"   */}
+      {/* ═══════════════════════════════════════════ */}
+      <Sequence from={START[3]} durationInFrames={S3}>
+        {/* Clip A: napkin vs vault split (0→117) */}
+        <Sequence from={0} durationInFrames={CLIP}>
+          <VideoClipBg videoPath="scenes/scene-3-a.mp4" durationInFrames={CLIP} fadeIn={0} />
+        </Sequence>
+        {/* Clip B: logo materializing (105→222) */}
+        <Sequence from={CLIP - XF} durationInFrames={CLIP}>
+          <VideoClipBg videoPath="scenes/scene-3-b.mp4" durationInFrames={CLIP} />
+        </Sequence>
+        {/* Clip C: portal / CTA energy (210→437) */}
+        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={S3 - (2 * CLIP - 2 * XF)}>
+          <VideoClipBg videoPath="scenes/scene-3-c.mp4" durationInFrames={S3 - (2 * CLIP - 2 * XF)} />
+        </Sequence>
+        {/* Sub-clip crossfades */}
+        <Sequence from={CLIP - XF} durationInFrames={XF * 2}>
+          <SubClipFade durationInFrames={XF * 2} />
+        </Sequence>
+        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={XF * 2}>
+          <SubClipFade durationInFrames={XF * 2} />
+        </Sequence>
+
+        <BottomGradient intensity={0.65} />
+
+        <SpeakerBadge name="Pad" color={PAD_COLOR} durationInFrames={S3} />
+
+        <Subtitles
+          text={scenes[3].dialogue}
+          accentColor={PAD_COLOR}
+          durationInFrames={S3}
+          highlightWords={["PawPad", "napkins", "hardware", "paw"]}
+        />
+
+        <Audio src={staticFile("audio/scene-3.wav")} />
+      </Sequence>
+
+      {/* Ping on CTA "paw dot zkagi dot ai" */}
+      <Sequence from={START[3] + 340} durationInFrames={10}>
+        <Audio src={staticFile("sfx/ping.wav")} volume={0.4} />
+      </Sequence>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* GLOBAL LAYERS                              */}
+      {/* ═══════════════════════════════════════════ */}
 
       {/* Background music */}
       {music.url && <Audio src={staticFile(music.url)} volume={music.volume} loop />}
