@@ -109,11 +109,69 @@ COMFY_URL="http://$(ip route show default | awk '{print $3}'):8001"
 ```
 **All LTX-2 workflow details, prompting guide, and quality tips → `.claude/LTX2-SKILL.md`**
 
-**Visual prompt guidelines:**
-- **Image gen prompts:** describe the SCENE (setting, mood, colors, composition). Include "cinematic lighting, vibrant"
-- **LTX-2 motion prompts:** describe MOVEMENT (camera, elements, energy). Must be DIFFERENT from image prompt
-- Motion prompts MUST relate to the dialogue — "breaking free" → show shattering/breaking motion
-- NEVER include text in AI images (Remotion adds all text)
+**VISUAL STYLE GUIDE (CRITICAL — READ THIS)**
+
+The #1 problem with our videos: visuals are GENERIC. "Glowing vault", "neon city", "digital shield" — boring, seen it a million times. Our visuals must be as funny, artsy, and personality-driven as our scripts.
+
+**IMAGE GEN PROMPT RULES:**
+
+1. **Match the TONE of the dialogue, not just the topic.**
+   - Dialogue: "Bro, your wallet has ONE key and you think that's safe?"
+   - BAD image: "glowing digital key in cyberspace, neon blue" ← boring stock art
+   - GOOD image: "cartoon character sweating nervously holding a giant golden key while shadowy figures reach for it from all sides, dramatic spotlight, comic book style, vibrant saturated colors, expressive faces"
+
+2. **Use CHARACTERS and SCENARIOS, not abstract concepts.**
+   - BAD: "blockchain security concept art" ← meaningless
+   - GOOD: "a confused person standing at a crossroads, one path labeled 'write 24 words on napkin' with a dumpster fire at the end, other path is a sleek glowing door, stylized illustration, warm lighting"
+   - BAD: "futuristic technology privacy" ← generic
+   - GOOD: "a tiny person sitting comfortably inside a giant crystal ball that is completely opaque from outside, curious people pressing faces against it trying to see in, whimsical illustration style"
+
+3. **Style keywords to ALWAYS include (pick 2-3 per prompt):**
+   - For humor: "comic book style, exaggerated expressions, cartoon, whimsical, playful"
+   - For quality: "highly detailed, professional illustration, artstation quality, cinematic composition"
+   - For mood: "dramatic lighting, volumetric light, vibrant saturated colors, depth of field"
+   - For crypto/tech: "cyberpunk aesthetic, holographic, iridescent, glitch art accents"
+   - NEVER: "stock photo", "corporate", "clean minimal" ← these produce boring images
+
+4. **Character-driven scenes beat abstract concepts:**
+   - Instead of "security concept" → show a character IN a secure situation
+   - Instead of "privacy technology" → show someone being protected
+   - Instead of "decentralization" → show a group of characters each holding a piece
+   - People connect with CHARACTERS and STORIES, not concepts
+
+5. **Vary the art style across scenes for visual interest:**
+   - Scene 1 (hook): Bold, high contrast, dramatic — grab attention
+   - Scene 2 (problem): Dark, moody, slightly chaotic — feel the pain
+   - Scene 3 (solution): Bright, clean, hopeful — relief
+   - Scene 4 (CTA): Energetic, warm, inviting — take action
+
+6. **EXPERIMENT with styles — try these:**
+   - "3D rendered cartoon character, Pixar style"
+   - "anime style illustration with dramatic lighting"
+   - "retro 80s synthwave aesthetic"
+   - "watercolor illustration with ink outlines"
+   - "isometric 3D scene, low poly"
+   - "claymation style, stop motion aesthetic"
+   - "comic book panel, bold outlines, halftone dots"
+   - "Studio Ghibli inspired, soft lighting, detailed backgrounds"
+
+**LTX-2 MOTION PROMPT RULES:**
+
+Motion prompts must describe WHAT MOVES, not what the scene looks like (the image already defines that).
+
+- **BAD motion:** "a secure digital vault" ← static, produces frozen video
+- **GOOD motion:** "character nervously looking around, then sighing with relief as a glowing shield wraps around them, camera slowly orbiting, particles of light drifting upward, warm light intensifying"
+
+- **BAD motion:** "cryptocurrency technology concept"
+- **GOOD motion:** "the giant key in the character's hands begins cracking and shattering into pieces, fragments floating away in slow motion, character's expression shifting from panic to calm, camera pulling back dramatically, dust particles catching light"
+
+**Motion must MATCH the dialogue emotion:**
+- Funny/roast dialogue → chaotic motion, things going wrong, exaggerated reactions
+- Explainer dialogue → smooth camera, gentle movements, things assembling/connecting
+- Hype/CTA dialogue → fast motion, energy bursts, things coming together triumphantly
+
+- NEVER include text/words in images or video — Remotion adds all text
+- Each sub-clip needs a DIFFERENT motion prompt even for same scene
 
 **Fallback:** If ComfyUI is down, use static images with Ken Burns zoom. But PREFER video clips always.
 
@@ -126,45 +184,100 @@ public/scenes/
 └── ...
 ```
 
-### Step 3b: Prepare Demo Clips (for demo scenes only)
-For scenes with `sceneType: "demo"`, trim the real screen recording to match:
+### Step 3b: USE REAL DEMO CLIPS (MANDATORY for demo scenes)
 
+**⚠️ THIS IS NOT OPTIONAL. If the brief mentions a product demo, screen recording, or "show the real app", you MUST use the actual demo clip file. Do NOT generate AI visuals for demo scenes. Do NOT skip this step.**
+
+**BEFORE writing any code, verify the demo clip exists:**
 ```bash
-# Trim demo clip to specific timestamp range
+# Check what demo clips are available
+ls -la products/pawpad/demo-clips/
+ffprobe -v error -show_entries format=duration -of csv=p=0 products/pawpad/demo-clips/tee-wallet-creation.mp4
+```
+
+**If the file exists, you MUST use it. No exceptions.**
+
+**Step 1: Copy the demo clip to public/scenes/ (so Remotion can access it via staticFile):**
+```bash
+# Copy the FULL demo clip first
+cp products/pawpad/demo-clips/tee-wallet-creation.mp4 public/scenes/scene-{i}-demo.mp4
+
+# OR trim to a specific section if needed
 ffmpeg -i products/pawpad/demo-clips/tee-wallet-creation.mp4 \
-  -ss 6 -to 18 \
+  -ss 0 -to 30 \
   -c:v libx264 -an \
   public/scenes/scene-{i}-demo.mp4
+```
 
-# Verify duration matches or exceeds audio duration
-ffprobe -v error -show_entries format=duration -of csv=p=0 public/scenes/scene-{i}-demo.mp4
+**Step 2: Get the demo clip duration (needed for Remotion frame math):**
+```bash
+DEMO_DURATION=$(ffprobe -v error -show_entries format=duration -of csv=p=0 public/scenes/scene-{i}-demo.mp4)
+echo "Demo clip duration: $DEMO_DURATION seconds"
+```
+
+**Step 3: In the Remotion composition, the demo scene MUST use OffthreadVideo pointing to the demo file:**
+```jsx
+// ═══════════════════════════════════════════════════
+// DEMO SCENE — REAL PRODUCT FOOTAGE (NOT AI GENERATED)
+// ═══════════════════════════════════════════════════
+<Sequence from={demoSceneStart} durationInFrames={demoSceneFrames}>
+  {/* THE ACTUAL SCREEN RECORDING */}
+  <OffthreadVideo
+    src={staticFile("scenes/scene-{i}-demo.mp4")}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "contain",
+      backgroundColor: "#000"
+    }}
+    volume={0}
+  />
+
+  {/* Dark gradient at bottom so captions are readable over the app UI */}
+  <div style={{
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    height: "25%",
+    background: "linear-gradient(transparent, rgba(0,0,0,0.75))",
+    zIndex: 5
+  }} />
+
+  {/* Subtitles explaining what's happening on screen */}
+  <Subtitles
+    text={scenes[sceneIndex].dialogue}
+    accentColor={accentColor}
+    durationInFrames={demoSceneFrames}
+  />
+
+  {/* TTS voiceover narrating the demo */}
+  <Audio src={staticFile("audio/scene-{i}.wav")} />
+</Sequence>
 ```
 
 **Demo clip rules:**
-- Trim to the relevant portion using timestamps from PRODUCT.md
-- Remove audio from demo clip (`-an`) — TTS voiceover replaces it
-- If demo clip is SHORTER than TTS audio: slow it down with `-filter:v "setpts=1.5*PTS"`
-- If demo clip is LONGER than TTS audio: trim tighter or speed up with `-filter:v "setpts=0.75*PTS"`
-- Add a subtle dark gradient overlay at bottom in Remotion so captions are readable over the UI
+- Remove audio from demo clip (`-an`) — TTS voiceover replaces the original audio
+- If demo clip is SHORTER than TTS audio: slow it down with `-filter:v "setpts=1.3*PTS"` during ffmpeg copy
+- If demo clip is LONGER than TTS audio: speed it up with `-filter:v "setpts=0.8*PTS"` or trim tighter
+- Use `objectFit: "contain"` so the app UI is fully visible (don't crop it)
+- Use dark background (`#000`) so letterbox bars are black
+- The dark gradient at bottom is essential — without it, captions are unreadable over bright app UI
 
-**In Remotion, demo scenes use `<OffthreadVideo>` (not `<Video>`) for better performance:**
-```jsx
-// Demo scene — real product footage
-<Sequence from={sceneStart} durationInFrames={sceneFrames}>
-  <OffthreadVideo
-    src={staticFile("scenes/scene-2-demo.mp4")}
-    style={{ width: "100%", height: "100%", objectFit: "contain" }}
-    volume={0}
-  />
-  {/* Dark gradient at bottom for caption readability */}
-  <div style={{
-    position: "absolute", bottom: 0, width: "100%", height: "30%",
-    background: "linear-gradient(transparent, rgba(0,0,0,0.7))"
-  }} />
-  <Subtitles text={dialogue} ... />
-  <Audio src={staticFile("audio/scene-2.wav")} />
-</Sequence>
+**HOW TO VERIFY DEMO CLIP IS ACTUALLY IN THE VIDEO:**
+After rendering, check manually:
+```bash
+# Extract a frame from the demo scene portion of the video
+DEMO_START_SEC=20  # adjust based on scene timing
+ffmpeg -ss $DEMO_START_SEC -i output/video.mp4 -frames:v 1 -q:v 2 /tmp/demo-frame.png
+# Open and visually verify it shows the actual app UI, not AI art
 ```
+
+**COMMON MISTAKES TO AVOID:**
+- ❌ Generating an AI image of "a phone showing a wallet app" — this is NOT a demo, it's fake
+- ❌ Using LTX-2 to generate "app interface animation" — this is NOT the real product
+- ❌ Skipping the demo clip because "AI looks better" — NO, the real app IS the demo
+- ❌ Forgetting to copy the file to public/scenes/ — Remotion can only access staticFile paths
+- ✅ Using the ACTUAL .mp4 file from products/pawpad/demo-clips/ with OffthreadVideo
 
 ### Step 4: Generate TTS Audio
 For each scene, call VoxCPM with the character's voice.
@@ -470,7 +583,7 @@ Claude Code MUST follow these rules when writing video scripts:
 - No "Welcome to..." or "Today we're going to..." — snooze!
 
 **Examples of GOOD vs BAD dialogue:**
-- BAD: "PawPad utilizes FROST MPC threshold signature schemes for distributed key management"
+- BAD: "PawPad utilizes Trusted Execution Environment cryptographic key management infrastructure"
 - GOOD: "Bro, your wallet has ONE key and you think that's safe? That's like putting all your money under your mattress and hoping nobody checks."
 
 - BAD: "We leverage Oasis ROFL Trusted Execution Environments for hardware-level isolation"
