@@ -1,238 +1,296 @@
-# Screenplay Writing Skill — 30-60s Video Scripts
+# Screenplay Skill — Video Script Writing
 
-## Copywriting Frameworks
+## MODE SELECTION (AUTOMATIC)
 
-### PAS (Problem → Agitate → Solve)
-1. **Problem** — State the pain in 1 sentence. Make it personal.
-2. **Agitate** — Twist the knife. Show why it's worse than they think.
-3. **Solve** — Introduce the product as the obvious answer.
+Read the brief. Pick the mode:
 
-Example (PawPad):
-- P: "Your crypto wallet has one key. ONE."
-- A: "That's like locking your house with a paperclip and hoping for the best."
-- S: "PawPad splits your keys across secure hardware vaults. Hack one? Cool, you get nothing."
+**🎭 STORY MODE** — if brief contains ANY of these words:
+`funny`, `humor`, `humorous`, `entertaining`, `fun`, `roast`, `spicy`, `masala`, `comedy`, `joke`, `hilarious`, `witty`, `sarcastic`, `meme`, `viral`, `educate + fun`, `learn + fun`, `edutainment`, `story`, `storytelling`, `emotional`, `captivate`
 
-### AIDA (Attention → Interest → Desire → Action)
-1. **Attention** — Shocking stat, bold roast, or "wait what?"
-2. **Interest** — Why should they care? Analogy or story.
-3. **Desire** — Show the transformation. Before/after.
-4. **Action** — Clear CTA with energy.
+**📈 STANDARD MODE** — if brief focuses on:
+`conversion`, `sell`, `download`, `sign up`, `ad`, `campaign`, `product launch`, `showcase`, `explainer`, `demo`, `walkthrough`
 
-Example (ZkAGI):
-- A: "What if AI could think for you... without ever seeing your data?"
-- I: "Right now, every AI app reads your prompts, your photos, your searches."
-- D: "ZkAGI runs AI inside encrypted vaults. Your data goes in, results come out. Nobody peeks."
-- A: "zkagi dot ai. Privacy isn't optional anymore."
+**If both are present**, default to Story Mode — entertainment converts better than sales pitches.
 
 ---
 
-## Hook Formulas (Scene 1 — First 3 Seconds)
+# 🎭 STORY MODE: Entertainment That Teaches
 
-### 1. The Roast
-Attack the status quo. Make the viewer feel called out.
-- "Bro, you're still storing your seed phrase in a NOTES APP?"
-- "Your wallet security is literally a Post-It note and a prayer."
-- "Congrats, you just made it super easy for hackers. Real generous of you."
+## Philosophy
+You are NOT making an explainer video. You are making a **short film** that happens to teach ONE thing. The viewer should laugh, feel something, and walk away knowing something new — without realizing they were "educated."
 
-### 2. The Shocking Stat
-Lead with a number that makes them stop scrolling.
-- "3.8 BILLION dollars stolen from crypto wallets last year. Yours could be next."
-- "94% of wallet hacks happen because of one single key. ONE."
-- "Every 12 seconds, someone loses crypto to a phishing attack."
+Think: Kurzgesagt meets stand-up comedy meets those TikToks your friend sends at 2am.
 
-### 3. The Question
-Ask something they can't scroll past.
-- "What happens to your crypto if your phone falls in a toilet?"
-- "Would you trust a stranger with your bank password? Then why trust a single key?"
-- "What if your wallet could protect itself... even from YOU?"
+## The Golden Rules
 
-### 4. The "What If"
-Open a possibility loop — they need to watch to close it.
-- "What if AI could trade for you while you sleep... without ever touching your keys?"
-- "What if losing your phone meant NOTHING for your crypto?"
-- "What if the safest wallet on earth was also the easiest to use?"
+1. **ONE concept per video. MAX.** If you can't say it in one sentence, it's too much.
+2. **Characters > Concepts.** "Dave lost $47k washing his jeans" > "Billions are lost annually"
+3. **Specific > General.** "$47,000" > "a lot of money". "Jeans pocket" > "lost it". "Sewer" > "gone forever"
+4. **Show the FEELING first, explain later.** Make them feel the pain/joy, THEN drop the knowledge.
+5. **If a 12-year-old can't retell it to a friend, rewrite it.**
 
-### 5. The Controversy
-Say something slightly spicy. Trigger a reaction.
-- "Hardware wallets are security theater. There, I said it."
-- "Your favorite wallet app is basically a glass safe. Everyone can see in."
-- "Hot take: if your wallet needs 24 recovery words, it's already broken."
-
----
-
-## Scene Pacing Template
+## Story Structure (NOT AIDA, NOT PAS)
 
 ```
-Scene 1 — HOOK (3s, ~10-12 words)
-  → Grab attention. Roast, shock, or provoke.
-  → Energy: HIGH. Fast cut. Sound effect (scratch/bass-drop).
+SCENE 1: THE SITUATION (5-8s)
+  → Relatable character in a relatable mess
+  → "Meet Dave. Dave had $47,000 in Bitcoin."
 
-Scene 2 — TWIST THE KNIFE (8s, ~20-25 words)
-  → Deepen the problem. Use analogy. Make them feel the pain.
-  → Energy: Building. Visual shows the chaos/problem.
+SCENE 2: THE TWIST (8-12s)  
+  → Something unexpected happens. Funny or shocking.
+  → "Dave also had a washing machine. And jeans. With pockets."
+  → "Dave's seed phrase is now in the city sewer system."
 
-Scene 3 — THE SOLUTION (10s, ~20-25 words)
-  → Introduce the product/feature. Keep it simple.
-  → Energy: Relief. Visual shift to clean/hopeful.
+SCENE 3: THE "WAIT, WHAT?" MOMENT (8-12s)
+  → Drop the knowledge bomb disguised as plot progression
+  → "But what if Dave never needed that napkin? What if his keys 
+     lived inside a vault that not even the wallet company could open?"
 
-Scene 4 — PROOF / DEMO (8s, ~15-20 words)
-  → Show it working. Real demo clip or concrete example.
-  → Energy: Confident. "Look, it actually works."
+SCENE 4: THE PAYOFF (8-10s)
+  → Show the solution through the character's story
+  → "That exists now. 30 seconds to set up. Dave is still recovering."
 
-Scene 5 — CTA (5s, ~12-15 words)
-  → Drive action. URL, hype, mic drop.
-  → Energy: PEAK. End on a high. Sound effect (ping).
+SCENE 5: THE MIC DROP (5-8s)
+  → Callback to the character + CTA with personality
+  → "Don't be Dave. paw.zkagi.ai. Your crypto deserves better 
+     than your jeans pocket."
 ```
 
-**Total: ~34 seconds of dialogue → ~45s with pauses/transitions**
+## Humor Toolkit
 
-For 60s videos, expand Scenes 2-3 to two scenes each (twist knife harder, explain solution deeper).
+### Character Creation
+- **Name them.** Dave, Karen, "your cousin who bought Doge at the top", "that guy in your Discord"
+- **Give them ONE flaw.** Overconfident, clueless, paranoid, cheap
+- **Make them lovable.** We laugh WITH them, not AT them (mostly)
 
----
+### Comedy Techniques
+- **Rule of Three:** Setup, setup, punchline. "Not a hack. Not a scam. He washed his jeans."
+- **Escalation:** Each beat gets MORE absurd. "One spill. One house fire. One nosy roommate."
+- **Callback:** Reference the character/joke again at the end. "Dave is still recovering."
+- **Understatement:** Describe something huge casually. "So that's 47 thousand dollars. In the sewer. On a Tuesday."
+- **Contrast:** Juxtapose serious with silly. "Military-grade encryption protects your keys. Dave's napkin protects his."
+- **Self-deprecating:** Include the audience. "We've ALL been Dave at some point."
 
-## Dialogue Rules
+### Humor DO's and DON'T's
 
-- **15-25 words per scene.** Not 10. Not 40. This range = 8-12s of TTS audio.
-- **One idea per scene.** Don't cram two concepts together.
-- **Conversational tone.** Write how you'd text a friend, not how you'd write an essay.
-- **Use contractions.** "That's" not "That is." "You're" not "You are."
-- **Active voice only.** "PawPad protects your keys" not "Your keys are protected by PawPad."
-- **Concrete > Abstract.** "Your keys live inside a hardware vault" not "Enhanced cryptographic security."
-- **Humor = specificity.** "Post-It note on your fridge" is funny. "Inadequate storage" is not.
+✅ DO:
+- Roast the PROBLEM, not the person
+- Use specific dollar amounts (funnier than "billions")
+- Name everyday objects (napkin, fridge, jeans, sticky note)
+- End on energy, not a lecture
+- Use "you" — make it personal
+- Pause for the joke to land (short scene, beat, next scene)
 
----
+❌ DON'T:
+- Be mean-spirited or punch down
+- Use inside jokes only crypto bros get
+- Explain the joke ("get it? because seed phrases are...")
+- Force humor where emotion works better
+- Make EVERY line funny — the serious moments make the funny ones hit harder
 
-## Humor Rules
+## Dialogue Rules (Story Mode)
 
-### The Formula: Roast → Empathize → Solve → Hype
+- **10-20 words per scene.** Shorter than Standard Mode. Comedy needs space.
+- **Read it OUT LOUD.** If it doesn't sound like a human talking, rewrite it.
+- **Contractions always.** "That's" not "That is". "Can't" not "Cannot".
+- **Sentence fragments are your friend.** "Gone. Just like that." "Thirty seconds. Boom."
+- **Questions pull viewers in.** "You know what Dave didn't have? A backup plan."
 
-1. **Roast the problem** — Make it absurd. Exaggerate the stupidity of the status quo.
-   - "Your wallet security plan is basically 'hope for the best.' Bold strategy."
+## Education Disguised as Entertainment
 
-2. **Empathize with the audience** — Show you get it. You've been there.
-   - "Look, we've all been there. Sweating at 3am wondering if we wrote the seed phrase right."
+The teaching happens INSIDE the story, never as a separate lecture:
 
-3. **Solve with confidence** — Present the fix like it's obvious (because it is).
-   - "PawPad splits your keys across three secure vaults. No single point of failure. Simple."
+❌ BAD (lecture inserted):
+> "Seed phrases are 24 random words used as cryptographic keys to access your wallet. 
+> If lost, funds are irrecoverable. PawPad uses TEE to eliminate this risk."
 
-4. **Hype the CTA** — Make them feel smart for taking action.
-   - "Stop gambling with your crypto. pawpad dot ai. Future you says thanks."
+✅ GOOD (knowledge woven into story):
+> "Dave's entire fortune was protected by 24 words on a napkin. Not a vault. 
+> Not a bank. A napkin. What if his keys lived inside hardware that nobody — 
+> not hackers, not Dave, not even the people who built it — could touch?"
 
-### Humor Techniques That Work:
-- **Exaggeration:** "That's like putting your diamonds in a ziplock bag."
-- **Callback:** Reference the roast from Scene 1 in the CTA.
-- **Sarcasm:** "Oh sure, a 24-word phrase on a napkin. Super secure."
-- **Bathos:** Build something up dramatically, then undercut it. "The most advanced... Post-It note in history."
-- **Relatable scenarios:** "You know that panic when you can't find your phone? Now imagine there's $50K on it."
-- **Rule of three:** "Fast, secure, and you don't need a PhD to use it."
+The viewer learns:
+- Seed phrases = 24 words (from the Dave story)
+- They're fragile (napkin metaphor)  
+- TEE = hardware nobody can access (vault analogy)
+- ...without EVER hearing "TEE", "cryptographic", or "irrecoverable"
 
-### Humor Techniques That DON'T Work:
-- Puns (cringe in short-form video)
-- Self-deprecation (undermines product credibility)
-- Inside jokes (alienates new viewers)
-- Dad jokes (too safe, not engaging)
+## Analogy Library (Use These)
 
----
+| Technical concept | Story-mode analogy |
+|---|---|
+| Seed phrase | "Writing your bank password on a napkin and praying" |
+| TEE/hardware vault | "A vault inside a vault inside a volcano" |
+| Private key never leaves | "The pen never leaves the room. Only the signed paper comes out." |
+| Multi-chain support | "One key that opens every door — Ethereum, Solana, Zcash" |
+| TOTP recovery | "Google Authenticator = your secret handshake to get back in" |
+| ZK proofs | "Proving you're old enough to drink without showing your ID" |
+| AI agents | "A robot butler that trades crypto while you sleep" |
+| Decentralized | "No single person has the off switch" |
 
-## BANNED Phrases — NEVER Use These
+## Hook Formulas (Story Mode)
 
-| Banned | Why | Use Instead |
-|--------|-----|-------------|
-| "In this video" | Boring, signals lecture | Jump straight to the hook |
-| "Let me explain" | Condescending | Just explain it |
-| "Welcome to" | Nobody wants a welcome | Hit them with a question/roast |
-| "Today we're going to" | Screams corporate | Start with the problem |
-| "Leveraging" | Jargon | "Using" |
-| "Utilize" | Jargon | "Use" |
-| "Cutting-edge" | Meaningless buzzword | Show what it actually does |
-| "Revolutionary" | Overused, eye-roll | Show, don't tell |
-| "Blockchain technology" | Too abstract | "Your keys", "your wallet" |
-| "Ecosystem" | Corporate speak | Say what the thing IS |
-| "Seamlessly" | Filler word | Cut it |
-| "End-to-end" | Vague | Be specific about what's protected |
-| "Next-generation" | Says nothing | Show the actual upgrade |
-| "Solutions" | The word that kills scripts | Name the actual thing |
+1. **The Character Intro:** "Meet Dave. Dave had $47,000 in Bitcoin. Dave also had a washing machine."
+2. **The Rhetorical Question:** "What's dumber than writing your life savings on a napkin? Putting it on the fridge."
+3. **The Bold Claim:** "This wallet can't be hacked. Not by hackers. Not by governments. Not by us. Not by anyone."
+4. **The Time Machine:** "It's 2019. You just bought Bitcoin. Now find those 24 words you wrote down. I'll wait."
+5. **The Plot Twist:** "I lost $12,000 in crypto. Not to a hack. To a cup of coffee. On my notebook."
+6. **The Comparison:** "Your bank has a vault, guards, cameras, and insurance. Your crypto has... a napkin."
 
----
+## Example: Full Story Mode Script
 
-## Before/After Examples
+**Brief:** "Funny educational video about why seed phrases are dangerous. Promote PawPad."
 
-### Example 1: Wallet Security Video
+```
+SCENE 1 — THE SITUATION (6s)
+"Meet Dave. Dave had forty seven thousand dollars in Bitcoin. 
+Dave also had a washing machine."
+[Visual: Cartoon Dave, confident smile, holding phone showing BTC balance]
 
-**BEFORE (Corporate Boring):**
-> Scene 1: "Welcome to PawPad. Today we'll explore our innovative wallet security solution."
-> Scene 2: "PawPad leverages Trusted Execution Environment technology for hardware-level cryptographic key isolation."
-> Scene 3: "Our multi-party computation framework ensures that no single point of failure exists in the key management infrastructure."
-> Scene 4: "Visit pawpad.ai to learn more about our cutting-edge security platform."
+SCENE 2 — THE TWIST (10s)  
+"One laundry day later, Dave's seed phrase went through a 
+spin cycle. His crypto is now technically in the city sewer 
+system. Dave tells people he's 'HODLing.' Dave is lying."
+[Visual: Washing machine churning, paper dissolving, Dave staring blankly]
 
-**AFTER (Entertaining):**
-> Scene 1: "Bro, your wallet has ONE key and you think that's safe? That's like locking Fort Knox with a paperclip."
-> Scene 2: "Every year, billions get stolen because wallets have a single weak point. One phish, one hack, and poof — it's gone."
-> Scene 3: "PawPad splits your key into three pieces, locked inside hardware vaults. Hack one? Congrats, you get absolutely nothing."
-> Scene 4: "Your crypto deserves better than a prayer. pawpad dot ai. You're welcome."
+SCENE 3 — THE KNOWLEDGE DROP (10s)
+"But what if Dave never needed that napkin? What if his keys 
+lived inside a hardware vault that nobody could open? Not 
+hackers. Not the company. Nobody."
+[Visual: Glowing vault materializing, force field around keys, dramatic reveal]
 
-### Example 2: AI Privacy Video
+SCENE 4 — THE PAYOFF (10s)
+"PawPad generates your keys inside sealed hardware. They 
+never leave. Three taps to set up. No words to write down. 
+No napkins to lose. Dave wishes he knew this six months ago."
+[Visual: Phone showing PawPad, tap-tap-tap, satisfying checkmark animation]
 
-**BEFORE (Corporate Boring):**
-> Scene 1: "ZkAGI is a decentralized AI platform that prioritizes user privacy through zero-knowledge cryptographic proofs."
-> Scene 2: "Our infrastructure ensures that sensitive data remains encrypted during the computation process."
-> Scene 3: "Join the ZkAGI ecosystem at zkagi.ai."
-
-**AFTER (Entertaining):**
-> Scene 1: "Every AI app right now reads your prompts, your photos, your weird 2am searches. ALL of it."
-> Scene 2: "What if AI could help you without EVER seeing your data? Like a blindfolded chef who still cooks a perfect meal."
-> Scene 3: "ZkAGI runs AI inside encrypted vaults. Data goes in, answers come out, nobody peeks. Not even us."
-> Scene 4: "Stop feeding big tech your life story. zkagi dot ai. Privacy hits different."
-
-### Example 3: Trading Bot Video
-
-**BEFORE (Corporate Boring):**
-> Scene 1: "Introducing PawPad's autonomous trading agent powered by artificial intelligence."
-> Scene 2: "The agent utilizes real-time market analysis to execute trades on your behalf while maintaining key security through TEE isolation."
-> Scene 3: "Get started at pawpad.ai."
-
-**AFTER (Entertaining):**
-> Scene 1: "What if you could make money while you sleep... without giving some random bot your private keys?"
-> Scene 2: "PawPad's AI agent watches the market 24/7, spots opportunities, and trades for you. Your keys? Locked in a hardware vault it can't touch."
-> Scene 3: "It's like having a Wall Street trader who physically CAN'T run off with your money."
-> Scene 4: "Let the robot do the work. pawpad dot ai. Sweet dreams."
-
-### Example 4: Recovery Feature Video
-
-**BEFORE (Corporate Boring):**
-> Scene 1: "PawPad offers seamless wallet recovery through our distributed key management system."
-> Scene 2: "Even in the event of device loss, your assets remain accessible through our secure recovery protocol."
-> Scene 3: "Experience peace of mind at pawpad.ai."
-
-**AFTER (Entertaining):**
-> Scene 1: "Phone in the toilet. Laptop stolen. House on fire. Your crypto? Still safe."
-> Scene 2: "PawPad doesn't keep your keys on your device. They live in hardware vaults. Lose your phone? Log in on a new one. Done."
-> Scene 3: "No seed phrases. No recovery panic. No calling your mom at 3am crying about Bitcoin."
-> Scene 4: "Sleep easy. pawpad dot ai."
-
-### Example 5: General Crypto Security Video
-
-**BEFORE (Corporate Boring):**
-> Scene 1: "In the cryptocurrency space, security remains a paramount concern for digital asset holders."
-> Scene 2: "Traditional wallet solutions present significant vulnerabilities through single-key architectures."
-> Scene 3: "Our next-generation platform addresses these challenges through advanced cryptographic innovations."
-> Scene 4: "Visit our website to begin your journey toward enhanced digital asset security."
-
-**AFTER (Entertaining):**
-> Scene 1: "3.8 billion dollars. That's how much got stolen from crypto wallets last year. Billion. With a B."
-> Scene 2: "And the wild part? Most of those hacks worked because the wallet had one key. One door. One lock. One problem."
-> Scene 3: "PawPad said nah. Three keys, three vaults, three layers of 'good luck with that.' Your crypto sits inside a fortress that doesn't even trust itself."
-> Scene 4: "Join the smart money. pawpad dot ai. Your future self will buy you dinner."
+SCENE 5 — MIC DROP (6s)
+"paw dot zkagi dot ai. Don't be Dave."
+[Visual: Dave waving sadly in background, PawPad logo front and center]
+```
 
 ---
 
-## Quick Reference Checklist
+# 📈 STANDARD MODE: Conversion-Focused Scripts
 
-Before finalizing any script, verify:
-- [ ] Hook in first 3 seconds (roast/stat/question/what-if/controversy)?
-- [ ] Each scene: 15-25 words?
-- [ ] Zero banned phrases?
-- [ ] At least one analogy a 12-year-old would get?
-- [ ] Problem is roasted before solution is introduced?
-- [ ] CTA has energy + URL + mic drop?
-- [ ] Would YOU watch this, or would you scroll past?
+## Philosophy
+Direct response. The viewer should feel a problem, see a solution, and take action. Every word earns its place or gets cut.
+
+## Structure: PAS + AIDA Hybrid
+
+```
+SCENE 1: HOOK (3-5s)
+  → Stop the scroll. Shock, question, or bold claim.
+  → PAS: Pain identification
+
+SCENE 2: AGITATE (8-12s)
+  → Twist the knife. Make the problem feel urgent and personal.
+  → Stats, consequences, "what happens if you don't act"
+
+SCENE 3: SOLUTION (8-12s)
+  → Present the product as the answer. Features = benefits.
+  → Show, don't just tell. Demo clip if available.
+
+SCENE 4: PROOF (8-10s)
+  → Social proof, stats, authority, or demo walkthrough
+  → "Here's how easy it is" or "Here's what it does"
+
+SCENE 5: CTA (5-8s)
+  → Clear action. URL. Urgency. One sentence.
+  → "Try it free at [url]. Takes 30 seconds."
+```
+
+## Hook Formulas (Standard Mode)
+
+1. **Shocking Stat:** "$140 billion in crypto lost forever. And most of it? Human error."
+2. **Direct Question:** "Is your crypto wallet actually secure? Or are you just hoping?"
+3. **Bold Claim:** "This wallet cannot be hacked. Period."
+4. **What If:** "What if you never had to write down a seed phrase again?"
+5. **Controversy:** "Seed phrases are the worst idea in crypto. Here's why."
+6. **Roast:** "Your wallet's security plan is a piece of paper. In 2026."
+
+## Dialogue Rules (Standard Mode)
+
+- **15-25 words per scene.** Slightly longer than Story Mode.
+- **Benefit-first language.** "Never lose access" not "Uses TEE technology"
+- **Power words:** free, instant, secure, proven, guaranteed, simple, now
+- **Urgency triggers:** "right now", "before it's too late", "while it's free"
+- **Social proof:** numbers, stats, comparisons to known brands
+
+## Tone
+- Confident, not arrogant
+- Urgent, not desperate  
+- Clear, not dumbed down
+- Professional but warm — NOT corporate
+- Still conversational — avoid jargon
+
+## Example: Full Standard Mode Script
+
+**Brief:** "Conversion video for PawPad. Get downloads."
+
+```
+SCENE 1 — HOOK (5s)
+"One hundred and forty billion dollars in crypto. Gone forever. 
+Not hacked. Just... lost. Forgotten seed phrases. Misplaced 
+backups. Human error."
+[Visual: Counter ticking up from $0 to $140B, dramatic red]
+
+SCENE 2 — AGITATE (10s)
+"Twenty percent of all Bitcoin is permanently inaccessible. 
+That's someone's retirement. Someone's house. Maybe yours. 
+And all because security meant writing 24 words on paper."
+[Visual: Paper burning, wallet balance dropping to zero]
+
+SCENE 3 — SOLUTION (10s)
+"PawPad eliminates seed phrases entirely. Your keys are 
+generated and stored inside a hardware vault. They never 
+leave. Not to your phone. Not to the cloud. Not to anyone."
+[Visual: Product demo or vault animation]
+
+SCENE 4 — PROOF (10s)
+"Three taps to create a wallet. Scan a QR code for recovery. 
+Download your backup. Done. Multi-chain — Ethereum, Solana, 
+Zcash. Built-in AI trading. All secured by hardware."
+[Visual: Product walkthrough, step by step]
+
+SCENE 5 — CTA (5s)
+"paw dot zkagi dot ai. Free. Thirty seconds to set up. 
+Your crypto deserves real security."
+[Visual: URL reveal, logo, energy burst]
+```
+
+---
+
+# UNIVERSAL RULES (Both Modes)
+
+## Never Say
+- "In this video..."
+- "Welcome to..."
+- "Let me explain..."
+- "Hey guys..."
+- "Before we begin..."
+- "Don't forget to like and subscribe" (unless ironic)
+- Any jargon without immediate analogy: TEE, ROFL, cryptographic, consensus, byzantine
+
+## Always Do
+- Read the product's PRODUCT.md first
+- Match voice character to brief (paw = energetic, pad = calm authority)
+- Write dialogue that sounds natural when spoken aloud
+- End with energy, never with a whimper
+- Include at least one moment that makes you smile while writing it
+
+## Scene Duration Guide
+| Scene type | Audio target | Word count |
+|---|---|---|
+| Hook | 3-6s | 10-20 words |
+| Story beat | 8-12s | 20-35 words |
+| Walkthrough | 10-15s | 25-40 words |
+| CTA | 5-8s | 10-20 words |
+
+## Quality Check Before Submitting Script
+1. Read it out loud. Does it sound like a human talking to a friend?
+2. Could a 12-year-old understand it?
+3. Is there at least ONE moment that makes you smile?
+4. Does every scene EARN its time? Cut anything that doesn't.
+5. Would YOU watch this? Or would you scroll past?
