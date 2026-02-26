@@ -32,51 +32,59 @@ const CHARACTERS = {
   },
 };
 
-// ── PawPad Wallet Creation Demo (60s, 4 scenes, all pad voice) ──
-// Audio durations: 13.92s + 15.36s + 17.92s + 14.56s = 61.76s
+// ── PawPad Seed Phrase Roast (55s, 5 scenes, paw voice) ──
+// Audio durations: 5.92s + 10.08s + 8.64s + 14.24s + 8.32s = 47.2s
 const PAWPAD_SCENES = [
   {
-    characterId: "pad",
-    dialogue: "Twenty four random words written down on a piece of paper. That is your master plan for protecting your entire life savings? Come on now. That is not security. That is like writing your bank password on a napkin and praying nobody finds it.",
+    characterId: "paw",
+    dialogue: "You wrote 24 secret words on a napkin and called it security? That's not a backup plan, that's a treasure map for hackers.",
     emotion: "serious" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 13.92,
+    durationOverride: 5.92,
   },
   {
-    characterId: "pad",
-    dialogue: "PawPad generates your wallet keys inside a hardware vault called a Trusted Execution Environment. Your keys never leave the vault. Not hackers, not node operators, nobody can see what is inside. It is like a safe that only opens for you.",
+    characterId: "paw",
+    dialogue: "Every year, billions in crypto vanish because someone's master plan was a sticky note on the fridge. One spill, one house fire, one nosy roommate, and poof. All gone.",
+    emotion: "serious" as const,
+    visualType: "talking-head" as const,
+    sceneType: "video" as const,
+    durationOverride: 10.08,
+  },
+  {
+    characterId: "paw",
+    dialogue: "PawPad locks your keys inside a hardware vault. They never leave. Not to your phone, not to the cloud, not to anyone. Even we can't peek.",
     emotion: "explaining" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 15.36,
+    durationOverride: 8.64,
   },
   {
-    characterId: "pad",
-    dialogue: "Here is how easy it is. Open PawPad, tap create wallet, choose seedless wallet. A QR code pops up on screen. Scan it with Google Authenticator, save your encrypted backup file, and boom. Your wallet is live. Thirty seconds flat.",
+    characterId: "paw",
+    dialogue: "Three taps to create a wallet. Scan a QR code with Google Authenticator. Download your backup file. Done. No seed phrase anywhere. Just vibes and security.",
     emotion: "excited" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 17.92,
+    durationOverride: 14.24,
   },
   {
-    characterId: "pad",
-    dialogue: "No seed phrases to lose. No passwords to forget. Just your keys locked in hardware that nobody can crack. Stop trusting napkins with your life savings. Try PawPad right now at paw dot zkagi dot ai.",
+    characterId: "paw",
+    dialogue: "Stop trusting napkins with your life savings. paw dot zkagi dot ai. Your crypto finally has a real home.",
     emotion: "celebrating" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 14.56,
+    durationOverride: 8.32,
   },
 ];
 
-// Total: 418 + 461 + 538 + 437 = 1854 frames at 30fps = 61.8s
-const TOTAL_FRAMES = 1854;
+// Total: 208 + 328 + 285 + 453 + 330 = 1604 frames at 30fps = 53.5s
+const TOTAL_FRAMES = 1604;
 
 const pawpadProps = {
-  title: "PawPad: Your Keys, Locked in Hardware",
+  title: "PawPad: Stop Trusting Napkins",
   characters: CHARACTERS,
   scenes: PAWPAD_SCENES,
-  style: { theme: "pawpad" as const, format: "16:9" as const, showSubtitles: true, showCharacterName: false, transitionType: "fade" as const },
+  style: { theme: "zkagi-brand" as const, format: "16:9" as const, showSubtitles: true, showCharacterName: false, transitionType: "fade" as const },
   music: { volume: 0.12 },
   watermark: { text: "PawPad", show: true },
   useGeneratedBackgrounds: true,
