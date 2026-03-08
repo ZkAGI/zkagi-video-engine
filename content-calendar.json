@@ -1,0 +1,215 @@
+{
+  "start_date": "2026-03-06",
+  "days": [
+    {
+      "day": 1,
+      "product": "zkagi",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "Meet the Zero-Employee Enterprise — a solo founder runs a $2M company with zero staff, just ZkAGI. HR? An AI agent. Marketing? Zynapse image gen + video gen API. Finance? PawPad DeFi trading bot. The only water cooler talk is with a chatbot. Punchline: 'My best employee never asks for a raise... because it's an API.'"
+    },
+    {
+      "day": 2,
+      "product": "zynapse",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "A dev rage-quits after juggling OpenAI, Midjourney, ElevenLabs, AND Runway subscriptions — $847/month in API bills. Discovers Zynapse: one API for image gen, video gen, audio gen, AND ZK proofs. Plot twist: the API costs less than his coffee budget. 'One endpoint to rule them all... and in the darkness, bind them.' Privacy-preserving, crypto-native, zero bloat."
+    },
+    {
+      "day": 3,
+      "product": "zkterminal",
+      "mode": "story",
+      "angle": "use-case",
+      "brief": "A prediction market degen uses ZkTerminal's AI crypto predictions to spot a Bitcoin trend 6 hours early. While CT (Crypto Twitter) argues about resistance levels, he's already in position. ZkTerminal prediction markets + AI signals = 'I don't predict the future, I just have better APIs than you.' Show the prediction dashboard, trading signals, and the smug satisfaction."
+    },
+    {
+      "day": 4,
+      "product": "pawpad",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "DeFi horror stories: a guy approves an unlimited token allowance to a sketchy contract and wakes up to an empty wallet. Another writes his seed phrase on a napkin — wife throws it away. PawPad enters: no seed phrases (TEE secured), smart approval limits, AI agent that flags suspicious contracts. 'Your wallet should be smarter than you. PawPad finally makes that possible.'"
+    },
+    {
+      "day": 5,
+      "product": "zynapse",
+      "mode": "standard",
+      "angle": "demo",
+      "brief": "Zynapse Content Factory demo — generate a product image, turn it into a 4-second promo video, clone a CEO voice for narration, ALL through one API. Three endpoints, three results, zero employees needed. Show actual API calls: /generate/image, /generate/video, /generate/audio. The entire marketing department replaced by curl commands. Privacy-preserving — your prompts and outputs stay yours via ZK verification."
+    },
+    {
+      "day": 6,
+      "product": "zkterminal",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "A zero-employee startup founder generates all marketing content from ZkTerminal — blog images via image gen, explainer videos via video gen, podcast intros via audio gen, and lets the AI prediction market feature pick which crypto to accept as payment. Investors ask 'How big is your team?' — 'Just me and my terminal.' Punchline: 'ZkTerminal is the cofounder that never argues about equity.'"
+    },
+    {
+      "day": 7,
+      "product": "pawpad",
+      "mode": "story",
+      "angle": "use-case",
+      "brief": "A DeFi yield farmer manages 5 chains from one PawPad wallet — EVM and Solana, swaps, bridges, yield positions. No seed phrase anxiety because TEE handles key security. The AI trading agent auto-compounds yields while he sleeps. 'Other wallets give you a seed phrase and anxiety. PawPad gives you a trading bot and a good night's sleep.' Show multi-chain dashboard and auto-DeFi features."
+    },
+    {
+      "day": 8,
+      "product": "zynapse",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "Privacy roast: companies that say 'we value your privacy' while selling your data to 47 ad networks. Meanwhile Zynapse uses ZK proofs so your API inputs are MATHEMATICALLY proven private — not 'pinky promise' private. 'Other APIs read your prompts for training. Zynapse can prove it DIDN'T read your prompts. That's not a privacy policy, that's a privacy PROOF.' Show ZK verification flow."
+    },
+    {
+      "day": 9,
+      "product": "zkterminal",
+      "mode": "standard",
+      "angle": "demo",
+      "brief": "ZkTerminal prediction markets deep dive — AI analyzes on-chain data, social sentiment, and macro trends to generate crypto trading signals. Demo the prediction dashboard: Bitcoin forecast, altcoin momentum scores, risk alerts. Show a prediction hitting within 2% accuracy. 'Fortune tellers use crystal balls. Degens use ZkTerminal.' All running on privacy-preserving ZK infrastructure."
+    },
+    {
+      "day": 10,
+      "product": "zkagi",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "The Zero-Employee Enterprise starter pack: PawPad for treasury management and DeFi (no CFO needed), Zynapse API for all content generation (no creative team needed), ZkTerminal for prediction markets and AI agents (no analysts needed). Compare: Traditional startup = 15 employees, $80k/month burn. ZkAGI startup = 0 employees, API calls. 'The future of business is zero headcount and infinite API calls.'"
+    },
+    {
+      "day": 11,
+      "product": "zynapse",
+      "mode": "story",
+      "angle": "use-case",
+      "brief": "A solo game developer uses Zynapse API to generate ALL game assets — character art via image gen, cutscene videos via video gen, NPC dialogue via audio gen — and uses ZK proofs to verify asset ownership without revealing the assets publicly. Ships a full indie game with zero artists, zero voice actors. 'My entire art department is an API key. And it never misses a deadline.'"
+    },
+    {
+      "day": 12,
+      "product": "zkterminal",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "Crypto prediction market fails vs ZkTerminal wins — show ridiculous CT predictions ('ETH to $50k by Tuesday') vs ZkTerminal's AI calmly saying 'consolidation phase, 73% probability of breakout in 48h.' The punchline: 'Some people read tea leaves. Some people read candlesticks. Smart people read ZkTerminal.' Show actual prediction interface with AI confidence scores."
+    },
+    {
+      "day": 13,
+      "product": "pawpad",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "Seed phrase horror compilation: tattooed it backwards, stored it in Google Docs (hacked), told Siri to remember it (Siri forgot), split it across 3 countries (lost passport). PawPad: no seed phrase at all — TEE secures your keys in hardware, TOTP for recovery. 'Humans had 15 years to prove they can handle seed phrases. They can't. PawPad took the hint.' DeFi-ready from day one."
+    },
+    {
+      "day": 14,
+      "product": "zynapse",
+      "mode": "standard",
+      "angle": "demo",
+      "brief": "Zynapse audio gen + video gen combo demo — generate a voiceover from text, then generate a matching video, then layer them together. All three API calls shown live. Use case: a zero-employee e-commerce brand creates product ads automatically. 'Your competitor hired a video agency for $5,000. You spent $0.03 on API calls. Same result. Better privacy. Way funnier origin story.'"
+    },
+    {
+      "day": 15,
+      "product": "zkterminal",
+      "mode": "story",
+      "angle": "use-case",
+      "brief": "A content creator runs their entire media empire from ZkTerminal — generates thumbnails with image gen, creates short-form videos with video gen, makes podcast intros with audio gen, uses prediction markets to pick trending crypto topics to cover. Zero employees, 500k followers. 'My team is me, my terminal, and an ungodly amount of API calls.' Privacy-preserving so competitors can't scrape his workflow."
+    },
+    {
+      "day": 16,
+      "product": "pawpad",
+      "mode": "story",
+      "angle": "use-case",
+      "brief": "DeFi power user story: PawPad's AI trading agent monitors prediction markets, auto-executes trades based on ZkTerminal signals, manages positions across 5 DEXs. User sets strategy once, PawPad handles everything — swaps, rebalancing, stop losses. 'I used to stare at charts 16 hours a day. Now PawPad's AI stares at charts and I stare at the beach.' Multi-chain, seedless, TEE-secured."
+    },
+    {
+      "day": 17,
+      "product": "zynapse",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "The privacy-preserving API rap battle: OpenAI says 'trust us with your data', Google says 'we only use it a little', Zynapse drops the mic with ZK proofs — 'I can mathematically PROVE I never saw your data.' Image gen, video gen, audio gen — all with cryptographic privacy guarantees. 'Other APIs have privacy policies. We have privacy PROOFS. Big difference. Huge.'"
+    },
+    {
+      "day": 18,
+      "product": "zkterminal",
+      "mode": "standard",
+      "angle": "demo",
+      "brief": "ZkTerminal image gen + video gen pipeline demo — type a prompt, get a stunning image in seconds, then animate it into a video clip, all inside ZkTerminal. Show the full flow: prompt → image → video → download. Then show audio gen for voiceover. 'Three AI capabilities, one terminal, zero employees, infinite content. This is what a one-person studio looks like in 2026.'"
+    },
+    {
+      "day": 19,
+      "product": "pawpad",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "A normie tries to explain DeFi to their mom. Mom asks 'But where's the bank?' 'There is no bank, Mom.' 'Then who has my money?' 'A smart contract.' 'That sounds like a scam.' Enter PawPad: looks like a normal wallet app, but underneath it's TEE-secured, seedless, with AI agents handling DeFi complexity. 'PawPad: DeFi for people whose moms would approve.'"
+    },
+    {
+      "day": 20,
+      "product": "zynapse",
+      "mode": "story",
+      "angle": "use-case",
+      "brief": "A zero-employee marketing agency uses Zynapse API to serve 20 clients — image gen for social media graphics, video gen for ad creatives, audio gen for podcast ads, ZK proofs for client data privacy. Revenue: $40k/month. Employees: zero. Office: a laptop. 'I'm a one-person agency powered by one API. My clients think I have a team of 12. I have a team of endpoints.'"
+    },
+    {
+      "day": 21,
+      "product": "zkterminal",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "Prediction market addicts anonymous: 'Hi, I'm Dave, and I lost $30k betting on random prediction markets.' 'Hi Dave.' Then someone discovers ZkTerminal's AI-powered prediction signals — actual data-driven forecasts instead of gut feelings. 'I didn't quit prediction markets. I just got smarter about them. My therapist is proud. My portfolio is prouder.' Show ZkTerminal signals dashboard."
+    },
+    {
+      "day": 22,
+      "product": "zkagi",
+      "mode": "story",
+      "angle": "use-case",
+      "brief": "The complete Zero-Employee Enterprise playbook: Day 1 — set up PawPad wallet for treasury + DeFi. Day 2 — connect Zynapse API for content generation (image, video, audio). Day 3 — use ZkTerminal prediction markets for market intelligence. Day 7 — first revenue, zero payroll. Privacy-preserving everything, crypto-native payments. 'The best employee handbook is an API reference. The best HR policy is no HR at all.'"
+    },
+    {
+      "day": 23,
+      "product": "zynapse",
+      "mode": "standard",
+      "angle": "demo",
+      "brief": "Zynapse ZK proof demo — prove you generated an image without revealing the prompt. Prove you own content without showing the content. Show the actual verification flow: generate image → get ZK proof → verify on-chain. 'Your competitors can prove they MADE something without showing WHAT they made. Welcome to privacy-preserving content generation. Patent trolls hate this one weird trick.'"
+    },
+    {
+      "day": 24,
+      "product": "zkterminal",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "The AI tools subscription graveyard: ChatGPT Plus ($20), Midjourney ($30), Runway ($76), ElevenLabs ($22), TradingView ($60) = $208/month. OR... ZkTerminal: image gen + video gen + audio gen + crypto predictions + AI agents, all in one place. 'I didn't cancel my subscriptions. I held a funeral for them. ZkTerminal sent flowers... generated by its own image API.'"
+    },
+    {
+      "day": 25,
+      "product": "pawpad",
+      "mode": "standard",
+      "angle": "demo",
+      "brief": "PawPad DeFi dashboard demo — show multi-chain portfolio view (EVM + Solana), AI trading agent configuration, automated yield strategies, prediction market integration with ZkTerminal signals. All seedless, TEE-secured. 'Most wallets show you your balance. PawPad shows you your balance, your strategy, your AI agent's PnL, and why you should probably go to sleep because the bot's got it handled.'"
+    },
+    {
+      "day": 26,
+      "product": "zynapse",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "Enterprise sales pitch parody: 'We need image generation.' 'Zynapse.' 'And video generation.' 'Also Zynapse.' 'And audio generation.' 'Still Zynapse.' 'And privacy compliance?' 'ZK proofs, built in.' 'And it works with crypto payments?' 'Obviously.' 'How many vendors is that?' 'One. One API. One invoice. Zero vendor meetings. You're welcome.' The zero-employee enterprise doesn't attend vendor demos — it IS the vendor."
+    },
+    {
+      "day": 27,
+      "product": "zkterminal",
+      "mode": "story",
+      "angle": "use-case",
+      "brief": "A DeFi fund manager uses ZkTerminal prediction markets + PawPad trading bots — ZkTerminal AI signals say 'ETH breakout 78% likely in 24h', PawPad agent auto-positions. The fund has $5M AUM and zero analysts. Content updates to investors? Auto-generated via ZkTerminal image gen and video gen. 'My fund runs itself. I just take the credit. And the management fees.'"
+    },
+    {
+      "day": 28,
+      "product": "pawpad",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "Wallet security evolution: 2013 — password is 'bitcoin123'. 2017 — seed phrase on paper in a safe. 2021 — hardware wallet you can't find. 2024 — multi-sig you can't coordinate. 2026 — PawPad: TEE-secured, no seed phrase, AI agent handles DeFi, TOTP recovery. 'We spent 13 years making wallets harder to use. PawPad spent 1 year making them impossible to lose. Progress.'"
+    },
+    {
+      "day": 29,
+      "product": "zynapse",
+      "mode": "story",
+      "angle": "use-case",
+      "brief": "A privacy-first news outlet uses Zynapse to generate all visuals (image gen), create video summaries (video gen), produce audio briefings (audio gen), and verify source authenticity with ZK proofs — proving a source is credible WITHOUT revealing who they are. Zero editorial staff, fully AI-generated content pipeline. 'We protect our sources with math, not promises. ZK proofs > pinky swears.'"
+    },
+    {
+      "day": 30,
+      "product": "zkagi",
+      "mode": "story",
+      "angle": "funny",
+      "brief": "Season finale: The Zero-Employee Enterprise 30-day challenge recap. We started with an idea and API keys. PawPad handled all treasury and DeFi. Zynapse generated every image, video, and audio asset. ZkTerminal predicted markets and ran AI agents. Total employees hired: zero. Total content generated: infinite. Total seed phrases memorized: zero. 'The future of enterprise isn't about hiring the right people. It's about calling the right APIs. Welcome to ZkAGI.'"
+    }
+  ]
+}

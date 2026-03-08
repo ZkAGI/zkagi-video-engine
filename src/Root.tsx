@@ -2,7 +2,7 @@ import { Composition } from "remotion";
 import { ZkAGIVideo } from "./compositions/ZkAGIVideo";
 import { VideoConfigSchema } from "./types";
 
-// ── Tiger characters (PawPad mascots) ──
+// ── Tiger characters (ZkAGI mascots) ──
 const CHARACTERS = {
   paw: {
     id: "paw", name: "Paw", color: "#7C3AED", role: "host",
@@ -32,67 +32,70 @@ const CHARACTERS = {
   },
 };
 
-// ── PawPad Seed Phrase Roast (55s, 5 scenes, paw voice) ──
-// Audio durations: 5.92s + 10.08s + 8.64s + 14.24s + 8.32s = 47.2s
-const PAWPAD_SCENES = [
+// ── ZkTerminal Prediction Market Story — Mar 8, 2026 ──
+// Story Mode: prediction market degen spots BTC trend 6 hours early
+// Audio durations: 10.24 + 8.64 + 11.84 + 9.92 + 9.28 = 49.92s
+const ZKTERMINAL_SCENES = [
   {
-    characterId: "paw",
-    dialogue: "You wrote 24 secret words on a napkin and called it security? That's not a backup plan, that's a treasure map for hackers.",
+    characterId: "pad",
+    dialogue: "Three AM. Kyle's staring at charts. Crypto Twitter is screaming about resistance levels. Nobody agrees. Nobody ever agrees.",
     emotion: "serious" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 5.92,
+    durationOverride: 10.24,
   },
   {
-    characterId: "paw",
-    dialogue: "Every year, billions in crypto vanish because someone's master plan was a sticky note on the fridge. One spill, one house fire, one nosy roommate, and poof. All gone.",
-    emotion: "serious" as const,
-    visualType: "talking-head" as const,
-    sceneType: "video" as const,
-    durationOverride: 10.08,
-  },
-  {
-    characterId: "paw",
-    dialogue: "PawPad locks your keys inside a hardware vault. They never leave. Not to your phone, not to the cloud, not to anyone. Even we can't peek.",
+    characterId: "pad",
+    dialogue: "But Kyle isn't reading tweets. He's reading ZkTerminal. The AI just flagged a Bitcoin trend. Six hours early.",
     emotion: "explaining" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
     durationOverride: 8.64,
   },
   {
-    characterId: "paw",
-    dialogue: "Three taps to create a wallet. Scan a QR code with Google Authenticator. Download your backup file. Done. No seed phrase anywhere. Just vibes and security.",
+    characterId: "pad",
+    dialogue: "While everyone debates direction, Kyle's already in position. Prediction markets locked. Entry set. No hesitation.",
     emotion: "excited" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 14.24,
+    durationOverride: 11.84,
   },
   {
-    characterId: "paw",
-    dialogue: "Stop trusting napkins with your life savings. paw dot zkagi dot ai. Your crypto finally has a real home.",
+    characterId: "pad",
+    dialogue: "Six hours later, the move hits. CT finally catches on. Kyle's already counting gains. Better APIs beat louder opinions.",
     emotion: "celebrating" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 8.32,
+    durationOverride: 9.92,
+  },
+  {
+    characterId: "pad",
+    dialogue: "terminal dot zkagi dot ai. I don't predict the future. I just have better APIs than you.",
+    emotion: "celebrating" as const,
+    visualType: "talking-head" as const,
+    sceneType: "video" as const,
+    durationOverride: 9.28,
   },
 ];
 
-// Total: 208 + 328 + 285 + 453 + 330 = 1604 frames at 30fps = 53.5s
-const TOTAL_FRAMES = 1604;
+// Frame counts from TTS durations (30fps):
+// S0: 10.24s → 307   S1: 8.64s → 259   S2: 11.84s → 355
+// S3: 9.92s → 298    S4: 9.28s → 278
+const TOTAL_FRAMES = 307 + 259 + 355 + 298 + 278; // = 1497
 
-const pawpadProps = {
-  title: "PawPad: Stop Trusting Napkins",
+const zkterminalProps = {
+  title: "Prediction Market Degen Spots BTC Trend Early",
   characters: CHARACTERS,
-  scenes: PAWPAD_SCENES,
+  scenes: ZKTERMINAL_SCENES,
   style: { theme: "zkagi-brand" as const, format: "16:9" as const, showSubtitles: true, showCharacterName: false, transitionType: "fade" as const },
   music: { volume: 0.12 },
-  watermark: { text: "PawPad", show: true },
+  watermark: { text: "ZkAGI", show: true },
   useGeneratedBackgrounds: true,
 };
 
 export const RemotionRoot: React.FC = () => (
   <>
-    <Composition id="ZkAGIVideo" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1920} height={1080} schema={VideoConfigSchema} defaultProps={pawpadProps} />
-    <Composition id="ZkAGIVideoVertical" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1080} height={1920} schema={VideoConfigSchema} defaultProps={{ ...pawpadProps, style: { ...pawpadProps.style, format: "9:16" as const } }} />
+    <Composition id="ZkAGIVideo" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1920} height={1080} schema={VideoConfigSchema} defaultProps={zkterminalProps} />
+    <Composition id="ZkAGIVideoVertical" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1080} height={1920} schema={VideoConfigSchema} defaultProps={{ ...zkterminalProps, style: { ...zkterminalProps.style, format: "9:16" as const } }} />
   </>
 );

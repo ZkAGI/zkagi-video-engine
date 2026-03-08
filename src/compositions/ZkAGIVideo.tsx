@@ -46,9 +46,66 @@ const VideoClipBg: React.FC<{
 };
 
 // ═══════════════════════════════════════════════════════════════
+// KEN BURNS IMAGE — zoom/pan on reference image
+// ═══════════════════════════════════════════════════════════════
+const KenBurnsImage: React.FC<{
+  imagePath: string;
+  durationInFrames: number;
+  fadeIn?: number;
+  direction?: "zoom-in" | "zoom-out" | "pan-left" | "pan-right" | "pan-up";
+}> = ({ imagePath, durationInFrames, fadeIn = 8, direction = "zoom-in" }) => {
+  const frame = useCurrentFrame();
+  const progress = frame / durationInFrames;
+
+  const fadeOpacity = fadeIn > 0
+    ? interpolate(frame, [0, fadeIn], [0, 1], { extrapolateRight: "clamp" })
+    : 1;
+
+  let scale = 1;
+  let translateX = 0;
+  let translateY = 0;
+
+  switch (direction) {
+    case "zoom-in":
+      scale = 1.0 + progress * 0.15;
+      break;
+    case "zoom-out":
+      scale = 1.15 - progress * 0.15;
+      break;
+    case "pan-left":
+      scale = 1.1;
+      translateX = -progress * 5;
+      break;
+    case "pan-right":
+      scale = 1.1;
+      translateX = progress * 5;
+      break;
+    case "pan-up":
+      scale = 1.1;
+      translateY = -progress * 4;
+      break;
+  }
+
+  return (
+    <AbsoluteFill>
+      <Img
+        src={staticFile(imagePath)}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          opacity: fadeOpacity,
+          transform: `scale(${scale}) translate(${translateX}%, ${translateY}%)`,
+        }}
+      />
+    </AbsoluteFill>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════
 // GLITCH FLASH — cyber transition between scenes
 // ═══════════════════════════════════════════════════════════════
-const GlitchFlash: React.FC<{ color?: string }> = ({ color = "#7C3AED" }) => {
+const GlitchFlash: React.FC<{ color?: string }> = ({ color = "#06B6D4" }) => {
   const frame = useCurrentFrame();
   if (frame > 8) return null;
 
@@ -98,7 +155,7 @@ const ScreenShake: React.FC<{
 };
 
 // ═══════════════════════════════════════════════════════════════
-// WORD-POP SUBTITLES — words spring in one by one, key words glow
+// WORD-POP SUBTITLES — words spring in one by one
 // ═══════════════════════════════════════════════════════════════
 const WordPopSubtitles: React.FC<{
   text: string;
@@ -110,16 +167,13 @@ const WordPopSubtitles: React.FC<{
   const { fps } = useVideoConfig();
   const words = text.split(" ");
 
-  // Words reveal over first 85% of scene
   const revealEnd = durationInFrames * 0.85;
   const framesPerWord = revealEnd / words.length;
 
-  // Container entrance
   const enterSpring = spring({ frame, fps, config: { damping: 15, mass: 0.5, stiffness: 140 } });
   const slideY = interpolate(enterSpring, [0, 1], [40, 0]);
   const enterOp = interpolate(enterSpring, [0, 1], [0, 1]);
 
-  // Container exit
   const exitOp = interpolate(frame, [durationInFrames - 12, durationInFrames], [1, 0], {
     extrapolateLeft: "clamp", extrapolateRight: "clamp",
   });
@@ -130,21 +184,21 @@ const WordPopSubtitles: React.FC<{
       bottom: 36,
       left: "50%",
       transform: `translateX(-50%) translateY(${slideY}px)`,
-      maxWidth: "82%",
+      maxWidth: "65%",
       opacity: enterOp * exitOp,
       zIndex: 50,
     }}>
       <div style={{
         background: "rgba(0,0,0,0.72)",
         backdropFilter: "blur(16px)",
-        padding: "10px 22px",
+        padding: "8px 18px",
         borderRadius: 10,
         borderLeft: `3px solid ${accentColor}`,
       }}>
         <p style={{
           color: "#FFFFFF",
           fontSize: 22,
-          lineHeight: 1.5,
+          lineHeight: 1.4,
           fontFamily: "'Inter', sans-serif",
           fontWeight: 500,
           margin: 0,
@@ -212,57 +266,43 @@ const SubClipFade: React.FC<{ durationInFrames: number }> = ({ durationInFrames 
 };
 
 // ═══════════════════════════════════════════════════════════════
-// SPEAKER BADGE — small tag top-left
+// TOPIC BADGE — scene topic indicator top-left
 // ═══════════════════════════════════════════════════════════════
-const SpeakerBadge: React.FC<{
-  name: string;
+const TopicBadge: React.FC<{
+  label: string;
   color: string;
   durationInFrames: number;
-}> = ({ name, color, durationInFrames }) => {
+}> = ({ label, color, durationInFrames }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const enterSpring = spring({ frame, fps, config: { damping: 20, mass: 0.4, stiffness: 160 } });
   const slideX = interpolate(enterSpring, [0, 1], [-60, 0]);
   const opacity = interpolate(enterSpring, [0, 1], [0, 1]);
-
   const exitOp = interpolate(frame, [durationInFrames - 8, durationInFrames], [1, 0], {
     extrapolateLeft: "clamp", extrapolateRight: "clamp",
   });
 
   return (
     <div style={{
-      position: "absolute",
-      top: 28,
-      left: 28,
-      transform: `translateX(${slideX}px)`,
-      opacity: opacity * exitOp,
-      zIndex: 55,
+      position: "absolute", top: 28, left: 28,
+      transform: `translateX(${slideX}px)`, opacity: opacity * exitOp, zIndex: 55,
     }}>
       <div style={{
-        background: `${color}30`,
-        border: `1px solid ${color}60`,
-        padding: "4px 14px",
-        borderRadius: 6,
-        backdropFilter: "blur(8px)",
+        background: `${color}30`, border: `1px solid ${color}60`,
+        padding: "4px 14px", borderRadius: 6, backdropFilter: "blur(8px)",
       }}>
         <span style={{
-          color,
-          fontSize: 14,
-          fontWeight: 700,
-          fontFamily: "'Inter', sans-serif",
-          textTransform: "uppercase",
-          letterSpacing: 1.5,
-        }}>
-          {name}
-        </span>
+          color, fontSize: 14, fontWeight: 700,
+          fontFamily: "'Inter', sans-serif", textTransform: "uppercase", letterSpacing: 1.5,
+        }}>{label}</span>
       </div>
     </div>
   );
 };
 
 // ═══════════════════════════════════════════════════════════════
-// CTA URL REVEAL — URL pops in at end with glow
+// CTA URL REVEAL
 // ═══════════════════════════════════════════════════════════════
 const CtaUrl: React.FC<{
   url: string;
@@ -275,55 +315,36 @@ const CtaUrl: React.FC<{
   const localFrame = frame - triggerFrame;
   if (localFrame < 0) return null;
 
-  const popSpring = spring({
-    frame: localFrame,
-    fps,
-    config: { damping: 10, mass: 0.5, stiffness: 120 },
-  });
+  const popSpring = spring({ frame: localFrame, fps, config: { damping: 10, mass: 0.5, stiffness: 120 } });
   const scale = interpolate(popSpring, [0, 1], [0.3, 1]);
   const opacity = interpolate(popSpring, [0, 1], [0, 1]);
-
-  // Pulsing glow
   const glowPulse = Math.sin(localFrame * 0.15) * 0.3 + 0.7;
-
   const exitOp = interpolate(frame, [durationInFrames - 15, durationInFrames], [1, 0], {
     extrapolateLeft: "clamp", extrapolateRight: "clamp",
   });
 
   return (
     <div style={{
-      position: "absolute",
-      bottom: 100,
-      left: "50%",
-      transform: `translateX(-50%) scale(${scale})`,
-      opacity: opacity * exitOp,
-      zIndex: 60,
+      position: "absolute", top: "35%", left: "50%",
+      transform: `translateX(-50%) scale(${scale})`, opacity: opacity * exitOp, zIndex: 60,
     }}>
       <div style={{
-        background: `${color}20`,
-        border: `2px solid ${color}90`,
-        padding: "12px 36px",
-        borderRadius: 14,
-        backdropFilter: "blur(12px)",
+        background: `${color}20`, border: `2px solid ${color}90`,
+        padding: "12px 36px", borderRadius: 14, backdropFilter: "blur(12px)",
         boxShadow: `0 0 ${30 * glowPulse}px ${color}40, 0 0 ${60 * glowPulse}px ${color}20`,
       }}>
         <span style={{
-          color: "#FFFFFF",
-          fontSize: 28,
-          fontWeight: 800,
-          fontFamily: "'Inter', sans-serif",
-          letterSpacing: 1,
+          color: "#FFFFFF", fontSize: 28, fontWeight: 800,
+          fontFamily: "'Inter', sans-serif", letterSpacing: 1,
           textShadow: `0 0 12px ${color}60`,
-        }}>
-          {url}
-        </span>
+        }}>{url}</span>
       </div>
     </div>
   );
 };
 
 // ═══════════════════════════════════════════════════════════════
-// MAIN COMPOSITION — PawPad Seed Phrase Roast (55s, 5 scenes)
+// MAIN COMPOSITION — ZkTerminal Prediction Market Story
 // ═══════════════════════════════════════════════════════════════
 interface ZkAGIVideoProps extends VideoConfig {
   useGeneratedBackgrounds?: boolean;
@@ -333,321 +354,219 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
   const { scenes, characters, style, music, watermark } = props;
   const theme = getTheme(style.theme);
 
-  const PAW_COLOR = "#7C3AED"; // purple — all scenes use paw voice
+  const PAD_COLOR = "#06B6D4";
 
-  // ── Scene durations from TTS audio (30fps) + breathing room ──
-  // Scene 0: 5.92s  → 178 + 30 = 208 frames
-  // Scene 1: 10.08s → 303 + 25 = 328 frames
-  // Scene 2: 8.64s  → 260 + 25 = 285 frames
-  // Scene 3: 14.24s → 428 + 25 = 453 frames
-  // Scene 4: 8.32s  → 250 + 80 = 330 frames (CTA needs breathing room)
-  const S0 = 208;
-  const S1 = 328;
-  const S2 = 285;
-  const S3 = 453;
-  const S4 = 330;
-  const TOTAL = S0 + S1 + S2 + S3 + S4; // 1604
+  // Scene durations (30fps) from TTS audio
+  // S0: 10.24s → 307   S1: 8.64s → 259   S2: 11.84s → 355
+  // S3: 9.92s → 298    S4: 9.28s → 278
+  const S0 = 307;
+  const S1 = 259;
+  const S2 = 355;
+  const S3 = 298;
+  const S4 = 278;
 
-  // Scene start frames
   const START = [0, S0, S0 + S1, S0 + S1 + S2, S0 + S1 + S2 + S3];
 
-  // LTX-2 clip at 25fps, 97 frames = 3.88s → at 30fps ≈ 117 frames
-  const CLIP = 117;
-  const XF = 12; // crossfade overlap
+  // Video clip is 97 frames at 25fps = 3.88s → at 30fps = ~116 frames
+  const VIDEO_FRAMES = 116;
+  const XF = 8; // crossfade frames
+
+  const TOPICS = ["3:00 AM", "ZKTERMINAL", "IN POSITION", "PAYOFF", "YOUR MOVE"];
+  const SCENE_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#22C55E", "#7C3AED"];
 
   return (
     <AbsoluteFill style={{ background: "#0a0a1a" }}>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* SCENE 0: HOOK — Seed phrase roast (comic)  */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* ═══ SCENE 0: THE SITUATION — 3AM Charts (10.24s = 307 frames) ═══ */}
       <Sequence from={START[0]} durationInFrames={S0}>
-        <ScreenShake triggerFrame={60} intensity={8}>
-          {/* Clip A: panicked character + napkin (0→117) */}
-          <Sequence from={0} durationInFrames={CLIP}>
-            <VideoClipBg videoPath="scenes/scene-0-a.mp4" durationInFrames={CLIP} fadeIn={0} />
+        <ScreenShake triggerFrame={250} intensity={4}>
+          {/* Video clip first: 116 frames */}
+          <Sequence from={0} durationInFrames={VIDEO_FRAMES}>
+            <VideoClipBg videoPath="scenes/scene-0-a.mp4" durationInFrames={VIDEO_FRAMES} fadeIn={0} />
           </Sequence>
-          {/* Clip B: napkin ripping into abyss (105→208) */}
-          <Sequence from={CLIP - XF} durationInFrames={S0 - (CLIP - XF)}>
-            <VideoClipBg videoPath="scenes/scene-0-b.mp4" durationInFrames={S0 - (CLIP - XF)} />
-          </Sequence>
-          {/* Crossfade between clips */}
-          <Sequence from={CLIP - XF} durationInFrames={XF * 2}>
+          {/* Crossfade video→image */}
+          <Sequence from={VIDEO_FRAMES - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
+          {/* Overflow: 307 - 116 = 191 frames for 2 images (96 + 95) */}
+          <Sequence from={VIDEO_FRAMES} durationInFrames={96 + XF}>
+            <KenBurnsImage imagePath="scenes/scene-0-b.png" durationInFrames={96 + XF} fadeIn={8} direction="pan-right" />
+          </Sequence>
+          <Sequence from={VIDEO_FRAMES + 96 - XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          <Sequence from={VIDEO_FRAMES + 96} durationInFrames={S0 - VIDEO_FRAMES - 96}>
+            <KenBurnsImage imagePath="scenes/scene-0-c.png" durationInFrames={S0 - VIDEO_FRAMES - 96} fadeIn={8} direction="zoom-in" />
+          </Sequence>
         </ScreenShake>
-
         <BottomGradient intensity={0.75} />
-
-        <SpeakerBadge name="Paw" color={PAW_COLOR} durationInFrames={S0} />
-
-        <WordPopSubtitles
-          text={scenes[0].dialogue}
-          accentColor={PAW_COLOR}
-          durationInFrames={S0}
-          highlightWords={["napkin", "security", "treasure", "hackers"]}
-        />
-
+        <TopicBadge label={TOPICS[0]} color={SCENE_COLORS[0]} durationInFrames={S0} />
+        <WordPopSubtitles text={scenes[0].dialogue} accentColor={SCENE_COLORS[0]} durationInFrames={S0}
+          highlightWords={["Three", "AM", "Kyle", "screaming", "resistance", "Nobody"]} />
         <Audio src={staticFile("audio/scene-0.wav")} />
       </Sequence>
-
-      {/* Record scratch on the hook opening */}
-      <Sequence from={0} durationInFrames={20}>
-        <Audio src={staticFile("sfx/scratch.wav")} volume={0.45} />
+      <Sequence from={0} durationInFrames={15}>
+        <Audio src={staticFile("sfx/bass-drop.wav")} volume={0.5} />
       </Sequence>
 
-      {/* Bass drop on "treasure map for hackers" punchline */}
-      <Sequence from={START[0] + 130} durationInFrames={15}>
-        <Audio src={staticFile("sfx/bass-drop.wav")} volume={0.4} />
-      </Sequence>
-
-      {/* ═══════════════════════════════════════════ */}
-      {/* TRANSITION: Scene 0 → 1 (whoosh + glitch) */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* TRANSITION 0→1 */}
       <Sequence from={START[1] - 4} durationInFrames={12}>
         <Audio src={staticFile("sfx/whoosh.wav")} volume={0.45} />
       </Sequence>
       <Sequence from={START[1]} durationInFrames={10}>
-        <GlitchFlash color={PAW_COLOR} />
-      </Sequence>
-
-      {/* ═══════════════════════════════════════════ */}
-      {/* SCENE 1: TWIST — Billions lost, noir style */}
-      {/* ═══════════════════════════════════════════ */}
-      <Sequence from={START[1]} durationInFrames={S1}>
-        {/* Clip A: sticky notes on fridge (0→117) */}
-        <Sequence from={0} durationInFrames={CLIP}>
-          <VideoClipBg videoPath="scenes/scene-1-a.mp4" durationInFrames={CLIP} fadeIn={0} />
-        </Sequence>
-        {/* Clip B: money dissolving to ash (105→222) */}
-        <Sequence from={CLIP - XF} durationInFrames={CLIP}>
-          <VideoClipBg videoPath="scenes/scene-1-b.mp4" durationInFrames={CLIP} />
-        </Sequence>
-        {/* Clip C: wallet corrupting, glitch (210→328) */}
-        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={S1 - (2 * CLIP - 2 * XF)}>
-          <VideoClipBg videoPath="scenes/scene-1-c.mp4" durationInFrames={S1 - (2 * CLIP - 2 * XF)} />
-        </Sequence>
-        {/* Crossfades */}
-        <Sequence from={CLIP - XF} durationInFrames={XF * 2}>
-          <SubClipFade durationInFrames={XF * 2} />
-        </Sequence>
-        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={XF * 2}>
-          <SubClipFade durationInFrames={XF * 2} />
-        </Sequence>
-
-        <BottomGradient intensity={0.7} />
-
-        <SpeakerBadge name="Paw" color={PAW_COLOR} durationInFrames={S1} />
-
-        <WordPopSubtitles
-          text={scenes[1].dialogue}
-          accentColor={PAW_COLOR}
-          durationInFrames={S1}
-          highlightWords={["billions", "sticky", "poof", "gone"]}
-        />
-
-        <Audio src={staticFile("audio/scene-1.wav")} />
-      </Sequence>
-
-      {/* Pop on "poof" */}
-      <Sequence from={START[1] + 260} durationInFrames={10}>
+        <GlitchFlash color={SCENE_COLORS[1]} />
         <Audio src={staticFile("sfx/pop.wav")} volume={0.4} />
       </Sequence>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* TRANSITION: Scene 1 → 2 (whoosh + glitch) */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* ═══ SCENE 1: THE EDGE — ZkTerminal AI Signal (8.64s = 259 frames) ═══ */}
+      <Sequence from={START[1]} durationInFrames={S1}>
+        {/* Video clip first: 116 frames */}
+        <Sequence from={0} durationInFrames={VIDEO_FRAMES}>
+          <VideoClipBg videoPath="scenes/scene-1-a.mp4" durationInFrames={VIDEO_FRAMES} fadeIn={0} />
+        </Sequence>
+        {/* Crossfade */}
+        <Sequence from={VIDEO_FRAMES - XF} durationInFrames={XF * 2}>
+          <SubClipFade durationInFrames={XF * 2} />
+        </Sequence>
+        {/* Overflow: 259 - 116 = 143 frames for 2 images (72 + 71) */}
+        <Sequence from={VIDEO_FRAMES} durationInFrames={72 + XF}>
+          <KenBurnsImage imagePath="scenes/scene-1-b.png" durationInFrames={72 + XF} fadeIn={8} direction="zoom-out" />
+        </Sequence>
+        <Sequence from={VIDEO_FRAMES + 72 - XF} durationInFrames={XF * 2}>
+          <SubClipFade durationInFrames={XF * 2} />
+        </Sequence>
+        <Sequence from={VIDEO_FRAMES + 72} durationInFrames={S1 - VIDEO_FRAMES - 72}>
+          <KenBurnsImage imagePath="scenes/scene-1-c.png" durationInFrames={S1 - VIDEO_FRAMES - 72} fadeIn={8} direction="pan-left" />
+        </Sequence>
+        <BottomGradient intensity={0.7} />
+        <TopicBadge label={TOPICS[1]} color={SCENE_COLORS[1]} durationInFrames={S1} />
+        <WordPopSubtitles text={scenes[1].dialogue} accentColor={SCENE_COLORS[1]} durationInFrames={S1}
+          highlightWords={["ZkTerminal", "AI", "flagged", "trend", "Six", "hours", "early"]} />
+        <Audio src={staticFile("audio/scene-1.wav")} />
+      </Sequence>
+
+      {/* TRANSITION 1→2 */}
       <Sequence from={START[2] - 4} durationInFrames={12}>
         <Audio src={staticFile("sfx/whoosh.wav")} volume={0.45} />
       </Sequence>
       <Sequence from={START[2]} durationInFrames={10}>
-        <GlitchFlash color="#FFD700" />
+        <GlitchFlash color={SCENE_COLORS[2]} />
+        <Audio src={staticFile("sfx/ping.wav")} volume={0.35} />
       </Sequence>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* SCENE 2: SOLUTION — Vault protection, Pixar */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* ═══ SCENE 2: IN POSITION — Locked & Loaded (11.84s = 355 frames) ═══ */}
       <Sequence from={START[2]} durationInFrames={S2}>
-        {/* Clip A: vault opens with golden light (0→117) */}
-        <Sequence from={0} durationInFrames={CLIP}>
-          <VideoClipBg videoPath="scenes/scene-2-a.mp4" durationInFrames={CLIP} fadeIn={0} />
-        </Sequence>
-        {/* Clip B: keys in force field (105→222) */}
-        <Sequence from={CLIP - XF} durationInFrames={CLIP}>
-          <VideoClipBg videoPath="scenes/scene-2-b.mp4" durationInFrames={CLIP} />
-        </Sequence>
-        {/* Clip C: vault layers pull-back (210→285) */}
-        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={S2 - (2 * CLIP - 2 * XF)}>
-          <VideoClipBg videoPath="scenes/scene-2-c.mp4" durationInFrames={S2 - (2 * CLIP - 2 * XF)} />
-        </Sequence>
-        {/* Crossfades */}
-        <Sequence from={CLIP - XF} durationInFrames={XF * 2}>
-          <SubClipFade durationInFrames={XF * 2} />
-        </Sequence>
-        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={XF * 2}>
-          <SubClipFade durationInFrames={XF * 2} />
-        </Sequence>
-
-        <BottomGradient intensity={0.6} />
-
-        <SpeakerBadge name="Paw" color={PAW_COLOR} durationInFrames={S2} />
-
-        <WordPopSubtitles
-          text={scenes[2].dialogue}
-          accentColor={PAW_COLOR}
-          durationInFrames={S2}
-          highlightWords={["PawPad", "vault", "never", "peek"]}
-        />
-
+        <ScreenShake triggerFrame={280} intensity={4}>
+          {/* Video clip first: 116 frames */}
+          <Sequence from={0} durationInFrames={VIDEO_FRAMES}>
+            <VideoClipBg videoPath="scenes/scene-2-a.mp4" durationInFrames={VIDEO_FRAMES} fadeIn={0} />
+          </Sequence>
+          {/* Crossfade */}
+          <Sequence from={VIDEO_FRAMES - XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          {/* Overflow: 355 - 116 = 239 frames for 2 images (120 + 119) */}
+          <Sequence from={VIDEO_FRAMES} durationInFrames={120 + XF}>
+            <KenBurnsImage imagePath="scenes/scene-2-b.png" durationInFrames={120 + XF} fadeIn={8} direction="pan-right" />
+          </Sequence>
+          <Sequence from={VIDEO_FRAMES + 120 - XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          <Sequence from={VIDEO_FRAMES + 120} durationInFrames={S2 - VIDEO_FRAMES - 120}>
+            <KenBurnsImage imagePath="scenes/scene-2-c.png" durationInFrames={S2 - VIDEO_FRAMES - 120} fadeIn={8} direction="zoom-in" />
+          </Sequence>
+        </ScreenShake>
+        <BottomGradient intensity={0.7} />
+        <TopicBadge label={TOPICS[2]} color={SCENE_COLORS[2]} durationInFrames={S2} />
+        <WordPopSubtitles text={scenes[2].dialogue} accentColor={SCENE_COLORS[2]} durationInFrames={S2}
+          highlightWords={["position", "Prediction", "markets", "locked", "Entry", "set", "No", "hesitation"]} />
         <Audio src={staticFile("audio/scene-2.wav")} />
       </Sequence>
 
-      {/* Bass drop on "never leave" emphasis */}
-      <Sequence from={START[2] + 100} durationInFrames={15}>
-        <Audio src={staticFile("sfx/bass-drop.wav")} volume={0.35} />
-      </Sequence>
-
-      {/* ═══════════════════════════════════════════ */}
-      {/* TRANSITION: Scene 2 → 3 (whoosh)          */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* TRANSITION 2→3 */}
       <Sequence from={START[3] - 4} durationInFrames={12}>
         <Audio src={staticFile("sfx/whoosh.wav")} volume={0.4} />
       </Sequence>
       <Sequence from={START[3]} durationInFrames={10}>
-        <GlitchFlash color="#06B6D4" />
-      </Sequence>
-
-      {/* ═══════════════════════════════════════════ */}
-      {/* SCENE 3: WALKTHROUGH — Step by step, iso   */}
-      {/* ═══════════════════════════════════════════ */}
-      <Sequence from={START[3]} durationInFrames={S3}>
-        {/* Clip A: phone tap create wallet (0→117) */}
-        <Sequence from={0} durationInFrames={CLIP}>
-          <VideoClipBg videoPath="scenes/scene-3-a.mp4" durationInFrames={CLIP} fadeIn={0} />
-        </Sequence>
-        {/* Clip B: QR code scan (105→222) */}
-        <Sequence from={CLIP - XF} durationInFrames={CLIP}>
-          <VideoClipBg videoPath="scenes/scene-3-b.mp4" durationInFrames={CLIP} />
-        </Sequence>
-        {/* Clip C: backup download + checkmark (210→327) */}
-        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={CLIP}>
-          <VideoClipBg videoPath="scenes/scene-3-c.mp4" durationInFrames={CLIP} />
-        </Sequence>
-        {/* Clip D: complete setup reveal (315→453) */}
-        <Sequence from={3 * CLIP - 3 * XF} durationInFrames={S3 - (3 * CLIP - 3 * XF)}>
-          <VideoClipBg videoPath="scenes/scene-3-d.mp4" durationInFrames={S3 - (3 * CLIP - 3 * XF)} />
-        </Sequence>
-        {/* Crossfades */}
-        <Sequence from={CLIP - XF} durationInFrames={XF * 2}>
-          <SubClipFade durationInFrames={XF * 2} />
-        </Sequence>
-        <Sequence from={2 * CLIP - 2 * XF} durationInFrames={XF * 2}>
-          <SubClipFade durationInFrames={XF * 2} />
-        </Sequence>
-        <Sequence from={3 * CLIP - 3 * XF} durationInFrames={XF * 2}>
-          <SubClipFade durationInFrames={XF * 2} />
-        </Sequence>
-
-        <BottomGradient intensity={0.6} />
-
-        <SpeakerBadge name="Paw" color={PAW_COLOR} durationInFrames={S3} />
-
-        <WordPopSubtitles
-          text={scenes[3].dialogue}
-          accentColor={PAW_COLOR}
-          durationInFrames={S3}
-          highlightWords={["wallet", "QR", "backup", "Done", "seed", "vibes"]}
-        />
-
-        <Audio src={staticFile("audio/scene-3.wav")} />
-      </Sequence>
-
-      {/* Ping on each step completion */}
-      <Sequence from={START[3] + 80} durationInFrames={10}>
-        <Audio src={staticFile("sfx/pop.wav")} volume={0.3} />
-      </Sequence>
-      <Sequence from={START[3] + 180} durationInFrames={10}>
-        <Audio src={staticFile("sfx/pop.wav")} volume={0.3} />
-      </Sequence>
-      <Sequence from={START[3] + 280} durationInFrames={10}>
-        <Audio src={staticFile("sfx/pop.wav")} volume={0.3} />
-      </Sequence>
-      {/* Satisfying ping on "Done" */}
-      <Sequence from={START[3] + 340} durationInFrames={10}>
+        <GlitchFlash color={SCENE_COLORS[3]} />
         <Audio src={staticFile("sfx/ping.wav")} volume={0.4} />
       </Sequence>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* TRANSITION: Scene 3 → 4 (bass + glitch)   */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* ═══ SCENE 3: THE PAYOFF — Gains (9.92s = 298 frames) ═══ */}
+      <Sequence from={START[3]} durationInFrames={S3}>
+        <ScreenShake triggerFrame={230} intensity={6}>
+          {/* Video clip first: 116 frames */}
+          <Sequence from={0} durationInFrames={VIDEO_FRAMES}>
+            <VideoClipBg videoPath="scenes/scene-3-a.mp4" durationInFrames={VIDEO_FRAMES} fadeIn={0} />
+          </Sequence>
+          {/* Crossfade */}
+          <Sequence from={VIDEO_FRAMES - XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          {/* Overflow: 298 - 116 = 182 frames for 2 images (91 + 91) */}
+          <Sequence from={VIDEO_FRAMES} durationInFrames={91 + XF}>
+            <KenBurnsImage imagePath="scenes/scene-3-b.png" durationInFrames={91 + XF} fadeIn={8} direction="zoom-out" />
+          </Sequence>
+          <Sequence from={VIDEO_FRAMES + 91 - XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          <Sequence from={VIDEO_FRAMES + 91} durationInFrames={S3 - VIDEO_FRAMES - 91}>
+            <KenBurnsImage imagePath="scenes/scene-3-c.png" durationInFrames={S3 - VIDEO_FRAMES - 91} fadeIn={8} direction="pan-right" />
+          </Sequence>
+        </ScreenShake>
+        <BottomGradient intensity={0.65} />
+        <TopicBadge label={TOPICS[3]} color={SCENE_COLORS[3]} durationInFrames={S3} />
+        <WordPopSubtitles text={scenes[3].dialogue} accentColor={SCENE_COLORS[3]} durationInFrames={S3}
+          highlightWords={["move", "hits", "catches", "gains", "Better", "APIs", "beat"]} />
+        <Audio src={staticFile("audio/scene-3.wav")} />
+      </Sequence>
+      <Sequence from={START[3] + 230} durationInFrames={15}>
+        <Audio src={staticFile("sfx/scratch.wav")} volume={0.35} />
+      </Sequence>
+
+      {/* TRANSITION 3→4 */}
       <Sequence from={START[4] - 4} durationInFrames={12}>
         <Audio src={staticFile("sfx/bass-drop.wav")} volume={0.45} />
       </Sequence>
       <Sequence from={START[4]} durationInFrames={10}>
-        <GlitchFlash color={PAW_COLOR} />
+        <GlitchFlash color={SCENE_COLORS[4]} />
       </Sequence>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* SCENE 4: CTA — Stop trusting napkins       */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* ═══ SCENE 4: MIC DROP — CTA (9.28s = 278 frames) ═══ */}
       <Sequence from={START[4]} durationInFrames={S4}>
-        <ScreenShake triggerFrame={100} intensity={5}>
-          {/* Clip A: split — dumpster fire vs vault (0→117) */}
-          <Sequence from={0} durationInFrames={CLIP}>
-            <VideoClipBg videoPath="scenes/scene-4-a.mp4" durationInFrames={CLIP} fadeIn={0} />
+        <ScreenShake triggerFrame={200} intensity={7}>
+          {/* Video clip first: 116 frames */}
+          <Sequence from={0} durationInFrames={VIDEO_FRAMES}>
+            <VideoClipBg videoPath="scenes/scene-4-a.mp4" durationInFrames={VIDEO_FRAMES} fadeIn={0} />
           </Sequence>
-          {/* Clip B: golden shockwave (105→222) */}
-          <Sequence from={CLIP - XF} durationInFrames={CLIP}>
-            <VideoClipBg videoPath="scenes/scene-4-b.mp4" durationInFrames={CLIP} />
-          </Sequence>
-          {/* Clip C: lanterns rising, portal (210→330) */}
-          <Sequence from={2 * CLIP - 2 * XF} durationInFrames={S4 - (2 * CLIP - 2 * XF)}>
-            <VideoClipBg videoPath="scenes/scene-4-c.mp4" durationInFrames={S4 - (2 * CLIP - 2 * XF)} />
-          </Sequence>
-          {/* Crossfades */}
-          <Sequence from={CLIP - XF} durationInFrames={XF * 2}>
+          {/* Crossfade */}
+          <Sequence from={VIDEO_FRAMES - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
-          <Sequence from={2 * CLIP - 2 * XF} durationInFrames={XF * 2}>
+          {/* Overflow: 278 - 116 = 162 frames for 2 images (81 + 81) */}
+          <Sequence from={VIDEO_FRAMES} durationInFrames={81 + XF}>
+            <KenBurnsImage imagePath="scenes/scene-4-b.png" durationInFrames={81 + XF} fadeIn={8} direction="pan-left" />
+          </Sequence>
+          <Sequence from={VIDEO_FRAMES + 81 - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          <Sequence from={VIDEO_FRAMES + 81} durationInFrames={S4 - VIDEO_FRAMES - 81}>
+            <KenBurnsImage imagePath="scenes/scene-4-c.png" durationInFrames={S4 - VIDEO_FRAMES - 81} fadeIn={8} direction="zoom-in" />
           </Sequence>
         </ScreenShake>
-
         <BottomGradient intensity={0.7} />
-
-        <SpeakerBadge name="Paw" color={PAW_COLOR} durationInFrames={S4} />
-
-        <WordPopSubtitles
-          text={scenes[4].dialogue}
-          accentColor={PAW_COLOR}
-          durationInFrames={S4}
-          highlightWords={["napkins", "paw", "home", "crypto"]}
-        />
-
-        {/* CTA URL reveal — appears when paw says the URL */}
-        <CtaUrl
-          url="paw.zkagi.ai"
-          color={PAW_COLOR}
-          triggerFrame={140}
-          durationInFrames={S4}
-        />
-
+        <TopicBadge label={TOPICS[4]} color={SCENE_COLORS[4]} durationInFrames={S4} />
+        <WordPopSubtitles text={scenes[4].dialogue} accentColor={SCENE_COLORS[4]} durationInFrames={S4}
+          highlightWords={["terminal", "zkagi", "predict", "future", "better", "APIs"]} />
+        <CtaUrl url="terminal.zkagi.ai" color={SCENE_COLORS[4]} triggerFrame={45} durationInFrames={S4} />
         <Audio src={staticFile("audio/scene-4.wav")} />
       </Sequence>
-
-      {/* Ping on CTA URL reveal */}
-      <Sequence from={START[4] + 140} durationInFrames={10}>
+      <Sequence from={START[4] + 45} durationInFrames={10}>
         <Audio src={staticFile("sfx/ping.wav")} volume={0.4} />
       </Sequence>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* GLOBAL LAYERS                              */}
-      {/* ═══════════════════════════════════════════ */}
-
-      {/* Background music */}
+      {/* GLOBAL LAYERS */}
       {music.url && <Audio src={staticFile(music.url)} volume={music.volume} loop />}
-
-      {/* Watermark */}
       {watermark.show && <Watermark text={watermark.text} color={theme.watermarkColor} />}
     </AbsoluteFill>
   );
