@@ -367,6 +367,10 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
 
   const START = [0, S0, S0 + S1, S0 + S1 + S2, S0 + S1 + S2 + S3];
 
+  // Ending video: 9.152s @ 30fps = 275 frames
+  const ENDING_FRAMES = 275;
+  const ENDING_START = S0 + S1 + S2 + S3 + S4;
+
   // Video clip is 97 frames at 25fps = 3.88s → at 30fps = ~116 frames
   const VIDEO_FRAMES = 116;
   const XF = 8; // crossfade frames
@@ -558,11 +562,21 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <TopicBadge label={TOPICS[4]} color={SCENE_COLORS[4]} durationInFrames={S4} />
         <WordPopSubtitles text={scenes[4].dialogue} accentColor={SCENE_COLORS[4]} durationInFrames={S4}
           highlightWords={["terminal", "zkagi", "predict", "future", "better", "APIs"]} />
-        <CtaUrl url="terminal.zkagi.ai" color={SCENE_COLORS[4]} triggerFrame={45} durationInFrames={S4} />
+        <CtaUrl url="zkterminal.zkagi.ai" color={SCENE_COLORS[4]} triggerFrame={45} durationInFrames={S4} />
         <Audio src={staticFile("audio/scene-4.wav")} />
       </Sequence>
       <Sequence from={START[4] + 45} durationInFrames={10}>
         <Audio src={staticFile("sfx/ping.wav")} volume={0.4} />
+      </Sequence>
+
+      {/* ═══ ENDING — Brand outro video ═══ */}
+      <Sequence from={ENDING_START} durationInFrames={ENDING_FRAMES}>
+        <Video
+          src={staticFile("video/ending.mp4")}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          volume={1}
+          startFrom={0}
+        />
       </Sequence>
 
       {/* GLOBAL LAYERS */}

@@ -128,7 +128,7 @@ MANDATORY PIPELINE — follow these steps IN THIS EXACT ORDER:
    - CONVERSION FOCUS: Every video must drive action. Include in your screenplay:
      * TARGET AUDIENCE: Identify who this video is for (e.g. crypto traders, developers, solo founders)
      * CTA (Call To Action): The FINAL scene MUST end with a clear CTA — a URL, "try it now", "download today"
-     * Product URLs: pawpad = paw.zkagi.ai | zynapse = zynapse.zkagi.ai | zkterminal = terminal.zkagi.ai
+     * Product URLs: pawpad = paw.zkagi.ai | zynapse = zynapse.zkagi.ai | zkterminal = zkterminal.zkagi.ai
      * Make the CTA natural, not salesy. Example: "paw dot zkagi dot ai. Thirty seconds. No seed phrase. No excuses."
      * Build toward the CTA: problem → pain → solution → proof → action
 
@@ -174,6 +174,21 @@ MANDATORY PIPELINE — follow these steps IN THIS EXACT ORDER:
    - Use 8-frame crossfade (SubClipFade) between video→image and image→image transitions.
    - Ken Burns directions: alternate zoom-in, pan-left, pan-right, zoom-out for variety.
    - Calculate precisely: scene_frames = audio_duration * 30 (fps), video_frames = 97
+
+   MANDATORY ENDING CLIP — EVERY video MUST end with the brand outro:
+   - After ALL scenes, append a final Sequence that plays public/video/ending.mp4
+   - The ending clip is 9.152 seconds = 275 frames at 30fps
+   - Add this as the LAST Sequence before global layers (music/watermark):
+     <Sequence from={{ENDING_START}} durationInFrames={{275}}>
+       <Video src={{staticFile("video/ending.mp4")}} style={{{{ width: "100%", height: "100%", objectFit: "cover" }}}} volume={{1}} startFrom={{0}} />
+     </Sequence>
+   - ENDING_START = sum of all scene frame durations
+   - TOTAL_FRAMES in Root.tsx MUST include the 275 ending frames (scenes_total + 275)
+
+   URL ACCURACY — when displaying product URLs (e.g. in CtaUrl components):
+   - zkterminal URL is "zkterminal.zkagi.ai" — NEVER drop the "zk" prefix
+   - pawpad URL is "paw.zkagi.ai"
+   - zynapse URL is "zynapse.zkagi.ai"
 
 7. RENDER: npx remotion render ZkAGIVideo output/{output_filename} --bundle-cache=false --timeout=300000
    Only render landscape 16:9.

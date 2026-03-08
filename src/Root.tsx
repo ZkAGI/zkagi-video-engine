@@ -81,7 +81,7 @@ const ZKTERMINAL_SCENES = [
 // Frame counts from TTS durations (30fps):
 // S0: 10.24s → 307   S1: 8.64s → 259   S2: 11.84s → 355
 // S3: 9.92s → 298    S4: 9.28s → 278
-const TOTAL_FRAMES = 307 + 259 + 355 + 298 + 278; // = 1497
+const TOTAL_FRAMES = 307 + 259 + 355 + 298 + 278 + 275; // = 1772 (scenes + ending.mp4)
 
 const zkterminalProps = {
   title: "Prediction Market Degen Spots BTC Trend Early",
