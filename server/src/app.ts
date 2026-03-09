@@ -19,6 +19,11 @@ export async function buildApp() {
         options: { colorize: true },
       },
     },
+    ajv: {
+      customOptions: {
+        keywords: ["example"],
+      },
+    },
   });
 
   // Add raw body content type parser for Stripe webhooks
@@ -77,7 +82,7 @@ export async function buildApp() {
   });
 
   await app.register(swaggerUi, {
-    routePrefix: "/docs",
+    routePrefix: "/api/docs",
     uiConfig: {
       docExpansion: "list",
       deepLinking: true,

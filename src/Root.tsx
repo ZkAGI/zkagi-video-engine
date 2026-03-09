@@ -32,62 +32,62 @@ const CHARACTERS = {
   },
 };
 
-// ── PawPad DeFi Horror Stories — Mar 9, 2026 ──
-// Story Mode: DeFi horror stories → PawPad solution
-// Audio durations: 7.68 + 11.52 + 8.32 + 10.56 + 8.64 = 46.72s
-const PAWPAD_SCENES = [
+// ── "This Video Was Made By AI" — Mar 9, 2026 ──
+// Story Mode: Meta self-referential AI demo → ZkAGI Video Engine
+// Audio durations: 10.08 + 10.24 + 6.88 + 9.60 + 7.84 = 44.64s
+const META_AI_SCENES = [
   {
     characterId: "pad",
-    dialogue: "Meet Rick. Rick approved unlimited token access to definitely not a rug dot finance. Rick woke up broke.",
+    dialogue: "This video was made by AI. Script, voice, images, editing. All AI. Zero humans touched this.",
     emotion: "serious" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 7.68,
+    durationOverride: 10.08,
   },
   {
     characterId: "pad",
-    dialogue: "Then there's Karen. Wrote her seed phrase on a napkin. Her husband used it to blow his nose. Forty thousand dollars. In a tissue.",
+    dialogue: "A language model wrote these exact words. Then it cloned a tiger's voice, generated every frame, and edited everything together.",
     emotion: "explaining" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 11.52,
+    durationOverride: 10.24,
   },
   {
     characterId: "pad",
-    dialogue: "Rick and Karen have one thing in common. Their wallets were dumber than they were. What if your wallet could actually think?",
+    dialogue: "You're not watching a demo of the product. You're watching the product demo itself. Inception level meta.",
     emotion: "thinking" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 8.32,
+    durationOverride: 6.88,
   },
   {
     characterId: "pad",
-    dialogue: "PawPad. No seed phrase to lose. Smart limits that block suspicious contracts. An AI agent that flags rugs before you click. Three taps.",
+    dialogue: "Most companies show you a slideshow about their AI. We let our AI make the slideshow. And this sentence.",
     emotion: "excited" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 10.56,
+    durationOverride: 9.60,
   },
   {
     characterId: "pad",
-    dialogue: "paw dot zkagi dot ai. Your wallet should be smarter than you. PawPad finally makes that possible.",
+    dialogue: "ZkAGI Video Engine. One prompt. Full production. zkagi dot ai.",
     emotion: "celebrating" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 8.64,
+    durationOverride: 7.84,
   },
 ];
 
 // Frame counts from TTS durations (30fps):
-// S0: 7.68s → 230   S1: 11.52s → 346   S2: 8.32s → 250
-// S3: 10.56s → 317   S4: 8.64s → 259
+// S0: 10.08s → 302   S1: 10.24s → 307   S2: 6.88s → 206
+// S3: 9.60s → 288   S4: 7.84s → 235
 // BrandOutro: 275   Ending clip: 300
-const TOTAL_FRAMES = 230 + 346 + 250 + 317 + 259 + 275 + 300; // = 1977
+const TOTAL_FRAMES = 302 + 307 + 206 + 288 + 235 + 275 + 300; // = 1913
 
-const pawpadProps = {
-  title: "DeFi Horror Stories — PawPad",
+const metaAiProps = {
+  title: "This Video Was Made By AI — ZkAGI",
   characters: CHARACTERS,
-  scenes: PAWPAD_SCENES,
+  scenes: META_AI_SCENES,
   style: { theme: "zkagi-brand" as const, format: "16:9" as const, showSubtitles: true, showCharacterName: false, transitionType: "fade" as const },
   music: { volume: 0.12 },
   watermark: { text: "ZkAGI", show: true },
@@ -96,7 +96,7 @@ const pawpadProps = {
 
 export const RemotionRoot: React.FC = () => (
   <>
-    <Composition id="ZkAGIVideo" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1920} height={1080} schema={VideoConfigSchema} defaultProps={pawpadProps} />
-    <Composition id="ZkAGIVideoVertical" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1080} height={1920} schema={VideoConfigSchema} defaultProps={{ ...pawpadProps, style: { ...pawpadProps.style, format: "9:16" as const } }} />
+    <Composition id="ZkAGIVideo" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1920} height={1080} schema={VideoConfigSchema} defaultProps={metaAiProps} />
+    <Composition id="ZkAGIVideoVertical" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1080} height={1920} schema={VideoConfigSchema} defaultProps={{ ...metaAiProps, style: { ...metaAiProps.style, format: "9:16" as const } }} />
   </>
 );
