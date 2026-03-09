@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum VideoStatus {
+  QUEUED
+  PROCESSING
+  RENDERING
+  COMPLETED
+  FAILED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PENDING
+  PAID
+  REFUNDED
+}
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  walletAddress  String   @unique @map("wallet_address")
+  displayName    String?  @map("display_name")
+  email          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  videos   Video[]
+  payments Payment[]
+  apiKeys  ApiKey[]
+
+  @@map("users")
+}
+
+model Video {
+  id                 String        @id @default(uuid()) @db.Uuid
+  userId             String        @map("user_id") @db.Uuid
+  topic              String
+  product            String?
+  mode               String        @default("standard")
+  voice              String        @default("pad")
+  format             String        @default("16:9")
+  customInstructions String?       @map("custom_instructions")
+  status             VideoStatus   @default(QUEUED)
+  phase              String?
+  phaseDetail        String?       @map("phase_detail")
+  queuePosition      Int?          @map("queue_position")
+  fullVideoPath      String?       @map("full_video_path")
+  previewPath        String?       @map("preview_path")
+  thumbnailPath      String?       @map("thumbnail_path")
+  durationSeconds    Float?        @map("duration_seconds")
+  fileSizeMb         Float?        @map("file_size_mb")
+  captions           Json?
+  paymentStatus      PaymentStatus @default(UNPAID) @map("payment_status")
+  isPaid             Boolean       @default(false) @map("is_paid")
+  failureReason      String?       @map("failure_reason")
+  retryCount         Int           @default(0) @map("retry_count")
+  startedAt          DateTime?     @map("started_at")
+  completedAt        DateTime?     @map("completed_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+
+  user     User      @relation(fields: [userId], references: [id])
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("videos")
+}
+
+model Payment {
+  id                   String        @id @default(uuid()) @db.Uuid
+  userId               String        @map("user_id") @db.Uuid
+  videoId              String        @map("video_id") @db.Uuid
+  amountCents          Int           @default(500) @map("amount_cents")
+  currency             String        @default("usd")
+  stripeSessionId      String?       @unique @map("stripe_session_id")
+  stripePaymentIntent  String?       @map("stripe_payment_intent")
+  status               PaymentStatus @default(PENDING)
+  paidAt               DateTime?     @map("paid_at")
+  createdAt            DateTime      @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id])
+  video Video @relation(fields: [videoId], references: [id])
+
+  @@index([userId])
+  @@index([videoId])
+  @@map("payments")
+}
+
+model ApiKey {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  name      String
+  keyHash   String    @unique @map("key_hash")
+  keyPrefix String    @map("key_prefix")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("api_keys")
+}

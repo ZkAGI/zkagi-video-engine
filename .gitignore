@@ -4,3 +4,9 @@ output/
 public/audio/
 .env
 *.mp4
+
+# Server
+server/node_modules/
+server/dist/
+server/.env
+workspaces/

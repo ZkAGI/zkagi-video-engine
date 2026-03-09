@@ -34,54 +34,54 @@ const CHARACTERS = {
 
 // ── ZkTerminal Prediction Market Story — Mar 8, 2026 ──
 // Story Mode: prediction market degen spots BTC trend 6 hours early
-// Audio durations: 10.24 + 8.64 + 11.84 + 9.92 + 9.28 = 49.92s
+// Audio durations: 8.96 + 9.92 + 8.48 + 12.32 + 9.76 = 49.44s
 const ZKTERMINAL_SCENES = [
   {
     characterId: "pad",
-    dialogue: "Three AM. Kyle's staring at charts. Crypto Twitter is screaming about resistance levels. Nobody agrees. Nobody ever agrees.",
+    dialogue: "Three AM. Kyle's glued to his charts. Crypto Twitter is screaming about resistance levels. Nobody agrees. Nobody ever does.",
     emotion: "serious" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 10.24,
+    durationOverride: 8.96,
   },
   {
     characterId: "pad",
-    dialogue: "But Kyle isn't reading tweets. He's reading ZkTerminal. The AI just flagged a Bitcoin trend. Six hours early.",
+    dialogue: "But Kyle's not reading tweets. He's watching ZkTerminal. The AI just flagged a Bitcoin trend reversal. Six hours before anyone else.",
     emotion: "explaining" as const,
-    visualType: "talking-head" as const,
-    sceneType: "video" as const,
-    durationOverride: 8.64,
-  },
-  {
-    characterId: "pad",
-    dialogue: "While everyone debates direction, Kyle's already in position. Prediction markets locked. Entry set. No hesitation.",
-    emotion: "excited" as const,
-    visualType: "talking-head" as const,
-    sceneType: "video" as const,
-    durationOverride: 11.84,
-  },
-  {
-    characterId: "pad",
-    dialogue: "Six hours later, the move hits. CT finally catches on. Kyle's already counting gains. Better APIs beat louder opinions.",
-    emotion: "celebrating" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
     durationOverride: 9.92,
   },
   {
     characterId: "pad",
-    dialogue: "terminal dot zkagi dot ai. I don't predict the future. I just have better APIs than you.",
+    dialogue: "While everyone debates, Kyle's already locked in. Prediction markets set. Entry confirmed. Zero hesitation.",
+    emotion: "excited" as const,
+    visualType: "talking-head" as const,
+    sceneType: "video" as const,
+    durationOverride: 8.48,
+  },
+  {
+    characterId: "pad",
+    dialogue: "Six hours later, the move hits. CT finally catches on. Kyle's already taking profit. Better APIs beat louder opinions every time.",
     emotion: "celebrating" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 9.28,
+    durationOverride: 12.32,
+  },
+  {
+    characterId: "pad",
+    dialogue: "zkterminal dot zkagi dot ai. I don't predict the future. I just have better APIs than you.",
+    emotion: "celebrating" as const,
+    visualType: "talking-head" as const,
+    sceneType: "video" as const,
+    durationOverride: 9.76,
   },
 ];
 
 // Frame counts from TTS durations (30fps):
-// S0: 10.24s → 307   S1: 8.64s → 259   S2: 11.84s → 355
-// S3: 9.92s → 298    S4: 9.28s → 278
-const TOTAL_FRAMES = 307 + 259 + 355 + 298 + 278 + 275; // = 1772 (scenes + ending.mp4)
+// S0: 8.96s → 269   S1: 9.92s → 298   S2: 8.48s → 254
+// S3: 12.32s → 370   S4: 9.76s → 293
+const TOTAL_FRAMES = 269 + 298 + 254 + 370 + 293 + 300; // = 1784 (scenes + ending clip)
 
 const zkterminalProps = {
   title: "Prediction Market Degen Spots BTC Trend Early",

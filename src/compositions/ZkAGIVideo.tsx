@@ -344,6 +344,85 @@ const CtaUrl: React.FC<{
 };
 
 // ═══════════════════════════════════════════════════════════════
+// BRAND OUTRO — animated ZkAGI brand card
+// ═══════════════════════════════════════════════════════════════
+const BrandOutro: React.FC<{
+  durationInFrames: number;
+  color: string;
+}> = ({ durationInFrames, color }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const logoSpring = spring({ frame, fps, config: { damping: 14, mass: 0.6, stiffness: 100 } });
+  const logoScale = interpolate(logoSpring, [0, 1], [0.3, 1]);
+  const logoOp = interpolate(logoSpring, [0, 1], [0, 1]);
+
+  const tagSpring = spring({ frame: Math.max(0, frame - 20), fps, config: { damping: 18, mass: 0.5, stiffness: 120 } });
+  const tagOp = interpolate(tagSpring, [0, 1], [0, 1]);
+  const tagY = interpolate(tagSpring, [0, 1], [20, 0]);
+
+  const glowPulse = Math.sin(frame * 0.08) * 0.3 + 0.7;
+  const exitOp = interpolate(frame, [durationInFrames - 20, durationInFrames], [1, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp",
+  });
+
+  return (
+    <AbsoluteFill style={{
+      background: "radial-gradient(ellipse at center, #0f172a 0%, #020617 70%, #000000 100%)",
+    }}>
+      {/* Animated glow ring */}
+      <div style={{
+        position: "absolute", top: "50%", left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 300, height: 300, borderRadius: "50%",
+        background: `radial-gradient(circle, ${color}15 0%, transparent 70%)`,
+        boxShadow: `0 0 ${80 * glowPulse}px ${color}30, 0 0 ${160 * glowPulse}px ${color}10`,
+        opacity: logoOp * exitOp,
+      }} />
+      {/* Logo text */}
+      <div style={{
+        position: "absolute", top: "38%", left: "50%",
+        transform: `translate(-50%, -50%) scale(${logoScale})`,
+        opacity: logoOp * exitOp,
+      }}>
+        <span style={{
+          fontSize: 72, fontWeight: 900, letterSpacing: 6,
+          fontFamily: "'Inter', sans-serif",
+          background: `linear-gradient(135deg, ${color}, #7C3AED, ${color})`,
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          textShadow: "none",
+          filter: `drop-shadow(0 0 20px ${color}50)`,
+        }}>ZkAGI</span>
+      </div>
+      {/* Tagline */}
+      <div style={{
+        position: "absolute", top: "52%", left: "50%",
+        transform: `translate(-50%, ${tagY}px)`,
+        opacity: tagOp * exitOp,
+      }}>
+        <span style={{
+          fontSize: 18, fontWeight: 400, letterSpacing: 4,
+          fontFamily: "'Inter', sans-serif", color: "#94a3b8",
+          textTransform: "uppercase",
+        }}>Privacy-First AI Infrastructure</span>
+      </div>
+      {/* Bottom URL */}
+      <div style={{
+        position: "absolute", bottom: 60, left: "50%",
+        transform: "translate(-50%, 0)",
+        opacity: tagOp * exitOp * 0.6,
+      }}>
+        <span style={{
+          fontSize: 14, fontWeight: 500, letterSpacing: 2,
+          fontFamily: "'Inter', sans-serif", color: "#475569",
+        }}>zkagi.ai</span>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════
 // MAIN COMPOSITION — ZkTerminal Prediction Market Story
 // ═══════════════════════════════════════════════════════════════
 interface ZkAGIVideoProps extends VideoConfig {
@@ -357,33 +436,33 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
   const PAD_COLOR = "#06B6D4";
 
   // Scene durations (30fps) from TTS audio
-  // S0: 10.24s → 307   S1: 8.64s → 259   S2: 11.84s → 355
-  // S3: 9.92s → 298    S4: 9.28s → 278
-  const S0 = 307;
-  const S1 = 259;
-  const S2 = 355;
-  const S3 = 298;
-  const S4 = 278;
+  // S0: 8.96s → 269   S1: 9.92s → 298   S2: 8.48s → 254
+  // S3: 12.32s → 370   S4: 9.76s → 293
+  const S0 = 269;
+  const S1 = 298;
+  const S2 = 254;
+  const S3 = 370;
+  const S4 = 293;
 
   const START = [0, S0, S0 + S1, S0 + S1 + S2, S0 + S1 + S2 + S3];
 
-  // Ending video: 9.152s @ 30fps = 275 frames
-  const ENDING_FRAMES = 275;
+  // Ending clip (video/ending.mp4) — played directly after scenes
   const ENDING_START = S0 + S1 + S2 + S3 + S4;
+  const ENDING_CLIP_FRAMES = 300; // 10s @ 30fps
 
   // Video clip is 97 frames at 25fps = 3.88s → at 30fps = ~116 frames
   const VIDEO_FRAMES = 116;
   const XF = 8; // crossfade frames
 
-  const TOPICS = ["3:00 AM", "ZKTERMINAL", "IN POSITION", "PAYOFF", "YOUR MOVE"];
+  const TOPICS = ["3:00 AM", "ZKTERMINAL", "LOCKED IN", "PAYOFF", "YOUR MOVE"];
   const SCENE_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#22C55E", "#7C3AED"];
 
   return (
     <AbsoluteFill style={{ background: "#0a0a1a" }}>
 
-      {/* ═══ SCENE 0: THE SITUATION — 3AM Charts (10.24s = 307 frames) ═══ */}
+      {/* ═══ SCENE 0: THE SITUATION — 3AM Charts (8.96s = 269 frames) ═══ */}
       <Sequence from={START[0]} durationInFrames={S0}>
-        <ScreenShake triggerFrame={250} intensity={4}>
+        <ScreenShake triggerFrame={220} intensity={4}>
           {/* Video clip first: 116 frames */}
           <Sequence from={0} durationInFrames={VIDEO_FRAMES}>
             <VideoClipBg videoPath="scenes/scene-0-a.mp4" durationInFrames={VIDEO_FRAMES} fadeIn={0} />
@@ -392,15 +471,15 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
           <Sequence from={VIDEO_FRAMES - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
-          {/* Overflow: 307 - 116 = 191 frames for 2 images (96 + 95) */}
-          <Sequence from={VIDEO_FRAMES} durationInFrames={96 + XF}>
-            <KenBurnsImage imagePath="scenes/scene-0-b.png" durationInFrames={96 + XF} fadeIn={8} direction="pan-right" />
+          {/* Overflow: 269 - 116 = 153 frames for 2 images (77 + 76) */}
+          <Sequence from={VIDEO_FRAMES} durationInFrames={77 + XF}>
+            <KenBurnsImage imagePath="scenes/scene-0-b.png" durationInFrames={77 + XF} fadeIn={8} direction="pan-right" />
           </Sequence>
-          <Sequence from={VIDEO_FRAMES + 96 - XF} durationInFrames={XF * 2}>
+          <Sequence from={VIDEO_FRAMES + 77 - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
-          <Sequence from={VIDEO_FRAMES + 96} durationInFrames={S0 - VIDEO_FRAMES - 96}>
-            <KenBurnsImage imagePath="scenes/scene-0-c.png" durationInFrames={S0 - VIDEO_FRAMES - 96} fadeIn={8} direction="zoom-in" />
+          <Sequence from={VIDEO_FRAMES + 77} durationInFrames={S0 - VIDEO_FRAMES - 77}>
+            <KenBurnsImage imagePath="scenes/scene-0-c.png" durationInFrames={S0 - VIDEO_FRAMES - 77} fadeIn={8} direction="zoom-in" />
           </Sequence>
         </ScreenShake>
         <BottomGradient intensity={0.75} />
@@ -422,7 +501,7 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <Audio src={staticFile("sfx/pop.wav")} volume={0.4} />
       </Sequence>
 
-      {/* ═══ SCENE 1: THE EDGE — ZkTerminal AI Signal (8.64s = 259 frames) ═══ */}
+      {/* ═══ SCENE 1: THE TWIST — ZkTerminal AI Signal (9.92s = 298 frames) ═══ */}
       <Sequence from={START[1]} durationInFrames={S1}>
         {/* Video clip first: 116 frames */}
         <Sequence from={0} durationInFrames={VIDEO_FRAMES}>
@@ -432,20 +511,20 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <Sequence from={VIDEO_FRAMES - XF} durationInFrames={XF * 2}>
           <SubClipFade durationInFrames={XF * 2} />
         </Sequence>
-        {/* Overflow: 259 - 116 = 143 frames for 2 images (72 + 71) */}
-        <Sequence from={VIDEO_FRAMES} durationInFrames={72 + XF}>
-          <KenBurnsImage imagePath="scenes/scene-1-b.png" durationInFrames={72 + XF} fadeIn={8} direction="zoom-out" />
+        {/* Overflow: 298 - 116 = 182 frames for 2 images (91 + 91) */}
+        <Sequence from={VIDEO_FRAMES} durationInFrames={91 + XF}>
+          <KenBurnsImage imagePath="scenes/scene-1-b.png" durationInFrames={91 + XF} fadeIn={8} direction="zoom-out" />
         </Sequence>
-        <Sequence from={VIDEO_FRAMES + 72 - XF} durationInFrames={XF * 2}>
+        <Sequence from={VIDEO_FRAMES + 91 - XF} durationInFrames={XF * 2}>
           <SubClipFade durationInFrames={XF * 2} />
         </Sequence>
-        <Sequence from={VIDEO_FRAMES + 72} durationInFrames={S1 - VIDEO_FRAMES - 72}>
-          <KenBurnsImage imagePath="scenes/scene-1-c.png" durationInFrames={S1 - VIDEO_FRAMES - 72} fadeIn={8} direction="pan-left" />
+        <Sequence from={VIDEO_FRAMES + 91} durationInFrames={S1 - VIDEO_FRAMES - 91}>
+          <KenBurnsImage imagePath="scenes/scene-1-c.png" durationInFrames={S1 - VIDEO_FRAMES - 91} fadeIn={8} direction="pan-left" />
         </Sequence>
         <BottomGradient intensity={0.7} />
         <TopicBadge label={TOPICS[1]} color={SCENE_COLORS[1]} durationInFrames={S1} />
         <WordPopSubtitles text={scenes[1].dialogue} accentColor={SCENE_COLORS[1]} durationInFrames={S1}
-          highlightWords={["ZkTerminal", "AI", "flagged", "trend", "Six", "hours", "early"]} />
+          highlightWords={["ZkTerminal", "AI", "flagged", "trend", "reversal", "Six", "hours"]} />
         <Audio src={staticFile("audio/scene-1.wav")} />
       </Sequence>
 
@@ -458,9 +537,9 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <Audio src={staticFile("sfx/ping.wav")} volume={0.35} />
       </Sequence>
 
-      {/* ═══ SCENE 2: IN POSITION — Locked & Loaded (11.84s = 355 frames) ═══ */}
+      {/* ═══ SCENE 2: LOCKED IN — Prediction Markets Set (8.48s = 254 frames) ═══ */}
       <Sequence from={START[2]} durationInFrames={S2}>
-        <ScreenShake triggerFrame={280} intensity={4}>
+        <ScreenShake triggerFrame={200} intensity={4}>
           {/* Video clip first: 116 frames */}
           <Sequence from={0} durationInFrames={VIDEO_FRAMES}>
             <VideoClipBg videoPath="scenes/scene-2-a.mp4" durationInFrames={VIDEO_FRAMES} fadeIn={0} />
@@ -469,21 +548,21 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
           <Sequence from={VIDEO_FRAMES - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
-          {/* Overflow: 355 - 116 = 239 frames for 2 images (120 + 119) */}
-          <Sequence from={VIDEO_FRAMES} durationInFrames={120 + XF}>
-            <KenBurnsImage imagePath="scenes/scene-2-b.png" durationInFrames={120 + XF} fadeIn={8} direction="pan-right" />
+          {/* Overflow: 254 - 116 = 138 frames for 2 images (69 + 69) */}
+          <Sequence from={VIDEO_FRAMES} durationInFrames={69 + XF}>
+            <KenBurnsImage imagePath="scenes/scene-2-b.png" durationInFrames={69 + XF} fadeIn={8} direction="pan-right" />
           </Sequence>
-          <Sequence from={VIDEO_FRAMES + 120 - XF} durationInFrames={XF * 2}>
+          <Sequence from={VIDEO_FRAMES + 69 - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
-          <Sequence from={VIDEO_FRAMES + 120} durationInFrames={S2 - VIDEO_FRAMES - 120}>
-            <KenBurnsImage imagePath="scenes/scene-2-c.png" durationInFrames={S2 - VIDEO_FRAMES - 120} fadeIn={8} direction="zoom-in" />
+          <Sequence from={VIDEO_FRAMES + 69} durationInFrames={S2 - VIDEO_FRAMES - 69}>
+            <KenBurnsImage imagePath="scenes/scene-2-c.png" durationInFrames={S2 - VIDEO_FRAMES - 69} fadeIn={8} direction="zoom-out" />
           </Sequence>
         </ScreenShake>
         <BottomGradient intensity={0.7} />
         <TopicBadge label={TOPICS[2]} color={SCENE_COLORS[2]} durationInFrames={S2} />
         <WordPopSubtitles text={scenes[2].dialogue} accentColor={SCENE_COLORS[2]} durationInFrames={S2}
-          highlightWords={["position", "Prediction", "markets", "locked", "Entry", "set", "No", "hesitation"]} />
+          highlightWords={["locked", "Prediction", "markets", "Entry", "confirmed", "Zero", "hesitation"]} />
         <Audio src={staticFile("audio/scene-2.wav")} />
       </Sequence>
 
@@ -496,9 +575,9 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <Audio src={staticFile("sfx/ping.wav")} volume={0.4} />
       </Sequence>
 
-      {/* ═══ SCENE 3: THE PAYOFF — Gains (9.92s = 298 frames) ═══ */}
+      {/* ═══ SCENE 3: THE PAYOFF — Gains (12.32s = 370 frames) ═══ */}
       <Sequence from={START[3]} durationInFrames={S3}>
-        <ScreenShake triggerFrame={230} intensity={6}>
+        <ScreenShake triggerFrame={300} intensity={6}>
           {/* Video clip first: 116 frames */}
           <Sequence from={0} durationInFrames={VIDEO_FRAMES}>
             <VideoClipBg videoPath="scenes/scene-3-a.mp4" durationInFrames={VIDEO_FRAMES} fadeIn={0} />
@@ -507,24 +586,30 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
           <Sequence from={VIDEO_FRAMES - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
-          {/* Overflow: 298 - 116 = 182 frames for 2 images (91 + 91) */}
-          <Sequence from={VIDEO_FRAMES} durationInFrames={91 + XF}>
-            <KenBurnsImage imagePath="scenes/scene-3-b.png" durationInFrames={91 + XF} fadeIn={8} direction="zoom-out" />
+          {/* Overflow: 370 - 116 = 254 frames for 3 images (85 + 85 + 84) */}
+          <Sequence from={VIDEO_FRAMES} durationInFrames={85 + XF}>
+            <KenBurnsImage imagePath="scenes/scene-3-b.png" durationInFrames={85 + XF} fadeIn={8} direction="zoom-out" />
           </Sequence>
-          <Sequence from={VIDEO_FRAMES + 91 - XF} durationInFrames={XF * 2}>
+          <Sequence from={VIDEO_FRAMES + 85 - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
-          <Sequence from={VIDEO_FRAMES + 91} durationInFrames={S3 - VIDEO_FRAMES - 91}>
-            <KenBurnsImage imagePath="scenes/scene-3-c.png" durationInFrames={S3 - VIDEO_FRAMES - 91} fadeIn={8} direction="pan-right" />
+          <Sequence from={VIDEO_FRAMES + 85} durationInFrames={85 + XF}>
+            <KenBurnsImage imagePath="scenes/scene-3-c.png" durationInFrames={85 + XF} fadeIn={8} direction="pan-right" />
+          </Sequence>
+          <Sequence from={VIDEO_FRAMES + 85 + 85 - XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          <Sequence from={VIDEO_FRAMES + 85 + 85} durationInFrames={S3 - VIDEO_FRAMES - 85 - 85}>
+            <KenBurnsImage imagePath="scenes/scene-3-d.png" durationInFrames={S3 - VIDEO_FRAMES - 85 - 85} fadeIn={8} direction="pan-left" />
           </Sequence>
         </ScreenShake>
         <BottomGradient intensity={0.65} />
         <TopicBadge label={TOPICS[3]} color={SCENE_COLORS[3]} durationInFrames={S3} />
         <WordPopSubtitles text={scenes[3].dialogue} accentColor={SCENE_COLORS[3]} durationInFrames={S3}
-          highlightWords={["move", "hits", "catches", "gains", "Better", "APIs", "beat"]} />
+          highlightWords={["move", "hits", "catches", "profit", "Better", "APIs", "beat"]} />
         <Audio src={staticFile("audio/scene-3.wav")} />
       </Sequence>
-      <Sequence from={START[3] + 230} durationInFrames={15}>
+      <Sequence from={START[3] + 300} durationInFrames={15}>
         <Audio src={staticFile("sfx/scratch.wav")} volume={0.35} />
       </Sequence>
 
@@ -536,9 +621,9 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <GlitchFlash color={SCENE_COLORS[4]} />
       </Sequence>
 
-      {/* ═══ SCENE 4: MIC DROP — CTA (9.28s = 278 frames) ═══ */}
+      {/* ═══ SCENE 4: MIC DROP — CTA (9.76s = 293 frames) ═══ */}
       <Sequence from={START[4]} durationInFrames={S4}>
-        <ScreenShake triggerFrame={200} intensity={7}>
+        <ScreenShake triggerFrame={230} intensity={7}>
           {/* Video clip first: 116 frames */}
           <Sequence from={0} durationInFrames={VIDEO_FRAMES}>
             <VideoClipBg videoPath="scenes/scene-4-a.mp4" durationInFrames={VIDEO_FRAMES} fadeIn={0} />
@@ -547,21 +632,21 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
           <Sequence from={VIDEO_FRAMES - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
-          {/* Overflow: 278 - 116 = 162 frames for 2 images (81 + 81) */}
-          <Sequence from={VIDEO_FRAMES} durationInFrames={81 + XF}>
-            <KenBurnsImage imagePath="scenes/scene-4-b.png" durationInFrames={81 + XF} fadeIn={8} direction="pan-left" />
+          {/* Overflow: 293 - 116 = 177 frames for 2 images (89 + 88) */}
+          <Sequence from={VIDEO_FRAMES} durationInFrames={89 + XF}>
+            <KenBurnsImage imagePath="scenes/scene-4-b.png" durationInFrames={89 + XF} fadeIn={8} direction="pan-left" />
           </Sequence>
-          <Sequence from={VIDEO_FRAMES + 81 - XF} durationInFrames={XF * 2}>
+          <Sequence from={VIDEO_FRAMES + 89 - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
-          <Sequence from={VIDEO_FRAMES + 81} durationInFrames={S4 - VIDEO_FRAMES - 81}>
-            <KenBurnsImage imagePath="scenes/scene-4-c.png" durationInFrames={S4 - VIDEO_FRAMES - 81} fadeIn={8} direction="zoom-in" />
+          <Sequence from={VIDEO_FRAMES + 89} durationInFrames={S4 - VIDEO_FRAMES - 89}>
+            <KenBurnsImage imagePath="scenes/scene-4-c.png" durationInFrames={S4 - VIDEO_FRAMES - 89} fadeIn={8} direction="zoom-in" />
           </Sequence>
         </ScreenShake>
         <BottomGradient intensity={0.7} />
         <TopicBadge label={TOPICS[4]} color={SCENE_COLORS[4]} durationInFrames={S4} />
         <WordPopSubtitles text={scenes[4].dialogue} accentColor={SCENE_COLORS[4]} durationInFrames={S4}
-          highlightWords={["terminal", "zkagi", "predict", "future", "better", "APIs"]} />
+          highlightWords={["zkterminal", "zkagi", "predict", "future", "better", "APIs"]} />
         <CtaUrl url="zkterminal.zkagi.ai" color={SCENE_COLORS[4]} triggerFrame={45} durationInFrames={S4} />
         <Audio src={staticFile("audio/scene-4.wav")} />
       </Sequence>
@@ -569,14 +654,16 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <Audio src={staticFile("sfx/ping.wav")} volume={0.4} />
       </Sequence>
 
-      {/* ═══ ENDING — Brand outro video ═══ */}
-      <Sequence from={ENDING_START} durationInFrames={ENDING_FRAMES}>
-        <Video
-          src={staticFile("video/ending.mp4")}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          volume={1}
-          startFrom={0}
-        />
+      {/* ═══ ENDING CLIP — ending.mp4 played directly as-is ═══ */}
+      <Sequence from={ENDING_START} durationInFrames={ENDING_CLIP_FRAMES}>
+        <AbsoluteFill>
+          <Video
+            src={staticFile("video/ending.mp4")}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            volume={1}
+            startFrom={0}
+          />
+        </AbsoluteFill>
       </Sequence>
 
       {/* GLOBAL LAYERS */}

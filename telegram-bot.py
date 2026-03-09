@@ -175,15 +175,14 @@ MANDATORY PIPELINE — follow these steps IN THIS EXACT ORDER:
    - Ken Burns directions: alternate zoom-in, pan-left, pan-right, zoom-out for variety.
    - Calculate precisely: scene_frames = audio_duration * 30 (fps), video_frames = 97
 
-   MANDATORY ENDING CLIP — EVERY video MUST end with the brand outro:
-   - After ALL scenes, append a final Sequence that plays public/video/ending.mp4
-   - The ending clip is 9.152 seconds = 275 frames at 30fps
-   - Add this as the LAST Sequence before global layers (music/watermark):
-     <Sequence from={{ENDING_START}} durationInFrames={{275}}>
-       <Video src={{staticFile("video/ending.mp4")}} style={{{{ width: "100%", height: "100%", objectFit: "cover" }}}} volume={{1}} startFrom={{0}} />
-     </Sequence>
+   MANDATORY ENDING — EVERY video MUST end with BrandOutro + ending clip:
+   - After ALL scenes, append TWO final Sequences before global layers:
+     1. BrandOutro (275 frames): <Sequence from={{ENDING_START}} durationInFrames={{ENDING_FRAMES}}><BrandOutro durationInFrames={{ENDING_FRAMES}} color={{PAD_COLOR}} /></Sequence>
+     2. Ending clip (ENDING_CLIP_FRAMES): <Sequence from={{ENDING_START + ENDING_FRAMES}} durationInFrames={{ENDING_CLIP_FRAMES}}><AbsoluteFill><Video src={{staticFile("video/ending.mp4")}} style={{{{ width: "100%", height: "100%", objectFit: "cover" }}}} volume={{1}} startFrom={{0}} /></AbsoluteFill></Sequence>
    - ENDING_START = sum of all scene frame durations
-   - TOTAL_FRAMES in Root.tsx MUST include the 275 ending frames (scenes_total + 275)
+   - ENDING_FRAMES = 275 (BrandOutro, 9.17s)
+   - ENDING_CLIP_FRAMES = 300 (ending.mp4, ~10s)
+   - TOTAL_FRAMES in Root.tsx MUST include BOTH: scenes_total + 275 + 300
 
    URL ACCURACY — when displaying product URLs (e.g. in CtaUrl components):
    - zkterminal URL is "zkterminal.zkagi.ai" — NEVER drop the "zk" prefix
@@ -192,6 +191,19 @@ MANDATORY PIPELINE — follow these steps IN THIS EXACT ORDER:
 
 7. RENDER: npx remotion render ZkAGIVideo output/{output_filename} --bundle-cache=false --timeout=300000
    Only render landscape 16:9.
+
+8. SOCIAL MEDIA CAPTIONS: After rendering, generate captions and save to output/{output_filename}.captions.json:
+   {{
+     "twitter": "<Twitter/X caption, max 280 characters. Punchy, attention-grabbing. Include 2-3 relevant hashtags. Include the product URL.>",
+     "linkedin": "<LinkedIn post, max 3000 characters. Professional but engaging. Hook in first line. Include context about the product, why it matters, and a CTA. Use line breaks for readability. Include relevant hashtags at the end.>",
+     "youtube_title": "<YouTube title, max 100 characters. SEO-friendly, compelling, includes key topic.>",
+     "youtube_description": "<YouTube description, max 5000 characters. First 2 lines are most important (shown in search). Include: summary, key points, product links, timestamps if applicable, relevant hashtags.>"
+   }}
+   - Match the tone/topic of the video
+   - Twitter: short, punchy, emoji OK, must fit 280 chars
+   - LinkedIn: professional, value-driven, storytelling hook
+   - YouTube title: clickworthy but not clickbait
+   - YouTube description: SEO-rich, include product URLs
 
 After rendering, verify the file exists and print its size.
 """
@@ -341,6 +353,33 @@ async def process_video_job(job: dict):
         )
 
     log.info("Delivered video for: %s", topic)
+
+    # Send social media captions
+    captions_path = output_path.with_suffix(".mp4.captions.json")
+    if captions_path.exists():
+        try:
+            with open(captions_path) as f:
+                captions = json.load(f)
+
+            captions_msg = (
+                "--- SOCIAL MEDIA CAPTIONS ---\n\n"
+                f"TWITTER/X (280 chars):\n{captions.get('twitter', 'N/A')}\n\n"
+                f"LINKEDIN:\n{captions.get('linkedin', 'N/A')}\n\n"
+                f"YOUTUBE TITLE:\n{captions.get('youtube_title', 'N/A')}\n\n"
+                f"YOUTUBE DESCRIPTION:\n{captions.get('youtube_description', 'N/A')}"
+            )
+            # Telegram message limit is 4096 chars — split if needed
+            if len(captions_msg) <= 4096:
+                await bot.send_message(chat_id, captions_msg)
+            else:
+                # Send platform by platform
+                await bot.send_message(chat_id, f"TWITTER/X:\n{captions.get('twitter', 'N/A')}")
+                await bot.send_message(chat_id, f"LINKEDIN:\n{captions.get('linkedin', 'N/A')}")
+                await bot.send_message(chat_id, f"YOUTUBE TITLE:\n{captions.get('youtube_title', 'N/A')}\n\nYOUTUBE DESCRIPTION:\n{captions.get('youtube_description', 'N/A')}")
+        except Exception as e:
+            log.warning("Failed to send captions: %s", e)
+    else:
+        log.info("No captions file found at %s", captions_path)
 
 
 # ── Job worker ──────────────────────────────────────────────────────────────
