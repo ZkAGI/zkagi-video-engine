@@ -4,7 +4,56 @@ import { redis } from "../lib/redis.js";
 import { config } from "../config.js";
 
 export async function healthRoutes(app: FastifyInstance) {
-  app.get("/api/v1/health", async (_request, reply) => {
+  app.get("/api/v1/health", {
+    schema: {
+      tags: ["Health"],
+      summary: "System health check",
+      description: "Returns status of database, Redis, and ComfyUI connections.",
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            status: { type: "string", enum: ["healthy"], example: "healthy" },
+            checks: {
+              type: "object",
+              properties: {
+                database: {
+                  type: "object",
+                  properties: {
+                    status: { type: "string", example: "ok" },
+                    latencyMs: { type: "number", example: 3 },
+                  },
+                },
+                redis: {
+                  type: "object",
+                  properties: {
+                    status: { type: "string", example: "ok" },
+                    latencyMs: { type: "number", example: 1 },
+                  },
+                },
+                comfyui: {
+                  type: "object",
+                  properties: {
+                    status: { type: "string", example: "ok" },
+                    latencyMs: { type: "number", example: 12 },
+                  },
+                },
+              },
+            },
+            timestamp: { type: "string", format: "date-time" },
+          },
+        },
+        503: {
+          type: "object",
+          properties: {
+            status: { type: "string", enum: ["degraded"] },
+            checks: { type: "object" },
+            timestamp: { type: "string", format: "date-time" },
+          },
+        },
+      },
+    },
+  }, async (_request, reply) => {
     const checks: Record<string, { status: string; latencyMs?: number }> = {};
 
     // Database

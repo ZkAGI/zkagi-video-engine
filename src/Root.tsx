@@ -32,61 +32,62 @@ const CHARACTERS = {
   },
 };
 
-// ── ZkTerminal Prediction Market Story — Mar 8, 2026 ──
-// Story Mode: prediction market degen spots BTC trend 6 hours early
-// Audio durations: 8.96 + 9.92 + 8.48 + 12.32 + 9.76 = 49.44s
-const ZKTERMINAL_SCENES = [
+// ── PawPad DeFi Horror Stories — Mar 9, 2026 ──
+// Story Mode: DeFi horror stories → PawPad solution
+// Audio durations: 7.68 + 11.52 + 8.32 + 10.56 + 8.64 = 46.72s
+const PAWPAD_SCENES = [
   {
     characterId: "pad",
-    dialogue: "Three AM. Kyle's glued to his charts. Crypto Twitter is screaming about resistance levels. Nobody agrees. Nobody ever does.",
+    dialogue: "Meet Rick. Rick approved unlimited token access to definitely not a rug dot finance. Rick woke up broke.",
     emotion: "serious" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 8.96,
+    durationOverride: 7.68,
   },
   {
     characterId: "pad",
-    dialogue: "But Kyle's not reading tweets. He's watching ZkTerminal. The AI just flagged a Bitcoin trend reversal. Six hours before anyone else.",
+    dialogue: "Then there's Karen. Wrote her seed phrase on a napkin. Her husband used it to blow his nose. Forty thousand dollars. In a tissue.",
     emotion: "explaining" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 9.92,
+    durationOverride: 11.52,
   },
   {
     characterId: "pad",
-    dialogue: "While everyone debates, Kyle's already locked in. Prediction markets set. Entry confirmed. Zero hesitation.",
+    dialogue: "Rick and Karen have one thing in common. Their wallets were dumber than they were. What if your wallet could actually think?",
+    emotion: "thinking" as const,
+    visualType: "talking-head" as const,
+    sceneType: "video" as const,
+    durationOverride: 8.32,
+  },
+  {
+    characterId: "pad",
+    dialogue: "PawPad. No seed phrase to lose. Smart limits that block suspicious contracts. An AI agent that flags rugs before you click. Three taps.",
     emotion: "excited" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 8.48,
+    durationOverride: 10.56,
   },
   {
     characterId: "pad",
-    dialogue: "Six hours later, the move hits. CT finally catches on. Kyle's already taking profit. Better APIs beat louder opinions every time.",
+    dialogue: "paw dot zkagi dot ai. Your wallet should be smarter than you. PawPad finally makes that possible.",
     emotion: "celebrating" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 12.32,
-  },
-  {
-    characterId: "pad",
-    dialogue: "zkterminal dot zkagi dot ai. I don't predict the future. I just have better APIs than you.",
-    emotion: "celebrating" as const,
-    visualType: "talking-head" as const,
-    sceneType: "video" as const,
-    durationOverride: 9.76,
+    durationOverride: 8.64,
   },
 ];
 
 // Frame counts from TTS durations (30fps):
-// S0: 8.96s → 269   S1: 9.92s → 298   S2: 8.48s → 254
-// S3: 12.32s → 370   S4: 9.76s → 293
-const TOTAL_FRAMES = 269 + 298 + 254 + 370 + 293 + 300; // = 1784 (scenes + ending clip)
+// S0: 7.68s → 230   S1: 11.52s → 346   S2: 8.32s → 250
+// S3: 10.56s → 317   S4: 8.64s → 259
+// BrandOutro: 275   Ending clip: 300
+const TOTAL_FRAMES = 230 + 346 + 250 + 317 + 259 + 275 + 300; // = 1977
 
-const zkterminalProps = {
-  title: "Prediction Market Degen Spots BTC Trend Early",
+const pawpadProps = {
+  title: "DeFi Horror Stories — PawPad",
   characters: CHARACTERS,
-  scenes: ZKTERMINAL_SCENES,
+  scenes: PAWPAD_SCENES,
   style: { theme: "zkagi-brand" as const, format: "16:9" as const, showSubtitles: true, showCharacterName: false, transitionType: "fade" as const },
   music: { volume: 0.12 },
   watermark: { text: "ZkAGI", show: true },
@@ -95,7 +96,7 @@ const zkterminalProps = {
 
 export const RemotionRoot: React.FC = () => (
   <>
-    <Composition id="ZkAGIVideo" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1920} height={1080} schema={VideoConfigSchema} defaultProps={zkterminalProps} />
-    <Composition id="ZkAGIVideoVertical" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1080} height={1920} schema={VideoConfigSchema} defaultProps={{ ...zkterminalProps, style: { ...zkterminalProps.style, format: "9:16" as const } }} />
+    <Composition id="ZkAGIVideo" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1920} height={1080} schema={VideoConfigSchema} defaultProps={pawpadProps} />
+    <Composition id="ZkAGIVideoVertical" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1080} height={1920} schema={VideoConfigSchema} defaultProps={{ ...pawpadProps, style: { ...pawpadProps.style, format: "9:16" as const } }} />
   </>
 );

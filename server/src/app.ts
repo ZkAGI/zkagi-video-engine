@@ -1,6 +1,8 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
 import { config } from "./config.js";
 import { healthRoutes } from "./routes/health.js";
 import { authRoutes } from "./routes/auth.js";
@@ -35,9 +37,59 @@ export async function buildApp() {
     }
   );
 
+  // Swagger / OpenAPI docs
+  await app.register(swagger, {
+    openapi: {
+      info: {
+        title: "ZkAGI Video Engine API",
+        description:
+          "AI-powered video generation platform. Authenticate with a Solana wallet or API key, submit video topics, and download the results after payment.",
+        version: "1.0.0",
+        contact: { name: "ZkAGI", url: "https://zkagi.ai" },
+      },
+      servers: [
+        { url: "https://content_agent_video.zkagi.ai", description: "Production" },
+      ],
+      tags: [
+        { name: "Health", description: "System health checks" },
+        { name: "Auth", description: "Solana wallet authentication & token refresh" },
+        { name: "Videos", description: "Video generation, listing, streaming & downloads" },
+        { name: "Payments", description: "Stripe checkout & webhook" },
+        { name: "API Keys", description: "Manage programmatic access keys" },
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+            description: "JWT token from wallet-verify endpoint",
+          },
+          apiKeyAuth: {
+            type: "apiKey",
+            in: "header",
+            name: "X-API-Key",
+            description: "API key (prefix zkv_). Create via /api/v1/api-keys",
+          },
+        },
+      },
+    },
+  });
+
+  await app.register(swaggerUi, {
+    routePrefix: "/docs",
+    uiConfig: {
+      docExpansion: "list",
+      deepLinking: true,
+      defaultModelsExpandDepth: 3,
+      tryItOutEnabled: true,
+    },
+    staticCSP: true,
+  });
+
   // CORS
   await app.register(cors, {
-    origin: config.FRONTEND_URL,
+    origin: [config.FRONTEND_URL, "https://content_agent_video.zkagi.ai"],
     credentials: true,
   });
 
