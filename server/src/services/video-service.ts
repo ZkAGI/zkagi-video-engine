@@ -32,11 +32,22 @@ export async function createVideo(userId: string, input: CreateVideoInput) {
     where: { status: "QUEUED" },
   });
 
+  // Validate productId ownership if provided
+  if (input.productId) {
+    const product = await prisma.product.findFirst({
+      where: { id: input.productId, userId, isActive: true },
+    });
+    if (!product) {
+      throw Object.assign(new Error("Product not found"), { statusCode: 404 });
+    }
+  }
+
   const video = await prisma.video.create({
     data: {
       userId,
       topic: input.topic,
       product: input.product,
+      productId: input.productId,
       mode: input.mode,
       voice: input.voice,
       format: input.format,
@@ -84,6 +95,7 @@ export async function getVideo(videoId: string, userId: string) {
     id: video.id,
     topic: video.topic,
     product: video.product,
+    productId: video.productId,
     mode: video.mode,
     voice: video.voice,
     format: video.format,

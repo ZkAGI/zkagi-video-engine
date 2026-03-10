@@ -16,7 +16,7 @@ export function hashApiKey(key: string): string {
 }
 
 /** Create a signed URL token */
-export function signUrl(videoId: string, type: "preview" | "download", expiresAt: number): string {
+export function signUrl(videoId: string, type: "preview" | "download" | "asset", expiresAt: number): string {
   const payload = `${videoId}:${type}:${expiresAt}`;
   const sig = createHmac("sha256", config.URL_SIGNING_SECRET)
     .update(payload)

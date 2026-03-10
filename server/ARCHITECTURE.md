@@ -69,39 +69,45 @@ The ZkAGI Video Engine generates AI-powered marketing videos using a pipeline of
          │    Bearer JWT         │  X-API-Key header
          └───────────┬──────────┘
                      ▼
+          ┌──────────────────┐
+          │ Cloudflare Tunnel│  content_agent_video.zkagi.ai
+          └────────┬─────────┘
+                   ▼
            ┌─────────────────┐
            │  Fastify API    │  :3001
            │  (auth-guard)   │
-           └──┬──────────┬───┘
-              │          │
-     ┌────────▼──┐  ┌────▼──────┐
-     │ PostgreSQL│  │   Redis   │
-     │  (data)   │  │  (queue)  │
-     └───────────┘  └─────┬─────┘
-                          │ BullMQ
-                    ┌─────▼─────┐
-                    │  Worker   │  concurrency = 1
-                    │           │  (single GPU)
-                    └─────┬─────┘
-                          │ spawns
-                    ┌─────▼─────┐
-                    │Claude Code│  in isolated workspace
-                    │   CLI     │
-                    └─────┬─────┘
-                          │ orchestrates
-              ┌───────────┼───────────┐
-              ▼           ▼           ▼
-         Image Gen    ComfyUI     VoxCPM TTS
-         (reference   LTX-2      (voice clone)
-          frames)    (video)
-                          │
-                    ┌─────▼─────┐
-                    │  Remotion  │  render → MP4
-                    └─────┬─────┘
-                          │
-                    ┌─────▼─────┐
-                    │  ffmpeg   │  5s preview + watermark
-                    └───────────┘
+           │  (@fastify/     │
+           │   multipart)    │
+           └──┬──────┬───┬───┘
+              │      │   │
+     ┌────────▼──┐ ┌─▼───▼────┐
+     │ PostgreSQL│ │  Redis   │
+     │  (data)   │ │  (queue) │
+     └───────────┘ └────┬─────┘
+                        │ BullMQ
+     ┌───────────┐ ┌────▼─────┐
+     │  uploads/ │ │  Worker  │  concurrency = 1
+     │  (assets) │ │          │  (single GPU)
+     └───────────┘ └────┬─────┘
+                        │ spawns
+                   ┌────▼──────┐
+                   │Claude Code│  in isolated workspace
+                   │   CLI     │
+                   └────┬──────┘
+                        │ orchestrates
+            ┌───────────┼───────────┐
+            ▼           ▼           ▼
+       Image Gen    ComfyUI     VoxCPM TTS
+       (reference   LTX-2      (voice clone)
+        frames)    (video)
+                        │
+                  ┌─────▼─────┐
+                  │  Remotion  │  render → MP4
+                  └─────┬─────┘
+                        │
+                  ┌─────▼─────┐
+                  │  ffmpeg   │  5s preview + watermark
+                  └───────────┘
 ```
 
 ---
@@ -111,7 +117,9 @@ The ZkAGI Video Engine generates AI-powered marketing videos using a pipeline of
 | Table | Purpose |
 |-------|---------|
 | **users** | Solana wallet address, display name, email |
-| **videos** | Topic, status, file paths, payment status, captions |
+| **products** | User-uploaded product details (name, slug, description, tagline, website, brand colors, category) |
+| **product_assets** | Files attached to products (images, voice clips, demo videos) with type, path, MIME info |
+| **videos** | Topic, status, file paths, payment status, captions. Optional `product_id` FK to products |
 | **payments** | Stripe session/intent, amount ($5), paid timestamp |
 | **api_keys** | SHA-256 hash of key, prefix for display, revoke support |
 
@@ -218,6 +226,8 @@ After completion, the MP4 is copied to permanent storage and the workspace is de
 | **API Keys** | Prefixed `zkv_` + 32 random bytes. Only SHA-256 hash stored in DB. Shown once on creation. |
 | **Auth Guard** | Every protected route checks: Bearer JWT first, then X-API-Key header. |
 | **Video Access** | Preview/download URLs are HMAC-SHA256 signed with expiry (1hr preview, 24hr download). |
+| **Asset Access** | Product asset file URLs are HMAC-SHA256 signed with 1hr expiry. Same mechanism as video URLs. |
+| **Upload Limits** | Images: 10MB/10 per product. Voice: 5MB/1 per product. Videos: 100MB/5 per product. Max 20 products per user. |
 | **Payment Gate** | Download endpoint checks `video.isPaid === true` before streaming file. |
 | **Stripe Webhook** | Signature verified via `stripe.webhooks.constructEvent()`. |
 | **Rate Limits** | 5 videos/hour, 20/day per user. Global: 100 requests/minute. |
@@ -230,18 +240,47 @@ After completion, the MP4 is copied to permanent storage and the workspace is de
 |--------|----------|------|---------|
 | POST | `/api/v1/auth/wallet-verify` | None | Sign in with Solana wallet |
 | POST | `/api/v1/auth/refresh` | None | Refresh access token |
-| POST | `/api/v1/videos` | Required | Submit video request |
+| POST | `/api/v1/videos` | Required | Submit video request (supports optional `productId`) |
 | GET | `/api/v1/videos` | Required | List your videos (paginated) |
 | GET | `/api/v1/videos/:id` | Required | Get video status + URLs |
 | DELETE | `/api/v1/videos/:id` | Required | Cancel queued video |
 | GET | `/api/v1/videos/:id/preview` | Signed URL | Stream 5s watermarked preview |
 | GET | `/api/v1/videos/:id/download` | Signed URL + Paid | Stream full video |
+| POST | `/api/v1/products` | Required | Create product with details |
+| GET | `/api/v1/products` | Required | List your products (paginated) |
+| GET | `/api/v1/products/:id` | Required | Get product + all assets with signed URLs |
+| PATCH | `/api/v1/products/:id` | Required | Update product details |
+| DELETE | `/api/v1/products/:id` | Required | Soft-delete product |
+| POST | `/api/v1/products/:id/images` | Required | Upload product image (max 10MB, up to 10) |
+| POST | `/api/v1/products/:id/voice` | Required | Upload voice reference (max 5MB, replaces existing) |
+| POST | `/api/v1/products/:id/videos` | Required | Upload demo video (max 100MB, up to 5) |
+| DELETE | `/api/v1/products/:id/assets/:assetId` | Required | Delete a specific asset |
+| GET | `/api/v1/products/:id/assets/:assetId/file` | Signed URL | Serve asset file (1hr expiry) |
 | POST | `/api/v1/payments/checkout` | Required | Create Stripe checkout |
 | POST | `/api/v1/payments/webhook` | Stripe sig | Handle payment confirmation |
 | POST | `/api/v1/api-keys` | Required | Create API key |
 | GET | `/api/v1/api-keys` | Required | List your API keys |
 | DELETE | `/api/v1/api-keys/:id` | Required | Revoke API key |
 | GET | `/api/v1/health` | None | System health check |
+
+---
+
+## Product Uploads & Storage
+
+Users can upload custom product assets (images, voice clips, demo videos) instead of using only the hardcoded pawpad/zynapse/zkterminal products. Uploaded files are stored on disk:
+
+```
+server/uploads/
+  {userId}/
+    {productId}/
+      images/      ← PNG/JPG/WebP, max 10MB each, up to 10
+      voices/      ← WAV/MP3, max 5MB, 1 per product (replaces on re-upload)
+      videos/      ← MP4/WebM, max 100MB each, up to 5
+```
+
+Asset files are served via HMAC-signed URLs (1hr expiry), same mechanism as video preview/download. When creating a video, users can pass `productId` instead of the `product` enum to use their custom product.
+
+**Cloudflare Tunnel:** The API is exposed via a Cloudflare tunnel (`cloudflared` systemd service). The default Cloudflare upload limit is **100MB** for free/pro plans, which matches the max video upload size. No tunnel config changes needed for the product upload endpoints.
 
 ---
 

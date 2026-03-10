@@ -34,23 +34,23 @@ const CHARACTERS = {
 
 // ── "This Video Was Made By AI" — Mar 9, 2026 ──
 // Story Mode: Meta self-referential AI demo → ZkAGI Video Engine
-// Audio durations: 10.08 + 10.24 + 6.88 + 9.60 + 7.84 = 44.64s
+// Audio durations: 10.40 + 8.00 + 7.20 + 9.44 + 10.56 = 45.60s
 const META_AI_SCENES = [
   {
     characterId: "pad",
-    dialogue: "This video was made by AI. Script, voice, images, editing. All AI. Zero humans touched this.",
+    dialogue: "This video was made by AI. Script, voice, images, editing. All of it. Zero humans touched this.",
     emotion: "serious" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 10.08,
+    durationOverride: 10.40,
   },
   {
     characterId: "pad",
-    dialogue: "A language model wrote these exact words. Then it cloned a tiger's voice, generated every frame, and edited everything together.",
+    dialogue: "A language model wrote these exact words. Then it cloned a voice, generated every frame, and edited everything together.",
     emotion: "explaining" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 10.24,
+    durationOverride: 8.00,
   },
   {
     characterId: "pad",
@@ -58,15 +58,15 @@ const META_AI_SCENES = [
     emotion: "thinking" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 6.88,
+    durationOverride: 7.20,
   },
   {
     characterId: "pad",
-    dialogue: "Most companies show you a slideshow about their AI. We let our AI make the slideshow. And this sentence.",
+    dialogue: "Most companies show you a slideshow about their AI. We let our AI make the slideshow. And the video. And this sentence.",
     emotion: "excited" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 9.60,
+    durationOverride: 9.44,
   },
   {
     characterId: "pad",
@@ -74,15 +74,15 @@ const META_AI_SCENES = [
     emotion: "celebrating" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 7.84,
+    durationOverride: 10.56,
   },
 ];
 
 // Frame counts from TTS durations (30fps):
-// S0: 10.08s → 302   S1: 10.24s → 307   S2: 6.88s → 206
-// S3: 9.60s → 288   S4: 7.84s → 235
+// S0: 10.40s → 312   S1: 8.00s → 240   S2: 7.20s → 216
+// S3: 9.44s → 283   S4: 10.56s → 317
 // BrandOutro: 275   Ending clip: 300
-const TOTAL_FRAMES = 302 + 307 + 206 + 288 + 235 + 275 + 300; // = 1913
+const TOTAL_FRAMES = 312 + 240 + 216 + 283 + 317 + 275 + 300; // = 1943
 
 const metaAiProps = {
   title: "This Video Was Made By AI — ZkAGI",

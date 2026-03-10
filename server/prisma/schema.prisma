@@ -22,6 +22,12 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum AssetType {
+  IMAGE
+  VOICE
+  VIDEO
+}
+
 model User {
   id             String   @id @default(uuid()) @db.Uuid
   walletAddress  String   @unique @map("wallet_address")
@@ -32,6 +38,7 @@ model User {
   videos   Video[]
   payments Payment[]
   apiKeys  ApiKey[]
+  products Product[]
 
   @@map("users")
 }
@@ -63,11 +70,15 @@ model Video {
   completedAt        DateTime?     @map("completed_at")
   createdAt          DateTime      @default(now()) @map("created_at")
 
-  user     User      @relation(fields: [userId], references: [id])
-  payments Payment[]
+  productId          String?       @map("product_id") @db.Uuid
+
+  user       User      @relation(fields: [userId], references: [id])
+  productRef Product?  @relation(fields: [productId], references: [id])
+  payments   Payment[]
 
   @@index([userId])
   @@index([status])
+  @@index([productId])
   @@map("videos")
 }
 
@@ -104,4 +115,46 @@ model ApiKey {
 
   @@index([userId])
   @@map("api_keys")
+}
+
+model Product {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  name        String
+  slug        String
+  description String?
+  tagline     String?
+  websiteUrl  String?  @map("website_url")
+  brandColors Json?    @map("brand_colors")
+  category    String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user   User           @relation(fields: [userId], references: [id])
+  assets ProductAsset[]
+  videos Video[]
+
+  @@unique([userId, slug])
+  @@index([userId])
+  @@map("products")
+}
+
+model ProductAsset {
+  id            String    @id @default(uuid()) @db.Uuid
+  productId     String    @map("product_id") @db.Uuid
+  type          AssetType
+  filename      String
+  storagePath   String    @map("storage_path")
+  mimeType      String    @map("mime_type")
+  fileSizeBytes Int       @map("file_size_bytes")
+  metadata      Json?
+  isPrimary     Boolean   @default(false) @map("is_primary")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([productId, type])
+  @@map("product_assets")
 }

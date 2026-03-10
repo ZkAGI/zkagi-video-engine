@@ -1,12 +1,14 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
+import multipart from "@fastify/multipart";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { config } from "./config.js";
 import { healthRoutes } from "./routes/health.js";
 import { authRoutes } from "./routes/auth.js";
 import { videoRoutes, videoStreamRoutes } from "./routes/videos.js";
+import { productRoutes, productAssetStreamRoutes } from "./routes/products.js";
 import { paymentRoutes } from "./routes/payments.js";
 import { apiKeyRoutes } from "./routes/api-keys.js";
 import { ZodError } from "zod";
@@ -60,6 +62,7 @@ export async function buildApp() {
         { name: "Auth", description: "Solana wallet authentication & token refresh" },
         { name: "Videos", description: "Video generation, listing, streaming & downloads" },
         { name: "Payments", description: "Stripe checkout & webhook" },
+        { name: "Products", description: "Product management & asset uploads" },
         { name: "API Keys", description: "Manage programmatic access keys" },
       ],
       components: {
@@ -98,6 +101,14 @@ export async function buildApp() {
     credentials: true,
   });
 
+  // Multipart file uploads
+  await app.register(multipart, {
+    limits: {
+      fileSize: 100 * 1024 * 1024, // 100MB global max
+      files: 1,
+    },
+  });
+
   // Global rate limiting
   await app.register(rateLimit, {
     max: 100,
@@ -128,6 +139,8 @@ export async function buildApp() {
   await app.register(authRoutes);
   await app.register(videoRoutes);
   await app.register(videoStreamRoutes);
+  await app.register(productRoutes);
+  await app.register(productAssetStreamRoutes);
   await app.register(paymentRoutes);
   await app.register(apiKeyRoutes);
 
