@@ -6,6 +6,7 @@ Zynapse is ZkAGI's developer API platform. It's the infrastructure layer that po
 **Tagline:** "One API. All of AI. Privacy included."
 
 **Base URL:** `https://zynapse.zkagi.ai`
+**Docs:** `https://docs.zkagi.ai/docs/getting-started/zynapse`
 
 **Target audience:** Developers, startups, enterprises building AI-powered apps who need privacy, crypto integration, or don't want to depend on OpenAI/Google.
 
@@ -150,8 +151,8 @@ const answer = await fetch("https://zynapse.zkagi.ai/v1/ask", {
 ```
 
 ## Links
-- API Docs: https://docs.zkagi.ai/docs/getting-started/zynapse
-- Base URL: https://zynapse.zkagi.ai
+- Docs & Getting Started: https://docs.zkagi.ai/docs/getting-started/zynapse
+- API Base URL: https://zynapse.zkagi.ai
 - GitHub: https://github.com/ZkAGI
 
 ## Demo Videos (Screen Recordings)

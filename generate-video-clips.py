@@ -6,9 +6,9 @@ import requests, json, time, random, sys, os
 COMFY_URL = "http://172.18.64.1:8001"
 SCENE_DIR = "/home/aten/zkagi-video-engine/public/scenes"
 
-CHECKPOINT = "ltx-2-19b-dev-fp8.safetensors"
+CHECKPOINT = "ltx-2.3-22b-dev-fp8.safetensors"
 TEXT_ENCODER = "gemma_3_12B_it.safetensors"
-LORA = "ltx-2-19b-distilled-lora-384.safetensors"
+LORA = "ltx-2.3-distilled-lora-384.safetensors"
 STEPS = 8
 CFG = 1.0
 FRAMES = 97  # 3.88s at 25fps
@@ -79,11 +79,11 @@ def build_workflow(uploaded_image_name, motion_prompt, filename_prefix, seed=Non
         },
         # 2: Load text encoder → CLIP(0)
         "2": {
-            "class_type": "LTXAVTextEncoderLoader",
+            "class_type": "DualCLIPLoader",
             "inputs": {
-                "text_encoder": TEXT_ENCODER,
-                "ckpt_name": CHECKPOINT,
-                "device": "cpu"
+                "clip_name1": "gemma_3_12B_it.safetensors",
+                "clip_name2": "ltx-2.3_text_projection_bf16.safetensors",
+                "type": "ltx"
             }
         },
         # 3: Apply distilled LoRA → MODEL(0)

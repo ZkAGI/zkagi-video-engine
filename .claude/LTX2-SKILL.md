@@ -1,7 +1,7 @@
-# LTX-2 Video Generation Skill — ComfyUI Integration
+# LTX-2.3 Video Generation Skill — ComfyUI Integration
 
 ## Overview
-LTX-2 is a 19B parameter audio-video foundation model by Lightricks. It generates synchronized video AND audio in a single pass. Running on RTX 5090 (32GB VRAM) via ComfyUI Desktop.
+LTX-2.3 is a 22B parameter audio-video foundation model by Lightricks. It generates synchronized video AND audio in a single pass. Running on RTX 5090 (32GB VRAM) via ComfyUI Desktop. Uses DualCLIPLoader for its dual text encoder architecture.
 
 **Connection:** `COMFY_URL="http://$(ip route show default | awk '{print $3}'):8001"`
 
@@ -17,18 +17,22 @@ LTX-2 is a 19B parameter audio-video foundation model by Lightricks. It generate
 
 ## Models Available on This System
 ```
-checkpoints/      → ltx-2-19b-dev-fp8.safetensors
-text_encoders/    → gemma_3_12B_it.safetensors (or gemma_3_12B_it_fp8_scaled.safetensors)
+checkpoints/      → ltx-2.3-22b-dev-fp8.safetensors
+text_encoders/    → gemma_3_12B_it.safetensors (reused from LTX-2)
+text_encoders/    → ltx-2.3_text_projection_bf16.safetensors (new text projection)
 latent_upscale/   → ltx-2-spatial-upscaler-x2-1.0.safetensors (check if available)
-loras/            → ltx-2-19b-distilled-lora-384.safetensors (check if available)
+loras/            → ltx-2.3-distilled-lora-384.safetensors (check if available)
 ```
+
+**Backward compatibility:** Old LTX-2 (19B) files remain on the system as fallback (`ltx-2-19b-dev-fp8.safetensors`, `ltx-2-19b-distilled-lora-384.safetensors`).
 
 Always verify at runtime:
 ```bash
-curl -s "$COMFY_URL/object_info/LTXAVTextEncoderLoader" | python3 -c "
-import sys,json; d=json.load(sys.stdin)['LTXAVTextEncoderLoader']['input']['required']
-print('Text encoders:', d.get('text_encoder', ['?'])[0])
-print('Checkpoints:', d.get('ckpt_name', ['?'])[0])
+curl -s "$COMFY_URL/object_info/DualCLIPLoader" | python3 -c "
+import sys,json; d=json.load(sys.stdin)['DualCLIPLoader']['input']['required']
+print('Clip name 1:', d.get('clip_name1', ['?'])[0])
+print('Clip name 2:', d.get('clip_name2', ['?'])[0])
+print('Type:', d.get('type', ['?'])[0])
 "
 ```
 
@@ -73,7 +77,7 @@ print('Checkpoints:', d.get('ckpt_name', ['?'])[0])
 
 ## PROMPTING GUIDE (CRITICAL)
 
-LTX-2 responds to DESCRIPTIVE, NOVEL-LIKE prompts. Not keywords.
+LTX-2.3 responds to DESCRIPTIVE, NOVEL-LIKE prompts. Not keywords.
 
 ### Structure of a GOOD prompt:
 ```
@@ -95,14 +99,14 @@ LTX-2 responds to DESCRIPTIVE, NOVEL-LIKE prompts. Not keywords.
 - ❌ "crypto wallet security" — too vague, keyword-like
 - ❌ "a shield" — no motion, no camera, no atmosphere
 - ❌ "neon city" — static description
-- ❌ Short prompts under 20 words — LTX-2 needs detail
+- ❌ Short prompts under 20 words — LTX-2.3 needs detail
 
 ### Motion keywords to weave into prompts:
 **Camera:** "slowly pushing forward", "dolly shot", "orbiting around", "pulling back to reveal", "tracking shot following", "pan left", "crane up", "close-up transitioning to wide"
 **Elements:** "particles drifting", "light rays sweeping", "energy pulsing", "waves rippling", "fragments floating", "sparks cascading"
 **Transitions:** "shifting from dark to bright", "focus pulling", "morphing into", "dissolving away"
 
-### Audio in prompts (LTX-2 generates audio too!):
+### Audio in prompts (LTX-2.3 generates audio too!):
 Include audio descriptions at the end of prompts:
 - "The sound of digital beeps and a low electronic hum"
 - "A rising orchestral swell with deep bass"
@@ -118,51 +122,58 @@ This is the OPTIMAL pipeline. 3 stages:
 ### Stage 1: Generate base video from reference image
 ```python
 workflow = {
-    # Load model + text encoder
+    # Load checkpoint (model + VAE)
     "1": {
-        "class_type": "LTXAVTextEncoderLoader",
+        "class_type": "CheckpointLoaderSimple",
         "inputs": {
-            "text_encoder": "DISCOVERED_TEXT_ENCODER",
-            "ckpt_name": "DISCOVERED_CHECKPOINT",
-            "device": "cpu"
+            "ckpt_name": "ltx-2.3-22b-dev-fp8.safetensors"
+        }
+    },
+    # Load dual text encoders via DualCLIPLoader
+    "2": {
+        "class_type": "DualCLIPLoader",
+        "inputs": {
+            "clip_name1": "gemma_3_12B_it.safetensors",
+            "clip_name2": "ltx-2.3_text_projection_bf16.safetensors",
+            "type": "ltx"
         }
     },
     # Load + preprocess reference image
-    "2": {
+    "3": {
         "class_type": "LoadImage",
         "inputs": {"image": "UPLOADED_IMAGE_NAME.png"}
     },
-    "3": {
+    "4": {
         "class_type": "LTXVPreprocess",
-        "inputs": {"image": ["2", 0]}
+        "inputs": {"image": ["3", 0]}
     },
     # Positive prompt (MOTION-FOCUSED)
-    "4": {
-        "class_type": "CLIPTextEncode",
-        "inputs": {
-            "text": "NOVEL-LIKE MOTION PROMPT WITH AUDIO DESCRIPTION",
-            "clip": ["1", 1]
-        }
-    },
-    # Negative prompt
     "5": {
         "class_type": "CLIPTextEncode",
         "inputs": {
+            "text": "NOVEL-LIKE MOTION PROMPT WITH AUDIO DESCRIPTION",
+            "clip": ["2", 0]
+        }
+    },
+    # Negative prompt
+    "6": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
             "text": "static, frozen, no motion, blurry, low quality, distorted, text, watermark, jittery, flickering, ugly, deformed",
-            "clip": ["1", 1]
+            "clip": ["2", 0]
         }
     },
     # LTX conditioning with frame rate
-    "6": {
+    "7": {
         "class_type": "LTXVConditioning",
         "inputs": {
-            "positive": ["4", 0],
-            "negative": ["5", 0],
+            "positive": ["5", 0],
+            "negative": ["6", 0],
             "frame_rate": 25
         }
     },
     # Empty video latent
-    "7": {
+    "8": {
         "class_type": "EmptyLTXVLatentVideo",
         "inputs": {
             "width": 768,     # Half of final output (gets 2x upscaled)
@@ -172,28 +183,28 @@ workflow = {
         }
     },
     # Empty audio latent
-    "8": {
+    "9": {
         "class_type": "LTXVEmptyLatentAudio",
         "inputs": {
             "length": 121     # Match video length
         }
     },
     # Combine video + audio latents
-    "9": {
+    "10": {
         "class_type": "LTXVConcatAVLatent",
         "inputs": {
-            "a": ["7", 0],    # video latent
-            "b": ["8", 0]     # audio latent
+            "a": ["8", 0],    # video latent
+            "b": ["9", 0]     # audio latent
         }
     },
     # Insert reference image as first frame
-    "10": {
+    "11": {
         "class_type": "LTXVImgToVideo",
         "inputs": {
-            "positive": ["6", 0],
-            "negative": ["6", 1],
+            "positive": ["7", 0],
+            "negative": ["7", 1],
             "vae": ["1", 2],
-            "image": ["3", 0],    # preprocessed image
+            "image": ["4", 0],    # preprocessed image
             "width": 768,
             "height": 512,
             "length": 121,
@@ -201,7 +212,7 @@ workflow = {
         }
     },
     # LTX scheduler
-    "11": {
+    "12": {
         "class_type": "LTXVScheduler",
         "inputs": {
             "steps": 20,
@@ -209,67 +220,67 @@ workflow = {
             "base_shift": 0.95,
             "stretch": True,
             "terminal": 0.1,
-            "latent": ["10", 0]
+            "latent": ["11", 0]
         }
     },
     # Noise
-    "12": {
+    "13": {
         "class_type": "RandomNoise",
         "inputs": {"noise_seed": RANDOM_SEED}
     },
     # Guider
-    "13": {
+    "14": {
         "class_type": "CFGGuider",
         "inputs": {
             "model": ["1", 0],
-            "positive": ["6", 0],
-            "negative": ["6", 1],
+            "positive": ["7", 0],
+            "negative": ["7", 1],
             "cfg": 4.0
         }
     },
     # Sampler
-    "14": {
+    "15": {
         "class_type": "KSamplerSelect",
         "inputs": {"sampler_name": "euler"}
     },
     # Sample
-    "15": {
+    "16": {
         "class_type": "SamplerCustomAdvanced",
         "inputs": {
-            "noise": ["12", 0],
-            "guider": ["13", 0],
-            "sampler": ["14", 0],
-            "sigmas": ["11", 0],
-            "latent_image": ["10", 0]
+            "noise": ["13", 0],
+            "guider": ["14", 0],
+            "sampler": ["15", 0],
+            "sigmas": ["12", 0],
+            "latent_image": ["11", 0]
         }
     },
     # STAGE 2: HIRES.FIX — Spatial Upscale 2x (if upscaler model available)
     # Check: curl -s "$COMFY_URL/object_info/LTXVLatentUpsampler"
-    # "16": {
+    # "17": {
     #     "class_type": "LTXVLatentUpsampler",
     #     "inputs": {
     #         "upscale_model": "ltx-2-spatial-upscaler-x2-1.0.safetensors",
-    #         "samples": ["15", 0]  # output from sampler
+    #         "samples": ["16", 0]  # output from sampler
     #     }
     # },
     # STAGE 3: DECODE — Separate and decode video + audio
-    "16": {
-        "class_type": "LTXVSeparateAVLatent",
-        "inputs": {"samples": ["15", 0]}
-    },
     "17": {
+        "class_type": "LTXVSeparateAVLatent",
+        "inputs": {"samples": ["16", 0]}
+    },
+    "18": {
         "class_type": "VAEDecode",
         "inputs": {
-            "samples": ["16", 0],   # video latent
+            "samples": ["17", 0],   # video latent
             "vae": ["1", 2]
         }
     },
     # Save video with audio
-    "18": {
+    "19": {
         "class_type": "SaveVideo",
         "inputs": {
             "filename_prefix": "scene_INDEX",
-            "images": ["17", 0],
+            "images": ["18", 0],
             "fps": 25
         }
     }
@@ -277,7 +288,7 @@ workflow = {
 ```
 
 ### Using Distilled LoRA for Speed (RECOMMENDED)
-If `ltx-2-19b-distilled-lora-384.safetensors` is available:
+If `ltx-2.3-distilled-lora-384.safetensors` is available:
 - Add LoRA loader node after model load
 - Change steps from 20 → 8
 - Change CFG from 4.0 → 1.0
@@ -287,15 +298,15 @@ If `ltx-2-19b-distilled-lora-384.safetensors` is available:
 ### Audio Decode (if LTXVAudioVAELoader + LTXVAudioVAEDecode available)
 ```python
 # Add these nodes to also extract generated audio
-"19": {
+"20": {
     "class_type": "LTXVAudioVAELoader",
     "inputs": {}
 },
-"20": {
+"21": {
     "class_type": "LTXVAudioVAEDecode",
     "inputs": {
-        "samples": ["16", 1],  # audio latent from SeparateAVLatent
-        "vae": ["19", 0]
+        "samples": ["17", 1],  # audio latent from SeparateAVLatent
+        "vae": ["20", 0]
     }
 }
 # The generated audio includes scene-appropriate sounds!
@@ -354,15 +365,15 @@ ffprobe -v error -show_entries format=duration -of csv=p=0 public/scenes/scene-{
 
 ## FILLING SCENE DURATION (CRITICAL)
 
-Each LTX-2 clip is 4-10 seconds. TTS audio is 8-15 seconds per scene.
+Each LTX-2.3 clip is 4-10 seconds. TTS audio is 8-15 seconds per scene.
 
 **Generate MULTIPLE clips per scene with DIFFERENT motion prompts:**
 
 Example: 12-second scene about "wallet security"
 ```
-Sub-clip A (0-5s):   LTX-2 image-to-video — "camera pushing into glowing vault, particles rising, dramatic reveal, electronic hum building"
-Sub-clip B (5-9s):   LTX-2 image-to-video — "keys splitting into glowing fragments orbiting around center, camera slowly orbiting, crystalline chimes"  
-Sub-clip C (9-12s):  LTX-2 image-to-video — "shield materializing with rippling energy, camera pulling back, triumphant orchestral swell"
+Sub-clip A (0-5s):   LTX-2.3 image-to-video — "camera pushing into glowing vault, particles rising, dramatic reveal, electronic hum building"
+Sub-clip B (5-9s):   LTX-2.3 image-to-video — "keys splitting into glowing fragments orbiting around center, camera slowly orbiting, crystalline chimes"
+Sub-clip C (9-12s):  LTX-2.3 image-to-video — "shield materializing with rippling energy, camera pulling back, triumphant orchestral swell"
 ```
 
 **Rules:**
@@ -377,7 +388,7 @@ Sub-clip C (9-12s):  LTX-2 image-to-video — "shield materializing with ripplin
 ```
 public/scenes/
 ├── scene-0-a.mp4     ← first clip
-├── scene-0-b.mp4     ← second clip  
+├── scene-0-b.mp4     ← second clip
 ├── scene-0-c.mp4     ← third clip (if needed)
 ├── scene-1-a.mp4
 ├── scene-1-b.mp4
@@ -388,12 +399,12 @@ public/scenes/
 
 ## VIDEO QUALITY TIPS
 
-1. **Image-to-video >> Text-to-video** — Always provide a reference image for this 
+1. **Image-to-video >> Text-to-video** — Always provide a reference image for this
 2. **LTXVPreprocess the image** — Intentionally degrades to look like video compression, preventing quality mismatch between input image and generated frames
 3. **Use Hires.fix** — 2x spatial upscale with LTXVLatentUpsampler if available
 4. **Distilled LoRA** — Use 8-step distilled for stable, fast results
 5. **Longer prompts = better** — Describe like a novel, not keywords
-6. **Include audio in prompt** — LTX-2 generates matching sound effects
+6. **Include audio in prompt** — LTX-2.3 generates matching sound effects
 7. **Frame count 121-161** — Best quality/speed balance on 32GB VRAM
 8. **Width/height divisible by 32** — Required by model architecture
 9. **Frame count = 8n+1** — Required (97, 105, 113, 121, 129, 137, 145, 153, 161, 169, ... 257)

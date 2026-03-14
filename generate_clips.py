@@ -51,11 +51,11 @@ def build_t2v_workflow(prompt, seed, output_prefix):
     negative = "static, frozen, no motion, blurry, low quality, distorted, text, words, letters, watermark, jittery, flickering, ugly, deformed, amateur"
     return {
         # Load model + VAE
-        "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "ltx-2-19b-dev-fp8.safetensors"}},
+        "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "ltx-2.3-22b-dev-fp8.safetensors"}},
         # Load text encoder (CLIP)
-        "2": {"class_type": "LTXAVTextEncoderLoader", "inputs": {"text_encoder": "gemma_3_12B_it.safetensors", "ckpt_name": "ltx-2-19b-dev-fp8.safetensors", "device": "cpu"}},
+        "2": {"class_type": "DualCLIPLoader", "inputs": {"clip_name1": "gemma_3_12B_it.safetensors", "clip_name2": "ltx-2.3_text_projection_bf16.safetensors", "type": "ltx"}},
         # Apply distilled LoRA for 8-step fast generation
-        "3": {"class_type": "LoraLoaderModelOnly", "inputs": {"model": ["1", 0], "lora_name": "ltx-2-19b-distilled-lora-384.safetensors", "strength_model": 1.0}},
+        "3": {"class_type": "LoraLoaderModelOnly", "inputs": {"model": ["1", 0], "lora_name": "ltx-2.3-distilled-lora-384.safetensors", "strength_model": 1.0}},
         # Positive prompt
         "4": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["2", 0]}},
         # Negative prompt

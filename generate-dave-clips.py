@@ -65,22 +65,22 @@ def build_workflow(uploaded_name, motion_prompt, frames=97):
         # Node 1: CheckpointLoaderSimple → MODEL(0), CLIP(1 unused), VAE(2)
         "1": {
             "class_type": "CheckpointLoaderSimple",
-            "inputs": {"ckpt_name": "ltx-2-19b-dev-fp8.safetensors"}
+            "inputs": {"ckpt_name": "ltx-2.3-22b-dev-fp8.safetensors"}
         },
-        # Node 2: LTXAVTextEncoderLoader → CLIP(0) only
+        # Node 2: DualCLIPLoader → CLIP(0) only
         "2": {
-            "class_type": "LTXAVTextEncoderLoader",
+            "class_type": "DualCLIPLoader",
             "inputs": {
-                "text_encoder": "gemma_3_12B_it.safetensors",
-                "ckpt_name": "ltx-2-19b-dev-fp8.safetensors",
-                "device": "default"
+                "clip_name1": "gemma_3_12B_it.safetensors",
+                "clip_name2": "ltx-2.3_text_projection_bf16.safetensors",
+                "type": "ltx"
             }
         },
         # Node 3: LoRA (distilled, 8 steps)
         "3": {
             "class_type": "LoraLoader",
             "inputs": {
-                "lora_name": "ltx-2-19b-distilled-lora-384.safetensors",
+                "lora_name": "ltx-2.3-distilled-lora-384.safetensors",
                 "strength_model": 1.0,
                 "strength_clip": 1.0,
                 "model": ["1", 0],

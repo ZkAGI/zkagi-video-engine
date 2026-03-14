@@ -56,9 +56,9 @@ CLIPS = [
 def build_i2v_workflow(image_name, motion_prompt, num_frames, seed, prefix):
     """Image-to-video workflow with distilled LoRA."""
     return {
-        "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "ltx-2-19b-dev-fp8.safetensors"}},
-        "2": {"class_type": "LTXAVTextEncoderLoader", "inputs": {"text_encoder": "gemma_3_12B_it.safetensors", "ckpt_name": "ltx-2-19b-dev-fp8.safetensors"}},
-        "3": {"class_type": "LoraLoader", "inputs": {"model": ["1", 0], "clip": ["2", 0], "lora_name": "ltx-2-19b-distilled-lora-384.safetensors", "strength_model": 1.0, "strength_clip": 1.0}},
+        "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "ltx-2.3-22b-dev-fp8.safetensors"}},
+        "2": {"class_type": "DualCLIPLoader", "inputs": {"clip_name1": "gemma_3_12B_it.safetensors", "clip_name2": "ltx-2.3_text_projection_bf16.safetensors", "type": "ltx"}},
+        "3": {"class_type": "LoraLoader", "inputs": {"model": ["1", 0], "clip": ["2", 0], "lora_name": "ltx-2.3-distilled-lora-384.safetensors", "strength_model": 1.0, "strength_clip": 1.0}},
         "4": {"class_type": "LoadImage", "inputs": {"image": image_name}},
         "5": {"class_type": "LTXVPreprocess", "inputs": {"image": ["4", 0], "img_compression": 35}},
         "6": {"class_type": "CLIPTextEncode", "inputs": {"text": motion_prompt, "clip": ["3", 1]}},
@@ -79,9 +79,9 @@ def build_i2v_workflow(image_name, motion_prompt, num_frames, seed, prefix):
 def build_t2v_workflow(prompt, num_frames, seed, prefix):
     """Text-to-video workflow with distilled LoRA (no reference image)."""
     return {
-        "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "ltx-2-19b-dev-fp8.safetensors"}},
-        "2": {"class_type": "LTXAVTextEncoderLoader", "inputs": {"text_encoder": "gemma_3_12B_it.safetensors", "ckpt_name": "ltx-2-19b-dev-fp8.safetensors"}},
-        "3": {"class_type": "LoraLoader", "inputs": {"model": ["1", 0], "clip": ["2", 0], "lora_name": "ltx-2-19b-distilled-lora-384.safetensors", "strength_model": 1.0, "strength_clip": 1.0}},
+        "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "ltx-2.3-22b-dev-fp8.safetensors"}},
+        "2": {"class_type": "DualCLIPLoader", "inputs": {"clip_name1": "gemma_3_12B_it.safetensors", "clip_name2": "ltx-2.3_text_projection_bf16.safetensors", "type": "ltx"}},
+        "3": {"class_type": "LoraLoader", "inputs": {"model": ["1", 0], "clip": ["2", 0], "lora_name": "ltx-2.3-distilled-lora-384.safetensors", "strength_model": 1.0, "strength_clip": 1.0}},
         "4": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["3", 1]}},
         "5": {"class_type": "CLIPTextEncode", "inputs": {"text": "static, frozen, no motion, blurry, low quality, distorted, text, watermark, jittery, flickering, ugly, deformed, extra limbs, bad anatomy", "clip": ["3", 1]}},
         "6": {"class_type": "LTXVConditioning", "inputs": {"positive": ["4", 0], "negative": ["5", 0], "frame_rate": 25}},

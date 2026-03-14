@@ -75,14 +75,15 @@ def build_txt2vid_workflow(prompt: str, prefix: str, seed: int) -> dict:
         # Load model checkpoint (for MODEL and VAE)
         "1": {
             "class_type": "CheckpointLoaderSimple",
-            "inputs": {"ckpt_name": "ltx-2-19b-dev-fp8.safetensors"},
+            "inputs": {"ckpt_name": "ltx-2.3-22b-dev-fp8.safetensors"},
         },
         # Load text encoder (for CLIP)
         "2": {
-            "class_type": "LTXAVTextEncoderLoader",
+            "class_type": "DualCLIPLoader",
             "inputs": {
-                "text_encoder": "gemma_3_12B_it.safetensors",
-                "ckpt_name": "ltx-2-19b-dev-fp8.safetensors",
+                "clip_name1": "gemma_3_12B_it.safetensors",
+                "clip_name2": "ltx-2.3_text_projection_bf16.safetensors",
+                "type": "ltx",
             },
         },
         # Apply distilled LoRA (8 steps, CFG 1.0)
@@ -91,7 +92,7 @@ def build_txt2vid_workflow(prompt: str, prefix: str, seed: int) -> dict:
             "inputs": {
                 "model": ["1", 0],  # MODEL from checkpoint
                 "clip": ["2", 0],  # CLIP from text encoder
-                "lora_name": "ltx-2-19b-distilled-lora-384.safetensors",
+                "lora_name": "ltx-2.3-distilled-lora-384.safetensors",
                 "strength_model": 1.0,
                 "strength_clip": 1.0,
             },

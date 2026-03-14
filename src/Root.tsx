@@ -32,62 +32,70 @@ const CHARACTERS = {
   },
 };
 
-// ── "This Video Was Made By AI" — Mar 9, 2026 ──
-// Story Mode: Meta self-referential AI demo → ZkAGI Video Engine
-// Audio durations: 10.40 + 8.00 + 7.20 + 9.44 + 10.56 = 45.60s
-const META_AI_SCENES = [
+// ── ZkAGI Brand Story — Mar 14, 2026 ──
+// Story Mode (funny): AI chaos digest — robots fail, NVIDIA dumped, EU assigns homework
+// Audio durations: 8.48 + 12.80 + 12.16 + 9.12 + 13.28 + 7.52 = 63.36s
+const ZKAGI_SCENES = [
   {
     characterId: "pad",
-    dialogue: "This video was made by AI. Script, voice, images, editing. All of it. Zero humans touched this.",
+    dialogue: "Robots just scored forty-two percent worse in real life than in simulations. The future showed up and face-planted on the doorstep.",
     emotion: "serious" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 10.40,
+    durationOverride: 8.48,
   },
   {
     characterId: "pad",
-    dialogue: "A language model wrote these exact words. Then it cloned a voice, generated every frame, and edited everything together.",
+    dialogue: "While robots trip, NVIDIA's crying. Groq served a billion requests with zero GPUs. Tesla built its own chip. Everyone's dumping NVIDIA.",
     emotion: "explaining" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 8.00,
+    durationOverride: 12.80,
   },
   {
     characterId: "pad",
-    dialogue: "You're not watching a demo of the product. You're watching the product demo itself. Inception level meta.",
+    dialogue: "And now the EU wants a permission slip for every AI model. Explainability reports. Bias audits. Your AI has homework.",
     emotion: "thinking" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 7.20,
+    durationOverride: 12.16,
   },
   {
     characterId: "pad",
-    dialogue: "Most companies show you a slideshow about their AI. We let our AI make the slideshow. And the video. And this sentence.",
+    dialogue: "Three industries cracking at once. New chips, new rules, new excuses. Engineers are rebuilding the plane mid-flight in a thunderstorm.",
+    emotion: "serious" as const,
+    visualType: "talking-head" as const,
+    sceneType: "video" as const,
+    durationOverride: 9.12,
+  },
+  {
+    characterId: "pad",
+    dialogue: "ZkAGI ships while the industry argues. Zynapse for APIs. ZkTerminal for signals. PawPad for wallets. Zero employees, all products.",
     emotion: "excited" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 9.44,
+    durationOverride: 13.28,
   },
   {
     characterId: "pad",
-    dialogue: "ZkAGI Video Engine. One prompt. Full production. zkagi dot ai.",
+    dialogue: "The chaos won't stop. Build anyway. zkagi dot ai.",
     emotion: "celebrating" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 10.56,
+    durationOverride: 7.52,
   },
 ];
 
 // Frame counts from TTS durations (30fps):
-// S0: 10.40s → 312   S1: 8.00s → 240   S2: 7.20s → 216
-// S3: 9.44s → 283   S4: 10.56s → 317
-// BrandOutro: 275   Ending clip: 300
-const TOTAL_FRAMES = 312 + 240 + 216 + 283 + 317 + 275 + 300; // = 1943
+// S0: 8.48s → 255   S1: 12.80s → 384   S2: 12.16s → 365
+// S3: 9.12s → 274   S4: 13.28s → 399   S5: 7.52s → 226
+// Ending clip: 300
+const TOTAL_FRAMES = 255 + 384 + 365 + 274 + 399 + 226 + 300; // = 2203
 
-const metaAiProps = {
-  title: "This Video Was Made By AI — ZkAGI",
+const zkAGIProps = {
+  title: "The AI Industry is Having the Worst Week — ZkAGI",
   characters: CHARACTERS,
-  scenes: META_AI_SCENES,
+  scenes: ZKAGI_SCENES,
   style: { theme: "zkagi-brand" as const, format: "16:9" as const, showSubtitles: true, showCharacterName: false, transitionType: "fade" as const },
   music: { volume: 0.12 },
   watermark: { text: "ZkAGI", show: true },
@@ -96,7 +104,7 @@ const metaAiProps = {
 
 export const RemotionRoot: React.FC = () => (
   <>
-    <Composition id="ZkAGIVideo" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1920} height={1080} schema={VideoConfigSchema} defaultProps={metaAiProps} />
-    <Composition id="ZkAGIVideoVertical" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1080} height={1920} schema={VideoConfigSchema} defaultProps={{ ...metaAiProps, style: { ...metaAiProps.style, format: "9:16" as const } }} />
+    <Composition id="ZkAGIVideo" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1920} height={1080} schema={VideoConfigSchema} defaultProps={zkAGIProps} />
+    <Composition id="ZkAGIVideoVertical" component={ZkAGIVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1080} height={1920} schema={VideoConfigSchema} defaultProps={{ ...zkAGIProps, style: { ...zkAGIProps.style, format: "9:16" as const } }} />
   </>
 );
