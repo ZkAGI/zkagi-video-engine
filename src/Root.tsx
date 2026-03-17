@@ -32,68 +32,68 @@ const CHARACTERS = {
   },
 };
 
-// ── ZkAGI Brand Story — Mar 14, 2026 ──
-// Story Mode (funny): AI chaos digest — robots fail, NVIDIA dumped, EU assigns homework
-// Audio durations: 8.48 + 12.80 + 12.16 + 9.12 + 13.28 + 7.52 = 63.36s
+// ── ZkAGI Brand Story — Mar 15, 2026 (Day 10) ──
+// Story Mode (funny): GPU Empire Cracks — Groq pantsed NVIDIA, EU dress codes, ZkAGI ships
+// Audio durations: 11.52 + 10.56 + 11.52 + 12.16 + 13.92 + 10.40 = 70.08s
 const ZKAGI_SCENES = [
   {
     characterId: "pad",
-    dialogue: "Robots just scored forty-two percent worse in real life than in simulations. The future showed up and face-planted on the doorstep.",
+    dialogue: "NVIDIA's been the undisputed king of AI chips. This week, Groq hit one billion requests without a single GPU. The king just got pantsed.",
     emotion: "serious" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 8.48,
+    durationOverride: 11.52,
   },
   {
     characterId: "pad",
-    dialogue: "While robots trip, NVIDIA's crying. Groq served a billion requests with zero GPUs. Tesla built its own chip. Everyone's dumping NVIDIA.",
+    dialogue: "Tesla built its own AI brain. Boston Dynamics' robot walks better than your intern. The GPU monopoly didn't crack — it shattered on live TV.",
     emotion: "explaining" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 12.80,
+    durationOverride: 10.56,
   },
   {
     characterId: "pad",
-    dialogue: "And now the EU wants a permission slip for every AI model. Explainability reports. Bias audits. Your AI has homework.",
+    dialogue: "But MIT found forty-two percent of robot AI falls apart in the real world. Simulations lied. Reality checked the receipts.",
     emotion: "thinking" as const,
+    visualType: "talking-head" as const,
+    sceneType: "motion-graphic" as const,
+    durationOverride: 11.52,
+  },
+  {
+    characterId: "pad",
+    dialogue: "And the EU just dropped a bomb. Show your training data, your bias audits, or get banned. Open source just got a dress code.",
+    emotion: "serious" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
     durationOverride: 12.16,
   },
   {
     characterId: "pad",
-    dialogue: "Three industries cracking at once. New chips, new rules, new excuses. Engineers are rebuilding the plane mid-flight in a thunderstorm.",
-    emotion: "serious" as const,
-    visualType: "talking-head" as const,
-    sceneType: "video" as const,
-    durationOverride: 9.12,
-  },
-  {
-    characterId: "pad",
-    dialogue: "ZkAGI ships while the industry argues. Zynapse for APIs. ZkTerminal for signals. PawPad for wallets. Zero employees, all products.",
+    dialogue: "ZkAGI ships while the industry argues. Zynapse for private APIs. ZkTerminal for signals. PawPad for wallets. Zero employees, full stack, all gas.",
     emotion: "excited" as const,
     visualType: "talking-head" as const,
     sceneType: "video" as const,
-    durationOverride: 13.28,
+    durationOverride: 13.92,
   },
   {
     characterId: "pad",
-    dialogue: "The chaos won't stop. Build anyway. zkagi dot ai.",
+    dialogue: "The AI stack is splitting three ways. Don't get caught in the middle. zkagi dot ai — the zero employee enterprise.",
     emotion: "celebrating" as const,
     visualType: "talking-head" as const,
-    sceneType: "video" as const,
-    durationOverride: 7.52,
+    sceneType: "motion-graphic" as const,
+    durationOverride: 10.40,
   },
 ];
 
 // Frame counts from TTS durations (30fps):
-// S0: 8.48s → 255   S1: 12.80s → 384   S2: 12.16s → 365
-// S3: 9.12s → 274   S4: 13.28s → 399   S5: 7.52s → 226
+// S0: 11.52s → 346   S1: 10.56s → 317   S2: 11.52s → 346
+// S3: 12.16s → 365   S4: 13.92s → 418   S5: 10.40s → 312
 // Ending clip: 300
-const TOTAL_FRAMES = 255 + 384 + 365 + 274 + 399 + 226 + 300; // = 2203
+const TOTAL_FRAMES = 346 + 317 + 346 + 365 + 418 + 312 + 300; // = 2404
 
 const zkAGIProps = {
-  title: "The AI Industry is Having the Worst Week — ZkAGI",
+  title: "The GPU Empire Cracks — ZkAGI",
   characters: CHARACTERS,
   scenes: ZKAGI_SCENES,
   style: { theme: "zkagi-brand" as const, format: "16:9" as const, showSubtitles: true, showCharacterName: false, transitionType: "fade" as const },

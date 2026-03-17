@@ -4,6 +4,7 @@ ZkAGI Video Engine — Telegram Bot
 
 Send /video <topic> to generate a complete video via Claude Code.
 Send /video_today to auto-generate today's planned video from the content calendar.
+Send /carousel to generate a LinkedIn carousel from daily news.
 """
 
 import asyncio
@@ -40,6 +41,7 @@ ALLOWED_USER_IDS = [
 MAX_TIMEOUT = 2400  # 40 minutes hard timeout
 TELEGRAM_FILE_LIMIT_MB = 50
 DIGEST_API_BASE = "http://34.67.134.209:8030"
+DIGEST_INGEST_URL = f"{DIGEST_API_BASE}/ingest/run"
 DIGEST_GENERATE_URL = f"{DIGEST_API_BASE}/digest/daily/generate"
 DIGEST_LATEST_URL = f"{DIGEST_API_BASE}/digest/daily/latest"
 CALENDAR_PATH = PROJECT_DIR / "content-calendar.json"
@@ -75,33 +77,72 @@ def authorized(func):
 # ── Digest API ─────────────────────────────────────────────────────────────
 
 async def fetch_daily_digest() -> str:
-    """Fetch trending daily digest. Tries /latest first (fast), then /generate (slow).
-    Returns empty string on failure — caller handles fallback."""
+    """Fetch today's daily digest. Runs full pipeline: ingest → generate → return.
+
+    Pipeline:
+      1. Check /latest — if created today, use it (fast, ~1s)
+      2. Otherwise run /ingest/run to pull fresh news (~10-30s)
+      3. Then /digest/daily/generate to create today's digest (~10-30s)
+    Returns empty string on failure — caller handles fallback.
+    """
+    from datetime import datetime, timezone
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
     async with httpx.AsyncClient() as client:
-        # 1. Try cached latest first (fast, ~1s)
+        # 1. Try cached latest — only accept if created today
+        try:
+            resp = await client.get(DIGEST_LATEST_URL, timeout=10.0)
+            resp.raise_for_status()
+            data = resp.json()
+            content = data.get("content", "")
+            created = data.get("created_at", "")
+            if content and created.startswith(today_str):
+                log.info("Fetched today's cached digest (%d chars, created %s)", len(content), created[:19])
+                return content
+            elif content:
+                log.info("Cached digest is stale (created %s, today is %s) — refreshing", created[:10], today_str)
+            else:
+                log.info("Cached digest empty — refreshing")
+        except Exception as e:
+            log.warning("Failed to fetch cached digest: %s", e)
+
+        # 2. Run ingestion to pull fresh news items
+        try:
+            log.info("Running news ingestion pipeline...")
+            resp = await client.post(DIGEST_INGEST_URL, timeout=60.0)
+            resp.raise_for_status()
+            ingest_data = resp.json()
+            new_items = ingest_data.get("new_items_ingested", 0)
+            log.info("Ingestion complete: %d new items", new_items)
+        except Exception as e:
+            log.warning("Ingestion failed (will try generate anyway): %s", e)
+
+        # 3. Generate fresh digest from ingested items
+        try:
+            log.info("Generating fresh daily digest...")
+            resp = await client.post(DIGEST_GENERATE_URL, timeout=90.0)
+            resp.raise_for_status()
+            data = resp.json()
+            content = data.get("content", "")
+            if content and len(content) > 200:
+                log.info("Generated fresh daily digest (%d chars)", len(content))
+                return content
+            else:
+                log.warning("Generated digest too short (%d chars) — may lack news items", len(content))
+        except Exception as e:
+            log.warning("Failed to generate fresh digest: %s", e)
+
+        # 4. Last resort — return whatever /latest has, even if stale
         try:
             resp = await client.get(DIGEST_LATEST_URL, timeout=10.0)
             resp.raise_for_status()
             data = resp.json()
             content = data.get("content", "")
             if content:
-                log.info("Fetched cached daily digest (%d chars)", len(content))
+                log.info("Falling back to stale digest (%d chars)", len(content))
                 return content
         except Exception as e:
-            log.warning("Failed to fetch cached digest: %s", e)
-
-        # 2. Try generating fresh digest (slow, may take 30-60s)
-        try:
-            log.info("Cached digest empty/stale, trying /generate (up to 90s)...")
-            resp = await client.post(DIGEST_GENERATE_URL, timeout=60.0)
-            resp.raise_for_status()
-            data = resp.json()
-            content = data.get("content", "")
-            if content:
-                log.info("Generated fresh daily digest (%d chars)", len(content))
-                return content
-        except Exception as e:
-            log.warning("Failed to generate fresh digest: %s", e)
+            log.warning("All digest attempts failed: %s", e)
 
     return ""
 
@@ -353,6 +394,95 @@ After rendering, verify the file exists and print its size.
 """
 
 
+def build_carousel_prompt(digest_content: str) -> str:
+    """Build a prompt for carousel generation from daily digest."""
+    today = date.today().isoformat()
+    return f"""You are generating a LinkedIn carousel from today's trending news.
+
+TODAY'S DATE: {today}
+
+DAILY TRENDING NEWS DIGEST:
+{digest_content}
+
+MANDATORY PIPELINE — follow these steps IN THIS EXACT ORDER:
+
+1. READ PRODUCT KNOWLEDGE (do this FIRST):
+   - products/pawpad/PRODUCT.md
+   - products/zynapse/PRODUCT.md
+   - products/zkterminal/PRODUCT.md
+
+2. ANALYZE NEWS & PICK PRODUCT:
+   From the digest, identify the top 3-5 stories. Pick the best-fit ZkAGI product:
+   - wallet/DeFi/security/seed phrase/hack → PawPad (paw.zkagi.ai)
+   - APIs/privacy/ZK/generation/developer tools → Zynapse (docs.zkagi.ai/docs/getting-started/zynapse)
+   - predictions/trading/signals/market/alpha → ZkTerminal (zkterminal.zkagi.ai)
+
+3. READ the image-prompt-craft skill FIRST: .claude/skills/image-prompt-craft/SKILL.md
+   Use this skill to write ai_background_prompt for EVERY slide.
+
+4. WRITE SLIDE JSON with 5-10 slides:
+   - First slide: type "hook" — bold, curiosity-driving statement
+   - Middle slides: "insight" or "stat" — actual news content
+   - One "product" slide — naturally tied to the news
+   - Last slide: type "cta" — drives action
+
+   Slide types and fields:
+   - hook: title, body, accent_color, ai_background_prompt
+   - insight: title, body, accent_color, tag, ai_background_prompt
+   - stat: title (the number — keep SHORT like "$4.2T" or "50+", NOT full sentences), body (description), accent_color, ai_background_prompt
+   - product: title (product name), tagline, features (list of 3-4), accent_color, ai_background_prompt
+   - cta: title, body, accent_color, ai_background_prompt
+
+   CRITICAL — PRODUCT SLIDE FEATURES MUST BE NEWS-RELEVANT:
+   Do NOT always use the same generic features. Read the product's PRODUCT.md and pick
+   the specific endpoints/features that DIRECTLY connect to today's news stories.
+   Examples for Zynapse:
+   - If news is about privacy/compliance/regulation → highlight: "ZK-proof document verification", "Verifiable AI answers", "Built-in audit trails"
+   - If news is about AI generation/creative tools → highlight: "Text-to-image API", "Text-to-video API", "One API key for all AI"
+   - If news is about infrastructure/compute/costs → highlight: "DePIN GPU network", "No vendor lock-in", "Crypto-native payments"
+   - If news is about data provenance/healthcare → highlight: "ZK proof Q&A", "Document authenticity proofs", "HIPAA-ready privacy"
+   Examples for PawPad:
+   - If news is about hacks/theft → highlight: "No seed phrase to steal", "TEE-secured keys", "Social recovery"
+   - If news is about onboarding/UX → highlight: "One-tap onboarding", "No seed phrase needed", "Gasless transactions"
+   Examples for ZkTerminal:
+   - If news is about trading/markets → highlight: "AI trading signals", "Real-time analysis", "Portfolio tracking"
+   - If news is about predictions/alpha → highlight: "AI-powered predictions", "On-chain analytics", "Signal aggregation"
+   The tagline should also vary — pick the most relevant one from the product doc, or write a new one that ties to the news.
+
+   IMPORTANT — ai_background_prompt for EVERY slide:
+   Use the image-prompt-craft skill to write a detailed, character-driven prompt for each slide.
+   Follow the formula: [SUBJECT] + [ACTION/POSE] + [SETTING] + [ART STYLE] + [LIGHTING] + [CAMERA] + [QUALITY]
+   Rules from the skill:
+   - NEVER write abstract concept prompts like "blockchain technology" — always use characters, scenarios, metaphors
+   - Use a cartoon tiger mascot character as the subject when appropriate
+   - Match art style to slide emotion: hook=dramatic, insight=atmospheric, stat=dramatic data, product=clean showcase, cta=warm inviting
+   - Always include lighting direction and quality boosters
+   - Vary visual approaches across slides for visual interest
+
+   Accent colors: #7C3AED (purple), #06B6D4 (teal), #EF4444 (red), #F59E0B (amber), #10B981 (green)
+   Keep slide text SHORT — max 3-4 lines, ~15 words per line.
+
+   Save to /tmp/carousel-slides.json
+
+5. GENERATE CAROUSEL:
+   python3 generate-carousel.py --input /tmp/carousel-slides.json
+   (The script auto-generates AI backgrounds for each slide using the ai_background_prompt fields,
+    and renders tiger mascot characters. It may take 2-4 minutes if AI image servers are active.)
+
+6. WRITE LINKEDIN CAPTION to output/carousel-{today}/caption.txt:
+   - Hook line (question or bold statement)
+   - 2-3 short paragraphs covering the news
+   - Mention the ZkAGI product naturally
+   - Include the product URL
+   - CTA: "Follow for daily crypto insights"
+   - 3-5 hashtags
+   - Under 1300 characters
+
+7. PRINT SUMMARY:
+   Print the output directory and list of files generated.
+"""
+
+
 # ── Phase detection keywords ────────────────────────────────────────────────
 
 PHASE_KEYWORDS = [
@@ -364,6 +494,13 @@ PHASE_KEYWORDS = [
     ("172.18.64.1:8001", "Generating video clips via ComfyUI..."),
     ("ZkAGIVideo.tsx", "Editing Remotion composition..."),
     ("remotion render", "Rendering final video..."),
+]
+
+CAROUSEL_PHASE_KEYWORDS = [
+    ("PRODUCT.md", "Reading product info..."),
+    ("carousel-slides.json", "Writing slide content..."),
+    ("generate-carousel.py", "Rendering carousel slides..."),
+    ("caption.txt", "Writing LinkedIn caption..."),
 ]
 
 
@@ -529,13 +666,124 @@ async def process_video_job(job: dict):
         log.info("No captions file found at %s", captions_path)
 
 
+# ── Carousel generation ───────────────────────────────────────────────────
+
+async def process_carousel_job(job: dict):
+    global current_job, current_proc
+    current_job = job
+
+    chat_id = job["chat_id"]
+    bot = job["bot"]
+    today = date.today().isoformat()
+    prompt = job["prompt"]
+
+    await bot.send_message(chat_id, "Carousel pipeline started. Spawning Claude Code...")
+    log.info("Starting carousel job for %s", today)
+
+    proc = await asyncio.create_subprocess_exec(
+        "claude",
+        "-p", prompt,
+        "--dangerously-skip-permissions",
+        "--output-format", "stream-json",
+        "--verbose",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
+        cwd=str(PROJECT_DIR),
+    )
+    current_proc = proc
+    proc.stdout._limit = 10 * 1024 * 1024
+
+    sent_phases = set()
+    try:
+        while True:
+            line = await asyncio.wait_for(proc.stdout.readline(), timeout=600)
+            if not line:
+                break
+            line_str = line.decode("utf-8", errors="replace").rstrip()
+            if line_str:
+                log.info("[claude-carousel] %s", line_str[:500])
+            for keyword, phase_msg in CAROUSEL_PHASE_KEYWORDS:
+                if keyword in line_str and phase_msg not in sent_phases:
+                    sent_phases.add(phase_msg)
+                    try:
+                        await bot.send_message(chat_id, phase_msg)
+                    except Exception:
+                        pass
+                    break
+    except asyncio.TimeoutError:
+        proc.kill()
+        await proc.wait()
+        await bot.send_message(chat_id, "Carousel timed out after 10 minutes.")
+        log.error("Carousel job timed out")
+        current_job = None
+        current_proc = None
+        return
+
+    await proc.wait()
+    current_job = None
+    current_proc = None
+
+    if proc.returncode != 0:
+        await bot.send_message(chat_id, f"Carousel pipeline failed (exit {proc.returncode}).")
+        log.error("Carousel job failed, exit %d", proc.returncode)
+        return
+
+    # Find and send the carousel slides
+    carousel_dir = OUTPUT_DIR / f"carousel-{today}"
+    if not carousel_dir.exists():
+        await bot.send_message(chat_id, "Pipeline completed but no carousel output found.")
+        log.error("No carousel dir: %s", carousel_dir)
+        return
+
+    slide_files = sorted(carousel_dir.glob("slide-*.png"))
+    if not slide_files:
+        await bot.send_message(chat_id, "No slide images found in output.")
+        return
+
+    # Combine slides into a PDF
+    from PIL import Image as PILImage
+    pdf_path = carousel_dir / f"carousel-{today}.pdf"
+    images = [PILImage.open(sf).convert("RGB") for sf in slide_files]
+    images[0].save(pdf_path, "PDF", save_all=True, append_images=images[1:])
+    for img in images:
+        img.close()
+
+    pdf_size_mb = pdf_path.stat().st_size / (1024 * 1024)
+    await bot.send_message(chat_id, f"Uploading carousel PDF ({len(slide_files)} slides, {pdf_size_mb:.1f} MB)...")
+
+    with open(pdf_path, "rb") as f:
+        await bot.send_document(
+            chat_id=chat_id,
+            document=f,
+            filename=f"carousel-{today}.pdf",
+            caption=f"LinkedIn Carousel — {today} ({len(slide_files)} slides)",
+        )
+
+    # Send the caption if it exists
+    caption_file = carousel_dir / "caption.txt"
+    if caption_file.exists():
+        caption_text = caption_file.read_text().strip()
+        if caption_text:
+            header = "--- LINKEDIN CAPTION ---\n\n"
+            msg = header + caption_text
+            if len(msg) <= 4096:
+                await bot.send_message(chat_id, msg)
+            else:
+                await bot.send_message(chat_id, msg[:4096])
+
+    log.info("Delivered carousel PDF for %s (%d slides)", today, len(slide_files))
+
+
 # ── Job worker ──────────────────────────────────────────────────────────────
 
 async def job_worker():
     while True:
         job = await job_queue.get()
         try:
-            await process_video_job(job)
+            if job.get("job_type") == "carousel":
+                await process_carousel_job(job)
+            else:
+                await process_video_job(job)
         except Exception as e:
             log.exception("Job worker error")
             try:
@@ -705,10 +953,11 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "ZkAGI Video Bot\n\n"
         "/video <topic> — Generate a video\n"
         "/video_today — Auto-generate today's planned video from calendar\n"
+        "/carousel — Generate LinkedIn carousel from daily news\n"
         "/stop — Cancel current generation\n"
         "/status — Check generation status\n"
         "/help — This message\n\n"
-        "Videos take 10-25 minutes to generate.\n"
+        "Videos take 10-25 minutes. Carousels take 3-5 minutes.\n"
         "Daily digest trending context is fetched automatically."
     )
 
@@ -732,6 +981,49 @@ async def cmd_stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
         log.info("Job stopped by user: %s", topic)
     else:
         await update.message.reply_text("Nothing running right now.")
+
+
+@authorized
+async def cmd_carousel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Generate a LinkedIn carousel from today's daily news digest."""
+    await update.message.reply_text("Fetching daily trending context for carousel...")
+
+    digest_context = await fetch_daily_digest()
+    if not digest_context:
+        await update.message.reply_text(
+            "Could not fetch daily digest. Carousel needs trending news to generate slides.\n"
+            "Try again later when the digest API is available."
+        )
+        return
+
+    prompt = build_carousel_prompt(digest_context)
+
+    queue_size = job_queue.qsize()
+    job = {
+        "job_type": "carousel",
+        "topic": "LinkedIn carousel from daily digest",
+        "prompt": prompt,
+        "chat_id": update.effective_chat.id,
+        "user_id": update.effective_user.id,
+        "username": update.effective_user.username or "unknown",
+        "bot": context.bot,
+        "timestamp": datetime.now(),
+    }
+    await job_queue.put(job)
+
+    if current_job:
+        pos = queue_size + 1
+        await update.message.reply_text(
+            f"Queued at position {pos}.\n"
+            f"Estimated wait: {pos * 5}-{pos * 10} min"
+        )
+    else:
+        await update.message.reply_text(
+            "Starting carousel generation.\n"
+            "This takes 3-5 minutes. I'll send progress updates."
+        )
+
+    log.info("Queued carousel from @%s", update.effective_user.username or "unknown")
 
 
 # ── Main ────────────────────────────────────────────────────────────────────
@@ -764,6 +1056,7 @@ def main():
     app.add_handler(CommandHandler("videotoday", cmd_video_today))
     app.add_handler(CommandHandler("status", cmd_status))
     app.add_handler(CommandHandler("stop", cmd_stop))
+    app.add_handler(CommandHandler("carousel", cmd_carousel))
 
     log.info("Bot starting — polling for updates...")
     app.run_polling(allowed_updates=["message"])

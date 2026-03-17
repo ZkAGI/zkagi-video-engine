@@ -23,11 +23,11 @@ import {
   CtaUrl,
   Watermark,
 } from "../components";
-import { AnimatedComparison, ProductShowcase } from "../components/motion-graphics";
+import { StatGrid, ProductShowcase } from "../components/motion-graphics";
 import { getTheme } from "../lib/themes";
 
 // ═══════════════════════════════════════════════════════════════
-// MAIN COMPOSITION — ZkAGI Brand Story: AI Industry Chaos (Day 9)
+// MAIN COMPOSITION — ZkAGI Brand Story: The GPU Empire Cracks (Day 10)
 // ═══════════════════════════════════════════════════════════════
 interface ZkAGIVideoProps extends VideoConfig {
   useGeneratedBackgrounds?: boolean;
@@ -38,14 +38,14 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
   const theme = getTheme(style.theme);
 
   // Scene durations (30fps) from TTS audio
-  // S0: 8.48s → 255   S1: 12.80s → 384   S2: 12.16s → 365
-  // S3: 9.12s → 274   S4: 13.28s → 399   S5: 7.52s → 226
-  const S0 = 255;
-  const S1 = 384;
-  const S2 = 365;
-  const S3 = 274;
-  const S4 = 399;
-  const S5 = 226;
+  // S0: 11.52s → 346   S1: 10.56s → 317   S2: 11.52s → 346
+  // S3: 12.16s → 365   S4: 13.92s → 418   S5: 10.40s → 312
+  const S0 = 346;
+  const S1 = 317;
+  const S2 = 346;
+  const S3 = 365;
+  const S4 = 418;
+  const S5 = 312;
 
   const START = [
     0,
@@ -56,7 +56,7 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
     S0 + S1 + S2 + S3 + S4,
   ];
 
-  const ENDING_START = S0 + S1 + S2 + S3 + S4 + S5; // 1903
+  const ENDING_START = S0 + S1 + S2 + S3 + S4 + S5; // 2104
   const ENDING_CLIP_FRAMES = 300;
 
   const XF = 8; // crossfade frames
@@ -64,29 +64,29 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
   // Video clip duration at 30fps comp: 97 frames @25fps = 3.88s → 116 comp frames
   const V1 = 116;
 
-  const TOPICS = ["THE HOOK", "THE BREAKUP", "THE HOMEWORK", "THE STORM", "THE ANSWER", "YOUR MOVE"];
-  const SCENE_COLORS = ["#EF4444", "#F59E0B", "#F97316", "#8B5CF6", "#06B6D4", "#10B981"];
+  const TOPICS = ["THE DETHRONE", "THE PILE-ON", "REALITY CHECK", "THE HAMMER", "THE ANSWER", "YOUR MOVE"];
+  const SCENE_COLORS = ["#EF4444", "#F59E0B", "#8B5CF6", "#F97316", "#06B6D4", "#10B981"];
 
   // Ken Burns overflow splits for video scenes
-  // S0: 255 - 116 = 139 remaining → 2 images: 70, 69
+  // S0: 346 - 116 = 230 remaining → 2 images: 115, 115
   const S0_R = S0 - V1;
   const S0_KB = [Math.ceil(S0_R / 2), S0_R - Math.ceil(S0_R / 2)];
-  // S2: 365 - 116 = 249 remaining → 3 images: 83, 83, 83
-  const S2_R = S2 - V1;
-  const S2_KB = [Math.ceil(S2_R / 3), Math.ceil(S2_R / 3), S2_R - 2 * Math.ceil(S2_R / 3)];
-  // S3: 274 - 116 = 158 remaining → 2 images: 79, 79
+  // S1: 317 - 116 = 201 remaining → 2 images: 101, 100
+  const S1_R = S1 - V1;
+  const S1_KB = [Math.ceil(S1_R / 2), S1_R - Math.ceil(S1_R / 2)];
+  // S3: 365 - 116 = 249 remaining → 3 images: 83, 83, 83
   const S3_R = S3 - V1;
-  const S3_KB = [Math.ceil(S3_R / 2), S3_R - Math.ceil(S3_R / 2)];
-  // S4: 399 - 116 = 283 remaining → 3 images: 95, 94, 94
+  const S3_KB = [Math.ceil(S3_R / 3), Math.ceil(S3_R / 3), S3_R - 2 * Math.ceil(S3_R / 3)];
+  // S4: 418 - 116 = 302 remaining → 3 images: 101, 101, 100
   const S4_R = S4 - V1;
   const S4_KB = [Math.ceil(S4_R / 3), Math.ceil(S4_R / 3), S4_R - 2 * Math.ceil(S4_R / 3)];
 
   return (
     <AbsoluteFill style={{ background: "#0a0a1a" }}>
 
-      {/* ═══ SCENE 0: THE HOOK — "Robots face-planted" (8.48s = 255 frames) ═══ */}
+      {/* ═══ SCENE 0: THE DETHRONE — "NVIDIA got pantsed" (11.52s = 346 frames) ═══ */}
       <Sequence from={START[0]} durationInFrames={S0}>
-        <ScreenShake triggerFrame={220} intensity={5}>
+        <ScreenShake triggerFrame={300} intensity={5}>
           {/* Video clip */}
           <Sequence from={0} durationInFrames={V1 + XF}>
             <AbsoluteFill>
@@ -115,7 +115,7 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <BottomGradient intensity={0.75} />
         <TopicBadge label={TOPICS[0]} color={SCENE_COLORS[0]} durationInFrames={S0} />
         <WordPopSubtitles text={scenes[0].dialogue} accentColor={SCENE_COLORS[0]} durationInFrames={S0}
-          highlightWords={["forty-two", "percent", "worse", "face-planted"]} />
+          highlightWords={["NVIDIA", "undisputed", "king", "billion", "GPU", "pantsed"]} />
         <Audio src={staticFile("audio/scene-0.wav")} />
       </Sequence>
       <Sequence from={0} durationInFrames={15}>
@@ -131,26 +131,38 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <Audio src={staticFile("sfx/pop.wav")} volume={0.4} />
       </Sequence>
 
-      {/* ═══ SCENE 1: THE BREAKUP — Motion Graphic AnimatedComparison (12.80s = 384 frames) ═══ */}
+      {/* ═══ SCENE 1: THE PILE-ON — "Tesla, Boston Dynamics, shattered" (10.56s = 317 frames) ═══ */}
       <Sequence from={START[1]} durationInFrames={S1}>
-        <AnimatedComparison
-          left={{
-            title: "NVIDIA Era",
-            items: ["$40k per chip", "Single vendor lock-in", "GPU-only pipeline", "Pay or wait"],
-            color: "#EF4444",
-          }}
-          right={{
-            title: "Post-NVIDIA",
-            items: ["Groq: 1B requests", "Tesla: custom Dojo", "LPU + TPU + GPU", "Competition wins"],
-            color: "#10B981",
-          }}
-          accentColor="#F59E0B"
-          durationInFrames={S1}
-        />
+        <ScreenShake triggerFrame={280} intensity={4}>
+          {/* Video clip */}
+          <Sequence from={0} durationInFrames={V1 + XF}>
+            <AbsoluteFill>
+              <Video
+                src={staticFile("scenes/scene-1-a.mp4")}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                volume={0}
+              />
+            </AbsoluteFill>
+          </Sequence>
+          <Sequence from={V1 - XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          {/* KB image b */}
+          <Sequence from={V1} durationInFrames={S1_KB[0] + XF}>
+            <KenBurnsImage imagePath="scenes/scene-1-b.png" durationInFrames={S1_KB[0] + XF} fadeIn={8} direction="pan-right" />
+          </Sequence>
+          <Sequence from={V1 + S1_KB[0] - XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          {/* KB image c */}
+          <Sequence from={V1 + S1_KB[0]} durationInFrames={S1_KB[1]}>
+            <KenBurnsImage imagePath="scenes/scene-1-c.png" durationInFrames={S1_KB[1]} fadeIn={8} direction="zoom-in" />
+          </Sequence>
+        </ScreenShake>
         <BottomGradient intensity={0.7} />
         <TopicBadge label={TOPICS[1]} color={SCENE_COLORS[1]} durationInFrames={S1} />
         <WordPopSubtitles text={scenes[1].dialogue} accentColor={SCENE_COLORS[1]} durationInFrames={S1}
-          highlightWords={["NVIDIA", "billion", "zero", "GPUs", "Tesla", "dumping"]} />
+          highlightWords={["Tesla", "Boston Dynamics", "intern", "monopoly", "shattered", "live TV"]} />
         <Audio src={staticFile("audio/scene-1.wav")} />
       </Sequence>
 
@@ -163,45 +175,23 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <Audio src={staticFile("sfx/ping.wav")} volume={0.35} />
       </Sequence>
 
-      {/* ═══ SCENE 2: THE HOMEWORK — "EU wants permission slips" (12.16s = 365 frames) ═══ */}
+      {/* ═══ SCENE 2: REALITY CHECK — Motion Graphic StatGrid (11.52s = 346 frames) ═══ */}
       <Sequence from={START[2]} durationInFrames={S2}>
-        <ScreenShake triggerFrame={320} intensity={4}>
-          {/* Video clip */}
-          <Sequence from={0} durationInFrames={V1 + XF}>
-            <AbsoluteFill>
-              <Video
-                src={staticFile("scenes/scene-2-a.mp4")}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                volume={0}
-              />
-            </AbsoluteFill>
-          </Sequence>
-          <Sequence from={V1 - XF} durationInFrames={XF * 2}>
-            <SubClipFade durationInFrames={XF * 2} />
-          </Sequence>
-          {/* KB image b */}
-          <Sequence from={V1} durationInFrames={S2_KB[0] + XF}>
-            <KenBurnsImage imagePath="scenes/scene-2-b.png" durationInFrames={S2_KB[0] + XF} fadeIn={8} direction="pan-right" />
-          </Sequence>
-          <Sequence from={V1 + S2_KB[0] - XF} durationInFrames={XF * 2}>
-            <SubClipFade durationInFrames={XF * 2} />
-          </Sequence>
-          {/* KB image c */}
-          <Sequence from={V1 + S2_KB[0]} durationInFrames={S2_KB[1] + XF}>
-            <KenBurnsImage imagePath="scenes/scene-2-c.png" durationInFrames={S2_KB[1] + XF} fadeIn={8} direction="zoom-in" />
-          </Sequence>
-          <Sequence from={V1 + S2_KB[0] + S2_KB[1] - XF} durationInFrames={XF * 2}>
-            <SubClipFade durationInFrames={XF * 2} />
-          </Sequence>
-          {/* KB image d */}
-          <Sequence from={V1 + S2_KB[0] + S2_KB[1]} durationInFrames={S2_KB[2]}>
-            <KenBurnsImage imagePath="scenes/scene-2-d.png" durationInFrames={S2_KB[2]} fadeIn={8} direction="zoom-out" />
-          </Sequence>
-        </ScreenShake>
+        <StatGrid
+          title="The AI Reality Check"
+          stats={[
+            { value: "42%", label: "Sim-to-real performance drop" },
+            { value: "1B", label: "Groq requests (0 GPUs)" },
+            { value: "Dojo 2", label: "Tesla's custom AI chip" },
+            { value: "EU Act", label: "Mandatory compliance" },
+          ]}
+          accentColor="#8B5CF6"
+          durationInFrames={S2}
+        />
         <BottomGradient intensity={0.7} />
         <TopicBadge label={TOPICS[2]} color={SCENE_COLORS[2]} durationInFrames={S2} />
         <WordPopSubtitles text={scenes[2].dialogue} accentColor={SCENE_COLORS[2]} durationInFrames={S2}
-          highlightWords={["EU", "permission", "Explainability", "Bias", "homework"]} />
+          highlightWords={["forty-two", "percent", "falls apart", "Simulations", "lied", "receipts"]} />
         <Audio src={staticFile("audio/scene-2.wav")} />
       </Sequence>
 
@@ -211,12 +201,12 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
       </Sequence>
       <Sequence from={START[3]} durationInFrames={10}>
         <GlitchFlash color={SCENE_COLORS[3]} />
-        <Audio src={staticFile("sfx/ping.wav")} volume={0.4} />
+        <Audio src={staticFile("sfx/pop.wav")} volume={0.4} />
       </Sequence>
 
-      {/* ═══ SCENE 3: THE STORM — "Engineers rebuilding mid-flight" (9.12s = 274 frames) ═══ */}
+      {/* ═══ SCENE 3: THE HAMMER — "EU dropped a bomb" (12.16s = 365 frames) ═══ */}
       <Sequence from={START[3]} durationInFrames={S3}>
-        <ScreenShake triggerFrame={240} intensity={5}>
+        <ScreenShake triggerFrame={320} intensity={5}>
           {/* Video clip */}
           <Sequence from={0} durationInFrames={V1 + XF}>
             <AbsoluteFill>
@@ -232,20 +222,27 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
           </Sequence>
           {/* KB image b */}
           <Sequence from={V1} durationInFrames={S3_KB[0] + XF}>
-            <KenBurnsImage imagePath="scenes/scene-3-b.png" durationInFrames={S3_KB[0] + XF} fadeIn={8} direction="pan-left" />
+            <KenBurnsImage imagePath="scenes/scene-3-b.png" durationInFrames={S3_KB[0] + XF} fadeIn={8} direction="pan-right" />
           </Sequence>
           <Sequence from={V1 + S3_KB[0] - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
           </Sequence>
           {/* KB image c */}
-          <Sequence from={V1 + S3_KB[0]} durationInFrames={S3_KB[1]}>
-            <KenBurnsImage imagePath="scenes/scene-3-c.png" durationInFrames={S3_KB[1]} fadeIn={8} direction="zoom-in" />
+          <Sequence from={V1 + S3_KB[0]} durationInFrames={S3_KB[1] + XF}>
+            <KenBurnsImage imagePath="scenes/scene-3-c.png" durationInFrames={S3_KB[1] + XF} fadeIn={8} direction="zoom-in" />
+          </Sequence>
+          <Sequence from={V1 + S3_KB[0] + S3_KB[1] - XF} durationInFrames={XF * 2}>
+            <SubClipFade durationInFrames={XF * 2} />
+          </Sequence>
+          {/* KB image d */}
+          <Sequence from={V1 + S3_KB[0] + S3_KB[1]} durationInFrames={S3_KB[2]}>
+            <KenBurnsImage imagePath="scenes/scene-3-d.png" durationInFrames={S3_KB[2]} fadeIn={8} direction="zoom-out" />
           </Sequence>
         </ScreenShake>
-        <BottomGradient intensity={0.65} />
+        <BottomGradient intensity={0.7} />
         <TopicBadge label={TOPICS[3]} color={SCENE_COLORS[3]} durationInFrames={S3} />
         <WordPopSubtitles text={scenes[3].dialogue} accentColor={SCENE_COLORS[3]} durationInFrames={S3}
-          highlightWords={["Three", "cracking", "chips", "rules", "excuses", "plane", "thunderstorm"]} />
+          highlightWords={["EU", "bomb", "training data", "bias", "banned", "dress code"]} />
         <Audio src={staticFile("audio/scene-3.wav")} />
       </Sequence>
 
@@ -255,12 +252,12 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
       </Sequence>
       <Sequence from={START[4]} durationInFrames={10}>
         <GlitchFlash color={SCENE_COLORS[4]} />
-        <Audio src={staticFile("sfx/pop.wav")} volume={0.4} />
+        <Audio src={staticFile("sfx/ping.wav")} volume={0.4} />
       </Sequence>
 
-      {/* ═══ SCENE 4: THE ANSWER — "ZkAGI ships" (13.28s = 399 frames) ═══ */}
+      {/* ═══ SCENE 4: THE ANSWER — "ZkAGI ships" (13.92s = 418 frames) ═══ */}
       <Sequence from={START[4]} durationInFrames={S4}>
-        <ScreenShake triggerFrame={360} intensity={4}>
+        <ScreenShake triggerFrame={380} intensity={4}>
           {/* Video clip */}
           <Sequence from={0} durationInFrames={V1 + XF}>
             <AbsoluteFill>
@@ -276,7 +273,7 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
           </Sequence>
           {/* KB image b */}
           <Sequence from={V1} durationInFrames={S4_KB[0] + XF}>
-            <KenBurnsImage imagePath="scenes/scene-4-b.png" durationInFrames={S4_KB[0] + XF} fadeIn={8} direction="pan-right" />
+            <KenBurnsImage imagePath="scenes/scene-4-b.png" durationInFrames={S4_KB[0] + XF} fadeIn={8} direction="pan-left" />
           </Sequence>
           <Sequence from={V1 + S4_KB[0] - XF} durationInFrames={XF * 2}>
             <SubClipFade durationInFrames={XF * 2} />
@@ -296,7 +293,7 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <BottomGradient intensity={0.65} />
         <TopicBadge label={TOPICS[4]} color={SCENE_COLORS[4]} durationInFrames={S4} />
         <WordPopSubtitles text={scenes[4].dialogue} accentColor={SCENE_COLORS[4]} durationInFrames={S4}
-          highlightWords={["ZkAGI", "ships", "Zynapse", "ZkTerminal", "PawPad", "Zero", "employees"]} />
+          highlightWords={["ZkAGI", "ships", "Zynapse", "ZkTerminal", "PawPad", "Zero", "employees", "all gas"]} />
         <Audio src={staticFile("audio/scene-4.wav")} />
       </Sequence>
 
@@ -308,7 +305,7 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <GlitchFlash color={SCENE_COLORS[5]} />
       </Sequence>
 
-      {/* ═══ SCENE 5: YOUR MOVE — Motion Graphic ProductShowcase (7.52s = 226 frames) ═══ */}
+      {/* ═══ SCENE 5: YOUR MOVE — Motion Graphic ProductShowcase (10.40s = 312 frames) ═══ */}
       <Sequence from={START[5]} durationInFrames={S5}>
         <ProductShowcase
           name="ZkAGI"
@@ -321,7 +318,7 @@ export const ZkAGIVideo: React.FC<ZkAGIVideoProps> = (props) => {
         <BottomGradient intensity={0.7} />
         <TopicBadge label={TOPICS[5]} color={SCENE_COLORS[5]} durationInFrames={S5} />
         <WordPopSubtitles text={scenes[5].dialogue} accentColor={SCENE_COLORS[5]} durationInFrames={S5}
-          highlightWords={["chaos", "Build", "anyway", "zkagi"]} />
+          highlightWords={["splitting", "three", "middle", "zkagi", "zero employee", "enterprise"]} />
         <CtaUrl url="zkagi.ai" color={SCENE_COLORS[5]} triggerFrame={45} durationInFrames={S5} />
         <Audio src={staticFile("audio/scene-5.wav")} />
       </Sequence>
