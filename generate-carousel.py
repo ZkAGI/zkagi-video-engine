@@ -289,7 +289,8 @@ def draw_text_wrapped(draw, text, x, y, max_width, font, fill=(255, 255, 255),
     for line in lines:
         _, lh = text_bbox_size(draw, line or " ", font)
         if shadow:
-            # Multi-layer shadow for depth
+            # Multi-layer shadow for depth and readability against vivid backgrounds
+            draw.text((x + 4, y + total_h + 5), line, fill=(0, 0, 0, 160), font=font)
             draw.text((x + 2, y + total_h + 3), line, fill=(0, 0, 0, 120), font=font)
             draw.text((x + 1, y + total_h + 2), line, fill=(0, 0, 0, 80), font=font)
         draw.text((x, y + total_h), line, fill=fill, font=font)
@@ -334,6 +335,7 @@ def draw_text_centered_wrapped(draw, text, y, w, font, fill=(255, 255, 255),
         lw, lh = text_bbox_size(draw, line or " ", font)
         tx = (w - lw) // 2
         if shadow:
+            draw.text((tx + 4, y + total_h + 5), line, fill=(0, 0, 0, 160), font=font)
             draw.text((tx + 2, y + total_h + 3), line, fill=(0, 0, 0, 120), font=font)
             draw.text((tx + 1, y + total_h + 2), line, fill=(0, 0, 0, 80), font=font)
         draw.text((tx, y + total_h), line, fill=fill, font=font)
@@ -564,21 +566,21 @@ def try_generate_character(character: str):
     # [SUBJECT] + [ACTION/POSE] + [SETTING] + [ART STYLE] + [LIGHTING] + [CAMERA] + [QUALITY]
     if character == "paw":
         prompt = (
-            "A friendly cartoon tiger mascot character with orange fur and dark stripes, "
-            "wearing a stylish purple gaming headset with a microphone, waving energetically "
-            "with one paw raised, upper body portrait centered in frame, "
-            f"{CAROUSEL_ART_STYLE}, warm golden rim lighting with soft purple accent glow, "
-            f"front-facing portrait composition, solid pure black background, "
-            f"{CAROUSEL_QUALITY}, no text no watermark"
+            "A majestic photorealistic tiger mascot character with dark purple-tinted fur and bold stripes, "
+            "wearing a stylish glowing purple gaming headset with a microphone, standing confidently "
+            "with powerful posture, full body centered in frame, "
+            f"{CAROUSEL_ART_STYLE}, dramatic purple rim lighting with volumetric purple glow, "
+            f"front-facing hero composition, solid pure black background, "
+            f"{CAROUSEL_QUALITY}, dark moody atmosphere, no text no watermark"
         )
     else:
         prompt = (
-            "A wise thoughtful cartoon tiger mascot character with orange fur and dark stripes, "
-            "wearing round teal-colored glasses, one paw on chin in a thinking pose, "
-            "upper body portrait centered in frame, "
-            f"{CAROUSEL_ART_STYLE}, cool blue-teal ambient lighting with soft glow, "
-            f"front-facing portrait composition, solid pure black background, "
-            f"{CAROUSEL_QUALITY}, no text no watermark"
+            "A wise photorealistic tiger mascot character with dark teal-tinted fur and bold stripes, "
+            "wearing round glowing teal-colored glasses, standing in a thoughtful pose, "
+            "full body centered in frame, "
+            f"{CAROUSEL_ART_STYLE}, cool teal ambient lighting with dramatic volumetric glow, "
+            f"front-facing editorial composition, solid pure black background, "
+            f"{CAROUSEL_QUALITY}, dark moody atmosphere, no text no watermark"
         )
 
     for server_fn in [_try_primary_server, _try_zynapse_server]:
@@ -616,49 +618,56 @@ def craft_slide_prompt(slide: dict, slide_type: str, product_name: str = "") -> 
 
     if slide_type == "hook":
         return (
-            f"A majestic photorealistic tiger standing in a futuristic {accent_name}-lit server room corridor, "
+            f"A majestic dark {accent_name}-toned photorealistic tiger standing in a futuristic server room corridor, "
+            f"the tiger's fur is dark with {accent_name} undertones matching the environment, "
             f"towering server racks on both sides with glowing {accent_name} circuit board patterns on the ceiling, "
-            f"holographic data streams and floating UI elements, dramatic {accent_name} neon atmosphere, "
+            f"holographic data streams, dramatic {accent_name} monochromatic neon atmosphere, "
+            f"the entire scene is bathed in deep {accent_name} tones creating a unified color palette, "
             f"{CAROUSEL_ART_STYLE}, cinematic wide establishing shot with {accent_name} volumetric fog and rim lighting, "
-            f"{CAROUSEL_QUALITY}, moody dark cyberpunk atmosphere"
+            f"{CAROUSEL_QUALITY}, moody dark cyberpunk atmosphere, dark color-matched tiger"
         )
 
     elif slide_type == "insight":
         return (
-            f"A photorealistic tiger with glowing teal spectacles analyzing holographic data displays "
-            f"about '{title}', surrounded by floating transparent screens showing charts and code, "
+            f"A photorealistic dark-furred tiger with glowing {accent_name} spectacles in a high-tech lab, "
+            f"the tiger's fur has {accent_name} undertones blending with the environment, "
+            f"surrounded by floating holographic screens showing data visualizations about '{title}', "
             f"sophisticated dark tech laboratory with {accent_name} accent lighting and glass surfaces, "
+            f"unified {accent_name} monochromatic color palette throughout the entire scene, "
             f"{CAROUSEL_ART_STYLE}, atmospheric {accent_name} volumetric lighting with cinematic depth of field, "
-            f"medium wide editorial composition, {CAROUSEL_QUALITY}, dark moody tech atmosphere"
+            f"medium wide editorial composition, {CAROUSEL_QUALITY}, dark moody unified color scheme"
         )
 
     elif slide_type == "stat":
         return (
             f"A dramatic data visualization scene with massive luminous {accent_name} holographic numbers "
-            f"floating in a dark void, crystalline geometric structures refracting light, "
-            f"a photorealistic tiger silhouette standing on a reflective {accent_name}-lit platform, "
-            f"surrounded by orbiting data particles and light trails, "
+            f"floating in a dark void, crystalline geometric structures refracting {accent_name} light, "
+            f"a dark-furred photorealistic tiger with {accent_name}-tinted fur standing on a reflective platform, "
+            f"surrounded by orbiting data particles and {accent_name} light trails, "
+            f"unified monochromatic {accent_name} color palette, "
             f"{CAROUSEL_ART_STYLE}, {accent_name} volumetric glow with dramatic low-angle composition, "
             f"{CAROUSEL_QUALITY}, premium dark cinematic atmosphere"
         )
 
     elif slide_type == "product":
         return (
-            f"A powerful photorealistic tiger confidently showcasing a glowing holographic product interface, "
-            f"sleek futuristic showroom with {accent_name} accent lighting and polished dark surfaces, "
-            f"floating UI panels with product features orbiting gracefully in the air, "
+            f"A powerful dark-furred photorealistic tiger with {accent_name}-tinted coat showcasing "
+            f"a glowing holographic product interface, sleek futuristic showroom bathed entirely in {accent_name} lighting, "
+            f"polished dark reflective surfaces, floating UI panels with {accent_name} accents, "
+            f"the tiger blends seamlessly into the monochromatic {accent_name} environment, "
             f"{CAROUSEL_ART_STYLE}, clean professional {accent_name} neon illumination with reflective floor, "
             f"hero product composition, {CAROUSEL_QUALITY}, premium dark elegant atmosphere"
         )
 
     elif slide_type == "cta":
         return (
-            f"A charismatic photorealistic tiger wearing a {accent_name} glowing headset, "
+            f"A charismatic dark-furred photorealistic tiger with {accent_name}-tinted coat, "
             f"extending a welcoming paw toward the viewer, standing before a radiant {accent_name} portal "
             f"of light with floating luminous particles and energy wisps, "
-            f"warm ethereal atmosphere with dramatic backlighting, "
-            f"{CAROUSEL_ART_STYLE}, warm {accent_name} backlighting with cinematic bokeh, "
-            f"medium close-up editorial composition, {CAROUSEL_QUALITY}, refined dark atmosphere"
+            f"the tiger matches the {accent_name} monochromatic atmosphere perfectly, "
+            f"dramatic {accent_name} backlighting with cinematic bokeh, "
+            f"{CAROUSEL_ART_STYLE}, warm {accent_name} rim lighting, "
+            f"medium close-up editorial composition, {CAROUSEL_QUALITY}, unified dark {accent_name} atmosphere"
         )
 
     # fallback
@@ -873,7 +882,7 @@ def render_hook(slide, img, ai_bg=None):
     accent = hex_to_rgb(slide.get("accent_color", "#7C3AED"))
 
     # Use AI background or rich gradient fallback
-    img = apply_ai_background(img, ai_bg, overlay_alpha=140)
+    img = apply_ai_background(img, ai_bg, overlay_alpha=100)
     if ai_bg is None:
         img = draw_rich_bg(img, accent, "hook", seed=hash(slide.get("title", "")) & 0xFFFF)
         img = add_glow(img, W // 2, H // 2, 400, accent, intensity=25)
@@ -883,12 +892,12 @@ def render_hook(slide, img, ai_bg=None):
     draw_dot_grid(draw, accent, spacing=50, dot_r=1, opacity=15)
     draw_corner_accents(draw, accent, opacity=50)
 
-    # --- Layout: text on left (60%), character on right (40%) ---
-    text_area_w = int(W * 0.58)
+    # --- Layout: text on left (55%), character on right (45%) ---
+    text_area_w = int(W * 0.55)
     char_size = 400
 
-    # Measure text to vertically center
-    font_title = load_font(56)
+    # Measure text to vertically center — bold, impactful sizes
+    font_title = load_font(72)
     font_body = load_font(28)
     title = slide.get("title", "")
     body = slide.get("body", "")
@@ -902,17 +911,17 @@ def render_hook(slide, img, ai_bg=None):
     usable_bottom = H - 80
     text_start_y = usable_top + (usable_bottom - usable_top - total_text_h) // 2
 
-    # Bold accent bar left of text (with glow)
+    # Bold accent bar left of text (with strong glow)
     bar_x = PAD
-    # Glow behind bar
+    # Glow behind bar (wider, more visible)
     draw.rounded_rectangle(
-        [bar_x - 4, text_start_y - 15, bar_x + 12, text_start_y + total_text_h + 15],
-        radius=6, fill=(*accent, 30),
+        [bar_x - 8, text_start_y - 20, bar_x + 18, text_start_y + total_text_h + 20],
+        radius=8, fill=(*accent, 50),
     )
-    # Core bar
+    # Core bar — thicker for visual impact
     draw.rounded_rectangle(
-        [bar_x, text_start_y - 10, bar_x + 7, text_start_y + total_text_h + 10],
-        radius=4, fill=(*accent, 240),
+        [bar_x, text_start_y - 10, bar_x + 10, text_start_y + total_text_h + 10],
+        radius=5, fill=(*accent, 255),
     )
 
     # Title
@@ -939,7 +948,7 @@ def render_insight(slide, img, ai_bg=None):
     """News/analysis slide — tag, title, body, character on right."""
     accent = hex_to_rgb(slide.get("accent_color", "#06B6D4"))
 
-    img = apply_ai_background(img, ai_bg, overlay_alpha=150)
+    img = apply_ai_background(img, ai_bg, overlay_alpha=110)
     if ai_bg is None:
         img = draw_rich_bg(img, accent, "insight", seed=hash(slide.get("title", "")) & 0xFFFF)
     draw = ImageDraw.Draw(img)
@@ -952,8 +961,8 @@ def render_insight(slide, img, ai_bg=None):
     text_area_w = int(W * 0.60)
     char_size = 300
 
-    font_tag_f = load_font(16)
-    font_title = load_font(44)
+    font_tag_f = load_font(18)
+    font_title = load_font(52)
     font_body = load_font(26)
     tag = slide.get("tag", "")
     title = slide.get("title", "")
@@ -983,14 +992,14 @@ def render_insight(slide, img, ai_bg=None):
                   fill=(255, 255, 255), font=font_tag_f)
         content_y += tag_h
 
-    # Left accent bar (spans title + body) with glow
+    # Left accent bar (spans title + body) with strong glow
     draw.rounded_rectangle(
-        [PAD - 4, content_y - 10, PAD + 12, content_y + title_h + 24 + body_h + 10],
-        radius=6, fill=(*accent, 25),
+        [PAD - 8, content_y - 15, PAD + 18, content_y + title_h + 24 + body_h + 15],
+        radius=8, fill=(*accent, 45),
     )
     draw.rounded_rectangle(
-        [PAD, content_y - 5, PAD + 6, content_y + title_h + 24 + body_h + 5],
-        radius=3, fill=(*accent, 220),
+        [PAD, content_y - 5, PAD + 10, content_y + title_h + 24 + body_h + 5],
+        radius=5, fill=(*accent, 255),
     )
 
     # Title
@@ -1022,7 +1031,7 @@ def render_stat(slide, img, ai_bg=None):
     """Big number/statistic — centered, clean."""
     accent = hex_to_rgb(slide.get("accent_color", "#F59E0B"))
 
-    img = apply_ai_background(img, ai_bg, overlay_alpha=155)
+    img = apply_ai_background(img, ai_bg, overlay_alpha=110)
     if ai_bg is None:
         img = draw_rich_bg(img, accent, "stat", seed=hash(slide.get("title", "")) & 0xFFFF)
         img = add_glow(img, W // 2, H // 2 - 40, 350, accent, intensity=35)
@@ -1079,7 +1088,7 @@ def render_product(slide, product_name, product_url, img, ai_bg=None):
     """Product showcase — character on left, info on right."""
     accent = hex_to_rgb(slide.get("accent_color", "#06B6D4"))
 
-    img = apply_ai_background(img, ai_bg, overlay_alpha=150)
+    img = apply_ai_background(img, ai_bg, overlay_alpha=105)
     if ai_bg is None:
         img = draw_rich_bg(img, accent, "product", seed=hash(product_name) & 0xFFFF)
         img = add_glow(img, W // 3, H // 2, 300, accent, intensity=30)
@@ -1104,9 +1113,9 @@ def render_product(slide, product_name, product_url, img, ai_bg=None):
         info_x = PAD + 40  # full width when AI background provides character
     info_w = W - info_x - PAD
 
-    # Product name
+    # Product name — bold and impactful
     name = slide.get("title", product_name)
-    font_name = load_font(48)
+    font_name = load_font(56)
     nw, nh = text_bbox_size(draw, name, font_name)
     name_y = 150
     draw.text((info_x, name_y), name, fill=(255, 255, 255), font=font_name)
@@ -1162,7 +1171,7 @@ def render_cta(slide, product_url, img, ai_bg=None):
     """Call-to-action closing slide — character on left, CTA content centered."""
     accent = hex_to_rgb(slide.get("accent_color", "#7C3AED"))
 
-    img = apply_ai_background(img, ai_bg, overlay_alpha=140)
+    img = apply_ai_background(img, ai_bg, overlay_alpha=100)
     if ai_bg is None:
         img = draw_rich_bg(img, accent, "cta", seed=hash(slide.get("title", "")) & 0xFFFF)
         img = add_glow(img, W // 2, H // 2, 350, accent, intensity=30)
@@ -1173,7 +1182,7 @@ def render_cta(slide, product_url, img, ai_bg=None):
     draw_corner_accents(draw, accent, opacity=50)
 
     # --- Measure to vertically center everything ---
-    font_title = load_font(50)
+    font_title = load_font(60)
     font_body = load_font(26)
     font_url = load_font(28)
     title = slide.get("title", "")
@@ -1254,54 +1263,55 @@ def generate_slide_background(slide: dict, slide_type: str,
 
 def apply_ai_background(img: Image.Image, bg: Image.Image | None,
                          overlay_alpha: int = 180) -> Image.Image:
-    """Apply an AI-generated background with radial vignette overlay.
+    """Apply an AI-generated background with minimal overlay to preserve quality.
 
-    Uses a radial gradient so the center is lighter (showing the AI art)
-    while edges darken for text readability and a cinematic feel.
+    Uses a light vignette so AI art remains vivid and cinematic while
+    keeping text readable through contrast rather than heavy overlays.
     """
     if bg is None:
         return img
 
-    # --- Layer 1: Light base tint so AI art shows through ---
-    base_alpha = max(overlay_alpha - 80, 60)  # much lighter than before
+    # --- Layer 1: Very light base tint — let AI art dominate ---
+    base_alpha = max(overlay_alpha - 120, 30)  # much lighter to preserve AI art
     base = Image.new("RGBA", (W, H), (12, 10, 28, base_alpha))
     result = Image.alpha_composite(bg, base)
 
-    # --- Layer 2: Radial vignette (dark edges, transparent center) ---
+    # --- Layer 2: Subtle edge vignette only (corners/edges darken, center stays vivid) ---
     vignette = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     vd = ImageDraw.Draw(vignette)
     cx, cy = W // 2, H // 2
     max_r = int(math.hypot(cx, cy))
-    # Start darkening from 55% of the way out
-    inner_r = int(max_r * 0.55)
+    # Start darkening from 70% out — keeps much more of center vivid
+    inner_r = int(max_r * 0.70)
     for r in range(max_r, 0, -4):
         if r > inner_r:
             t = (r - inner_r) / (max_r - inner_r)
-            alpha = int(t * t * overlay_alpha * 0.7)  # quadratic falloff
+            alpha = int(t * t * overlay_alpha * 0.45)  # gentler falloff
         else:
             alpha = 0
         vd.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(8, 6, 22, alpha))
     result = Image.alpha_composite(result, vignette)
 
-    # --- Layer 3: Bottom gradient band for text/UI readability ---
+    # --- Layer 3: Left-side text readability gradient (only where text sits) ---
+    text_band = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    td = ImageDraw.Draw(text_band)
+    # Horizontal gradient: dark on left, transparent on right
+    band_end = int(W * 0.55)
+    for x in range(0, band_end):
+        t = 1.0 - (x / band_end)
+        a = int(t * t * 90)  # quadratic — strong near edge, fades quickly
+        td.line([(x, 0), (x, H)], fill=(8, 6, 22, a))
+    result = Image.alpha_composite(result, text_band)
+
+    # --- Layer 4: Subtle bottom strip for UI elements ---
     bottom_band = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     bd = ImageDraw.Draw(bottom_band)
-    band_start = int(H * 0.7)
+    band_start = int(H * 0.85)
     for y in range(band_start, H):
         t = (y - band_start) / (H - band_start)
-        a = int(t * 100)
+        a = int(t * 70)
         bd.line([(0, y), (W, y)], fill=(8, 6, 22, a))
     result = Image.alpha_composite(result, bottom_band)
-
-    # --- Layer 4: Top gradient band for logo area ---
-    top_band = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    td = ImageDraw.Draw(top_band)
-    band_end = int(H * 0.12)
-    for y in range(0, band_end):
-        t = 1.0 - (y / band_end)
-        a = int(t * 80)
-        td.line([(0, y), (W, y)], fill=(8, 6, 22, a))
-    result = Image.alpha_composite(result, top_band)
 
     return result
 
